@@ -1,6 +1,8 @@
 # Meloetta
 
-![meloetta](meloetta.png "meloetta")
+<p align="center">
+  <img src="meloetta.png" alt="Sublime's custom image"/>
+</p>
 
 ```bash
 pip install meloetta
