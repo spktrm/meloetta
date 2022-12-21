@@ -18,7 +18,7 @@ I have taken asyncio code directly from [pmariglia](https://github.com/pmariglia
 
 # Quickstart
 
-See the code in `test.py`
+See the code in [test.py](https://github.com/spktrm/meloetta/blob/main/test.py)
 
 # Manual Sync
 
