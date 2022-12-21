@@ -3,7 +3,6 @@ from setuptools import find_packages, setup
 from meloetta import __version__
 
 requirements = [
-    "detoxify==0.5.1",
     "py_mini_racer==0.6.0",
     "requests==2.28.1",
     "websockets==10.4",
