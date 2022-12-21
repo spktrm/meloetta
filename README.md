@@ -8,7 +8,7 @@
 pip install meloetta
 ```
 
-Meloetta is a Pokémon Battle Client for Interacting with Pokémon Showdown written in Python. This project was born out of frustration for currently existing tools and their lack of dependency on Zarel's (PS Creator) existing code for handling client server interation.
+Meloetta is a Pokémon Battle Client for interacting with Pokémon Showdown written in Python. This project was born out of frustration for currently existing tools and their lack of dependency on Zarel's (PS Creator) existing code for handling client server interation.
 
 The client works by reading messages from an asyncio stream and forwarding these to the javascript client battle object with PyMiniRacer.
 
