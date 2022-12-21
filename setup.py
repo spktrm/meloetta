@@ -13,7 +13,7 @@ requirements = [
 setup(
     name="meloetta",
     version=__version__,
-    url="",
+    url="https://github.com/spktrm/meloetta",
     author="Joseph Twin",
     author_email="joseph.twin14@gmail.com",
     packages=find_packages(),
