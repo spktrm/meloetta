@@ -41,7 +41,7 @@ Then finally run `extract.py` from the main directory. This will copy over the n
 
 Below is an example of the state of the game that is collected. 
 
-**NOTE:** there are `{ "$ref": "$" }` scattered throughout the dictionary object. These are circular references found in the javascript code. I have logic that recontstructs the ciruclar reference and it present in the package, but it impossible to show here
+**NOTE:** there are `{ "$ref": "$" }` scattered throughout the dictionary object. These are circular references found in the javascript code. I have logic that recontstructs the ciruclar references, but it impossible to show here
 
 ## State
 ```json
