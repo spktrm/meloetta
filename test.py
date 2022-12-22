@@ -5,6 +5,7 @@ import multiprocessing as mp
 
 from meloetta.player import Player
 from typing import Any
+from tqdm import tqdm
 
 
 class SelfPlayWorker:
@@ -42,10 +43,11 @@ class SelfPlayWorker:
         await player.client.login()
         await asyncio.sleep(1)
 
-        battle_format = "gen8randombattle"
+        battle_format = "gen1randombattle"
         team = "null"
 
-        for _ in range(10):  # 10 battles each player-player pair
+        progress = tqdm(range(10)) if player_index == 0 else range(10)
+        for _ in progress:  # 10 battles each player-player pair
             if player_index % 2 == 0:
                 await player.client.challenge_user(
                     f"p{player_index + 1}", battle_format, team
@@ -85,7 +87,7 @@ class SelfPlayWorker:
 def main():
     procs = []
     for i in range(20): # num workes (check with os.cpu_count())
-        worker = SelfPlayWorker(i, 2) # 2 is players per worker
+        worker = SelfPlayWorker(i, 1) # 2 is players per worker
         # This config will spawn 20 workers with 2 players each
         # for a total of 40 players, playing 20 games.
         # it is recommended to have an even number of players per worker

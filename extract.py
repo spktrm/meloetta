@@ -1,14 +1,26 @@
+import re
 import os
+import json
 import shutil
+
+from py_mini_racer import MiniRacer
+
 
 PS_CLIENT_DIR = "pokemon-showdown-client"
 
-SRC = [
+CLIENT_SRC = [
     f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/abilities.js",
     f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/aliases.js",
     f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/items.js",
     f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/moves.js",
     f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/pokedex.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/typechart.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/natures.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/conditions.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/learnsets.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/formats-data.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/.data-dist/tags.js",
+    f"{PS_CLIENT_DIR}/data/teambuilder-tables.js",
     f"{PS_CLIENT_DIR}/js/battle-scene-stub.js",
     f"{PS_CLIENT_DIR}/js/battle-choices.js",
     f"{PS_CLIENT_DIR}/js/battle-dex.js",
@@ -18,11 +30,39 @@ SRC = [
 ]
 
 
+DATA_SRC = [
+    os.path.join(f"{PS_CLIENT_DIR}/data", file)
+    for file in os.listdir(f"{PS_CLIENT_DIR}/data")
+    if file.endswith(".js") and file not in ["text-afd.js"]
+]
+
+
 def main():
-    for src_path in SRC:
+    for src_path in CLIENT_SRC:
         file = os.path.split(src_path)[-1]
         dst_path = os.path.join("js/client", file)
         shutil.copy(src_path, dst_path)
+
+    _ctx = MiniRacer()
+    exports = []
+    for file in DATA_SRC:
+        with open(file, "r", encoding="utf-8") as f:
+            file_src = f.read()
+
+        exports += re.findall(r"exports.(\w+) =", file_src)
+
+        file_src = file_src.replace("exports.", "")
+        _ctx.eval(file_src)
+
+    for export in exports:
+        try:
+            string = _ctx.execute("JSON.stringify({})".format(export))
+            obj = json.loads(string)
+        except:
+            print(f"{export} failed to write")
+        else:
+            with open(f"js/data/{export}.json", "w") as f:
+                json.dump(obj, f)
 
 
 if __name__ == "__main__":
