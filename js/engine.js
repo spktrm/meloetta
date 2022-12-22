@@ -1,4 +1,3 @@
-
 window.BattleItems = Items;
 window.BattleMovedex = Moves;
 window.BattleTypeChart = TypeChart;
@@ -9,12 +8,9 @@ window.BattleBaseSpeciesChart = BattleBaseSpeciesChart;
 window.BattleTeambuilderTable = BattleTeambuilderTable;
 window.BattleAliases = Aliases;
 
-
 function serialize(obj) {
     return JSON.decycle(obj);
 }
-
-
 
 var engine = (function () {
     battle = null;
@@ -65,27 +61,27 @@ var engine = (function () {
         // Battle Funcs
 
         parsePokemonId: function (pokemonId) {
-            return battle.parsePokemonId(pokemonId)
+            return battle.parsePokemonId(pokemonId);
         },
 
         getPokemon: function (pokemonId) {
-            return battle.getPokemon(pokemonId)
+            return battle.getPokemon(pokemonId);
         },
 
         getNearSide: function () {
-            return battle.nearSide
+            return battle.nearSide;
         },
 
         // Choices
 
         getChoices: function (request) {
-            choices = new BattleChoiceBuilder(request)
-            return JSON.parse(JSON.stringify(choices))
+            choices = new BattleChoiceBuilder(request);
+            return JSON.parse(JSON.stringify(choices));
         },
 
         fixRequest: function (request) {
             BattleChoiceBuilder.fixRequest(request, battle);
-            return request
+            return request;
         },
 
         // Dex
@@ -108,7 +104,7 @@ var engine = (function () {
 
         getType: function (type) {
             return battle.dex.types.get(type);
-        }
+        },
     };
 })();
 

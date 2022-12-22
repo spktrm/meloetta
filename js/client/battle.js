@@ -149,7 +149,10 @@
         }
 
         var oldrange = Pokemon.getPixelRange(damage[3], damage[4]);
-        var newrange = Pokemon.getPixelRange(damage[3] + damage[0], this.hpcolor);
+        var newrange = Pokemon.getPixelRange(
+            damage[3] + damage[0],
+            this.hpcolor
+        );
         if (damage[0] === 0) {
             return [0, newrange[1] - newrange[0]];
         }
@@ -205,7 +208,9 @@
             oldmaxhp = oldhp = this.maxhp;
         }
 
-        var oldnum = oldhp ? Math.floor((this.maxhp * oldhp) / oldmaxhp) || 1 : 0;
+        var oldnum = oldhp
+            ? Math.floor((this.maxhp * oldhp) / oldmaxhp) || 1
+            : 0;
         var delta = this.hp - oldnum;
         var deltawidth = this.hpWidth(100) - oldwidth;
         return [delta, this.maxhp, deltawidth, oldnum, oldcolor];
@@ -223,7 +228,9 @@
     };
     _proto.getIdent = function getIdent() {
         var slots = ["a", "b", "c", "d", "e", "f"];
-        return this.ident.substr(0, 2) + slots[this.slot] + this.ident.substr(2);
+        return (
+            this.ident.substr(0, 2) + slots[this.slot] + this.ident.substr(2)
+        );
     };
     _proto.removeVolatile = function removeVolatile(volatile) {
         this.side.battle.scene.removeEffect(this, volatile);
@@ -233,8 +240,8 @@
     _proto.addVolatile = function addVolatile(volatile) {
         for (
             var _len = arguments.length,
-            args = new Array(_len > 1 ? _len - 1 : 0),
-            _key = 1;
+                args = new Array(_len > 1 ? _len - 1 : 0),
+                _key = 1;
             _key < _len;
             _key++
         ) {
@@ -296,7 +303,9 @@
     };
     _proto.rememberMove = function rememberMove(moveName) {
         var pp =
-            arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+            arguments.length > 1 && arguments[1] !== undefined
+                ? arguments[1]
+                : 1;
         var recursionSource = arguments.length > 2 ? arguments[2] : undefined;
         if (recursionSource === this.ident) return;
         moveName = Dex.moves.get(moveName).name;
@@ -304,7 +313,11 @@
         if (moveName === "Struggle") return;
         if (this.volatiles.transform) {
             if (!recursionSource) recursionSource = this.ident;
-            this.volatiles.transform[1].rememberMove(moveName, 0, recursionSource);
+            this.volatiles.transform[1].rememberMove(
+                moveName,
+                0,
+                recursionSource
+            );
             moveName = "*" + moveName;
         }
         for (
@@ -556,9 +569,9 @@
         if (this.fainted || this.volatiles["gastroacid"]) return "";
         var ability = this.side.battle.dex.abilities.get(
             (serverPokemon == null ? void 0 : serverPokemon.ability) ||
-            this.ability ||
-            (serverPokemon == null ? void 0 : serverPokemon.baseAbility) ||
-            ""
+                this.ability ||
+                (serverPokemon == null ? void 0 : serverPokemon.baseAbility) ||
+                ""
         );
 
         if (this.side.battle.ngasActive() && !ability.isPermanent) {
@@ -576,8 +589,8 @@
         return this.volatiles.formechange
             ? this.volatiles.formechange[1]
             : serverPokemon
-                ? serverPokemon.speciesForme
-                : this.speciesForme;
+            ? serverPokemon.speciesForme
+            : this.speciesForme;
     };
     _proto.getSpecies = function getSpecies(serverPokemon) {
         return this.side.battle.dex.species.get(
@@ -613,15 +626,21 @@
     };
     _proto.getHPText = function getHPText() {
         var precision =
-            arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+            arguments.length > 0 && arguments[0] !== undefined
+                ? arguments[0]
+                : 1;
         return Pokemon.getHPText(this, precision);
     };
     Pokemon.getHPText = function getHPText(pokemon) {
         var precision =
-            arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+            arguments.length > 1 && arguments[1] !== undefined
+                ? arguments[1]
+                : 1;
         if (pokemon.maxhp === 100) return pokemon.hp + "%";
         if (pokemon.maxhp !== 48)
-            return ((100 * pokemon.hp) / pokemon.maxhp).toFixed(precision) + "%";
+            return (
+                ((100 * pokemon.hp) / pokemon.maxhp).toFixed(precision) + "%"
+            );
         var range = Pokemon.getPixelRange(pokemon.hp, pokemon.hpcolor);
         return Pokemon.getFormattedRange(range, precision, "–");
     };
@@ -794,7 +813,9 @@ var Side = (function () {
     };
     _proto2.addPokemon = function addPokemon(name, ident, details) {
         var replaceSlot =
-            arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : -1;
+            arguments.length > 3 && arguments[3] !== undefined
+                ? arguments[3]
+                : -1;
         var oldItem =
             replaceSlot >= 0 ? this.pokemon[replaceSlot].item : undefined;
 
@@ -1043,7 +1064,9 @@ var Side = (function () {
 var Battle = (function () {
     function Battle() {
         var options =
-            arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+            arguments.length > 0 && arguments[0] !== undefined
+                ? arguments[0]
+                : {};
         this.scene = void 0;
         this.sidesSwitched = false;
         this.stepQueue = void 0;
@@ -1104,7 +1127,11 @@ var Battle = (function () {
         this.id = options.id || "";
 
         if (options.$frame && options.$logFrame) {
-            this.scene = new BattleScene(this, options.$frame, options.$logFrame);
+            this.scene = new BattleScene(
+                this,
+                options.$frame,
+                options.$logFrame
+            );
         } else if (!options.$frame && !options.$logFrame) {
             this.scene = new BattleSceneStub();
         } else {
@@ -1403,8 +1430,10 @@ var Battle = (function () {
                 if (ability) {
                     this.activateAbility(poke, ability.name);
                 }
-                this.weatherTimeLeft = this.gen <= 5 || isExtremeWeather ? 0 : 8;
-                this.weatherMinTimeLeft = this.gen <= 5 || isExtremeWeather ? 0 : 5;
+                this.weatherTimeLeft =
+                    this.gen <= 5 || isExtremeWeather ? 0 : 8;
+                this.weatherMinTimeLeft =
+                    this.gen <= 5 || isExtremeWeather ? 0 : 5;
             } else if (isExtremeWeather) {
                 this.weatherTimeLeft = 0;
                 this.weatherMinTimeLeft = 0;
@@ -1496,7 +1525,7 @@ var Battle = (function () {
         }
         for (
             var _i13 = 0,
-            _ref3 = [].concat(this.nearSide.active, this.farSide.active);
+                _ref3 = [].concat(this.nearSide.active, this.farSide.active);
             _i13 < _ref3.length;
             _i13++
         ) {
@@ -1565,9 +1594,12 @@ var Battle = (function () {
                 ) {
                     foeTargets.push(pokemon.side.foe.active[0]);
                 } else if (
-                    ["all", "allAdjacent", "allAdjacentFoes", "foeSide"].includes(
-                        moveTarget
-                    )
+                    [
+                        "all",
+                        "allAdjacent",
+                        "allAdjacentFoes",
+                        "foeSide",
+                    ].includes(moveTarget)
                 ) {
                     for (
                         var _i14 = 0, _this$getAllActive3 = this.getAllActive();
@@ -1732,7 +1764,9 @@ var Battle = (function () {
                 args[0] === "-damage" &&
                 !kwArgs.from &&
                 args[1] !== nextArgs[1] &&
-                (["-crit", "-supereffective", "-resisted"].includes(nextArgs[0]) ||
+                (["-crit", "-supereffective", "-resisted"].includes(
+                    nextArgs[0]
+                ) ||
                     (nextArgs[0] === "-damage" && !nextKwargs.from))
             ) {
                 kwArgs.then = ".";
@@ -1822,7 +1856,9 @@ var Battle = (function () {
                             break;
                     }
                 } else {
-                    if (this.dex.moves.get(this.lastMove).category !== "Status") {
+                    if (
+                        this.dex.moves.get(this.lastMove).category !== "Status"
+                    ) {
                         poke.timesAttacked++;
                     }
                     var damageinfo =
@@ -1894,7 +1930,9 @@ var Battle = (function () {
                             break;
                         case "revivalblessing":
                             this.scene.runResidualAnim("wish", _poke);
-                            var _this$parsePokemonId = this.parsePokemonId(args[1]),
+                            var _this$parsePokemonId = this.parsePokemonId(
+                                    args[1]
+                                ),
                                 siden = _this$parsePokemonId.siden;
                             var side = this.sides[siden];
                             _poke.fainted = false;
@@ -2015,7 +2053,15 @@ var Battle = (function () {
                 var poke2 = this.getPokemon(args[2]);
                 var stats = args[3]
                     ? args[3].split(", ")
-                    : ["atk", "def", "spa", "spd", "spe", "accuracy", "evasion"];
+                    : [
+                          "atk",
+                          "def",
+                          "spa",
+                          "spd",
+                          "spe",
+                          "accuracy",
+                          "evasion",
+                      ];
                 for (var _i18 = 0; _i18 < stats.length; _i18++) {
                     var _stat4 = stats[_i18];
                     var tmp = _poke5.boosts[_stat4];
@@ -2067,7 +2113,15 @@ var Battle = (function () {
                 var frompoke = this.getPokemon(args[2]);
                 var _stats = args[3]
                     ? args[3].split(", ")
-                    : ["atk", "def", "spa", "spd", "spe", "accuracy", "evasion"];
+                    : [
+                          "atk",
+                          "def",
+                          "spa",
+                          "spd",
+                          "spe",
+                          "accuracy",
+                          "evasion",
+                      ];
                 for (var _i19 = 0; _i19 < _stats.length; _i19++) {
                     var _stat7 = _stats[_i19];
                     _poke8.boosts[_stat7] = frompoke.boosts[_stat7];
@@ -2134,7 +2188,8 @@ var Battle = (function () {
             }
             case "-crit": {
                 var _poke11 = this.getPokemon(args[1]);
-                if (_poke11) this.scene.resultAnim(_poke11, "Critical hit", "bad");
+                if (_poke11)
+                    this.scene.resultAnim(_poke11, "Critical hit", "bad");
                 if (this.activeMoveIsSpread) kwArgs.spread = ".";
                 this.log(args, kwArgs);
                 break;
@@ -2146,7 +2201,8 @@ var Battle = (function () {
                     this.scene.resultAnim(_poke12, "Super-effective", "bad");
                     if (
                         (_window$Config = window.Config) != null &&
-                        (_window$Config$server = _window$Config.server) != null &&
+                        (_window$Config$server = _window$Config.server) !=
+                            null &&
                         _window$Config$server.afd
                     ) {
                         this.scene.runOtherAnim("hitmark", [_poke12]);
@@ -2158,7 +2214,8 @@ var Battle = (function () {
             }
             case "-resisted": {
                 var _poke13 = this.getPokemon(args[1]);
-                if (_poke13) this.scene.resultAnim(_poke13, "Resisted", "neutral");
+                if (_poke13)
+                    this.scene.resultAnim(_poke13, "Resisted", "neutral");
                 if (this.activeMoveIsSpread) kwArgs.spread = ".";
                 this.log(args, kwArgs);
                 break;
@@ -2190,11 +2247,19 @@ var Battle = (function () {
                 this.activateAbility(_ofpoke5 || _poke15, _fromeffect);
                 switch (_effect6.id) {
                     case "brn":
-                        this.scene.resultAnim(_poke15, "Already burned", "neutral");
+                        this.scene.resultAnim(
+                            _poke15,
+                            "Already burned",
+                            "neutral"
+                        );
                         break;
                     case "tox":
                     case "psn":
-                        this.scene.resultAnim(_poke15, "Already poisoned", "neutral");
+                        this.scene.resultAnim(
+                            _poke15,
+                            "Already poisoned",
+                            "neutral"
+                        );
                         break;
                     case "slp":
                         if (_fromeffect.id === "uproar") {
@@ -2215,7 +2280,11 @@ var Battle = (function () {
                         );
                         break;
                     case "frz":
-                        this.scene.resultAnim(_poke15, "Already frozen", "neutral");
+                        this.scene.resultAnim(
+                            _poke15,
+                            "Already frozen",
+                            "neutral"
+                        );
                         break;
                     case "unboost":
                         this.scene.resultAnim(
@@ -2369,19 +2438,31 @@ var Battle = (function () {
                     _poke21.status = "";
                     switch (args[2]) {
                         case "brn":
-                            this.scene.resultAnim(_poke21, "Burn cured", "good");
+                            this.scene.resultAnim(
+                                _poke21,
+                                "Burn cured",
+                                "good"
+                            );
                             break;
                         case "tox":
                         case "psn":
                             _poke21.statusData.toxicTurns = 0;
-                            this.scene.resultAnim(_poke21, "Poison cured", "good");
+                            this.scene.resultAnim(
+                                _poke21,
+                                "Poison cured",
+                                "good"
+                            );
                             break;
                         case "slp":
                             this.scene.resultAnim(_poke21, "Woke up", "good");
                             _poke21.statusData.sleepTurns = 0;
                             break;
                         case "par":
-                            this.scene.resultAnim(_poke21, "Paralysis cured", "good");
+                            this.scene.resultAnim(
+                                _poke21,
+                                "Paralysis cured",
+                                "good"
+                            );
                             break;
                         case "frz":
                             this.scene.resultAnim(_poke21, "Thawed", "good");
@@ -2427,13 +2508,21 @@ var Battle = (function () {
 
                         case "recycle":
                             _poke23.itemEffect = "found";
-                            this.scene.resultAnim(_poke23, item.name, "neutral");
+                            this.scene.resultAnim(
+                                _poke23,
+                                item.name,
+                                "neutral"
+                            );
                             break;
                         case "frisk":
                             this.activateAbility(_ofpoke8, "Frisk");
                             if (_poke23 && _poke23 !== _ofpoke8) {
                                 _poke23.itemEffect = "frisked";
-                                this.scene.resultAnim(_poke23, item.name, "neutral");
+                                this.scene.resultAnim(
+                                    _poke23,
+                                    item.name,
+                                    "neutral"
+                                );
                             }
                             break;
                         case "magician":
@@ -2448,17 +2537,33 @@ var Battle = (function () {
                             _ofpoke8.prevItemEffect = "stolen";
                             _ofpoke8.addVolatile("itemremoved");
                             _poke23.itemEffect = "stolen";
-                            this.scene.resultAnim(_poke23, item.name, "neutral");
-                            this.scene.resultAnim(_ofpoke8, "Item Stolen", "bad");
+                            this.scene.resultAnim(
+                                _poke23,
+                                item.name,
+                                "neutral"
+                            );
+                            this.scene.resultAnim(
+                                _ofpoke8,
+                                "Item Stolen",
+                                "bad"
+                            );
                             break;
                         case "harvest":
                             _poke23.itemEffect = "harvested";
                             this.activateAbility(_poke23, "Harvest");
-                            this.scene.resultAnim(_poke23, item.name, "neutral");
+                            this.scene.resultAnim(
+                                _poke23,
+                                item.name,
+                                "neutral"
+                            );
                             break;
                         case "bestow":
                             _poke23.itemEffect = "bestowed";
-                            this.scene.resultAnim(_poke23, item.name, "neutral");
+                            this.scene.resultAnim(
+                                _poke23,
+                                item.name,
+                                "neutral"
+                            );
                             break;
                         case "switcheroo":
                         case "trick":
@@ -2540,7 +2645,11 @@ var Battle = (function () {
                             this.scene.resultAnim(_poke24, "Sash", "neutral");
                             break;
                         case "focusband":
-                            this.scene.resultAnim(_poke24, "Focus Band", "neutral");
+                            this.scene.resultAnim(
+                                _poke24,
+                                "Focus Band",
+                                "neutral"
+                            );
                             break;
                         case "redcard":
                             _poke24.prevItemEffect = "held up";
@@ -2558,7 +2667,10 @@ var Battle = (function () {
                 var ability = Dex.abilities.get(args[2]);
                 var _effect12 = Dex.getEffect(kwArgs.from);
                 var _ofpoke9 = this.getPokemon(kwArgs.of);
-                _poke25.rememberAbility(ability.name, _effect12.id && !kwArgs.fail);
+                _poke25.rememberAbility(
+                    ability.name,
+                    _effect12.id && !kwArgs.fail
+                );
 
                 if (kwArgs.silent) {
                 } else if (_effect12.id) {
@@ -2604,7 +2716,8 @@ var Battle = (function () {
                 _poke26.ability = "(suppressed)";
 
                 if (_ability.id) {
-                    if (!_poke26.baseAbility) _poke26.baseAbility = _ability.name;
+                    if (!_poke26.baseAbility)
+                        _poke26.baseAbility = _ability.name;
                 }
                 this.log(args, kwArgs);
                 break;
@@ -2655,7 +2768,8 @@ var Battle = (function () {
                 var _poke28 = this.getPokemon(args[1]);
                 var tpoke = this.getPokemon(args[2]);
                 var _effect13 = Dex.getEffect(kwArgs.from);
-                if (_poke28 === tpoke) throw new Error("Transforming into self");
+                if (_poke28 === tpoke)
+                    throw new Error("Transforming into self");
 
                 if (!kwArgs.silent) {
                     this.activateAbility(_poke28, _effect13);
@@ -2674,7 +2788,13 @@ var Battle = (function () {
                 var shiny = tpoke.shiny;
                 var gender = tpoke.gender;
                 var _level = tpoke.level;
-                _poke28.addVolatile("transform", _pokemon2, shiny, gender, _level);
+                _poke28.addVolatile(
+                    "transform",
+                    _pokemon2,
+                    shiny,
+                    gender,
+                    _level
+                );
                 _poke28.addVolatile("formechange", speciesForme);
                 for (
                     var _i23 = 0, _tpoke$moveTrack = tpoke.moveTrack;
@@ -2769,14 +2889,22 @@ var Battle = (function () {
                         this.scene.animTransform(_poke32, true);
                         break;
                     case "powertrick":
-                        this.scene.resultAnim(_poke32, "Power Trick", "neutral");
+                        this.scene.resultAnim(
+                            _poke32,
+                            "Power Trick",
+                            "neutral"
+                        );
                         break;
                     case "foresight":
                     case "miracleeye":
                         this.scene.resultAnim(_poke32, "Identified", "bad");
                         break;
                     case "telekinesis":
-                        this.scene.resultAnim(_poke32, "Telekinesis", "neutral");
+                        this.scene.resultAnim(
+                            _poke32,
+                            "Telekinesis",
+                            "neutral"
+                        );
                         break;
                     case "confusion":
                         if (!kwArgs.already) {
@@ -2819,18 +2947,30 @@ var Battle = (function () {
                         break;
                     case "stockpile2":
                         _poke32.removeVolatile("stockpile1");
-                        this.scene.resultAnim(_poke32, "Stockpile&times;2", "good");
+                        this.scene.resultAnim(
+                            _poke32,
+                            "Stockpile&times;2",
+                            "good"
+                        );
                         break;
                     case "stockpile3":
                         _poke32.removeVolatile("stockpile2");
-                        this.scene.resultAnim(_poke32, "Stockpile&times;3", "good");
+                        this.scene.resultAnim(
+                            _poke32,
+                            "Stockpile&times;3",
+                            "good"
+                        );
                         break;
                     case "perish0":
                         _poke32.removeVolatile("perish1");
                         break;
                     case "perish1":
                         _poke32.removeVolatile("perish2");
-                        this.scene.resultAnim(_poke32, "Perish next turn", "bad");
+                        this.scene.resultAnim(
+                            _poke32,
+                            "Perish next turn",
+                            "bad"
+                        );
                         break;
                     case "perish2":
                         _poke32.removeVolatile("perish3");
@@ -2838,7 +2978,11 @@ var Battle = (function () {
                         break;
                     case "perish3":
                         if (!kwArgs.silent)
-                            this.scene.resultAnim(_poke32, "Perish in 3", "bad");
+                            this.scene.resultAnim(
+                                _poke32,
+                                "Perish in 3",
+                                "bad"
+                            );
                         break;
                     case "encore":
                         this.scene.resultAnim(_poke32, "Encored", "bad");
@@ -2883,7 +3027,11 @@ var Battle = (function () {
                         if (kwArgs.damage) {
                             this.scene.resultAnim(_poke32, "Damage", "bad");
                         } else if (kwArgs.block) {
-                            this.scene.resultAnim(_poke32, "Blocked", "neutral");
+                            this.scene.resultAnim(
+                                _poke32,
+                                "Blocked",
+                                "neutral"
+                            );
                         }
                         break;
 
@@ -2917,7 +3065,11 @@ var Battle = (function () {
                             this.scene.animTransform(_poke33);
                             break;
                         case "powertrick":
-                            this.scene.resultAnim(_poke33, "Power Trick", "neutral");
+                            this.scene.resultAnim(
+                                _poke33,
+                                "Power Trick",
+                                "neutral"
+                            );
                             break;
                         case "telekinesis":
                             this.scene.resultAnim(
@@ -2940,11 +3092,19 @@ var Battle = (function () {
                             break;
                         case "leechseed":
                             if (_fromeffect4.id === "rapidspin") {
-                                this.scene.resultAnim(_poke33, "De-seeded", "good");
+                                this.scene.resultAnim(
+                                    _poke33,
+                                    "De-seeded",
+                                    "good"
+                                );
                             }
                             break;
                         case "healblock":
-                            this.scene.resultAnim(_poke33, "Heal Block ended", "good");
+                            this.scene.resultAnim(
+                                _poke33,
+                                "Heal Block ended",
+                                "good"
+                            );
                             break;
                         case "attract":
                             this.scene.resultAnim(
@@ -2954,7 +3114,11 @@ var Battle = (function () {
                             );
                             break;
                         case "taunt":
-                            this.scene.resultAnim(_poke33, "Taunt&nbsp;ended", "good");
+                            this.scene.resultAnim(
+                                _poke33,
+                                "Taunt&nbsp;ended",
+                                "good"
+                            );
                             break;
                         case "disable":
                             this.scene.resultAnim(
@@ -2964,7 +3128,11 @@ var Battle = (function () {
                             );
                             break;
                         case "embargo":
-                            this.scene.resultAnim(_poke33, "Embargo ended", "good");
+                            this.scene.resultAnim(
+                                _poke33,
+                                "Embargo ended",
+                                "good"
+                            );
                             break;
                         case "torment":
                             this.scene.resultAnim(
@@ -2984,11 +3152,19 @@ var Battle = (function () {
                             this.scene.runOtherAnim("bideunleash", [_poke33]);
                             break;
                         case "illusion":
-                            this.scene.resultAnim(_poke33, "Illusion ended", "bad");
+                            this.scene.resultAnim(
+                                _poke33,
+                                "Illusion ended",
+                                "bad"
+                            );
                             _poke33.rememberAbility("Illusion");
                             break;
                         case "slowstart":
-                            this.scene.resultAnim(_poke33, "Slow Start ended", "good");
+                            this.scene.resultAnim(
+                                _poke33,
+                                "Slow Start ended",
+                                "good"
+                            );
                             break;
                         case "perishsong":
                             _poke33.removeVolatile("perish3");
@@ -3018,10 +3194,14 @@ var Battle = (function () {
                         default:
                             if (_effect15.effectType === "Move") {
                                 if (_effect15.name === "Doom Desire") {
-                                    this.scene.runOtherAnim("doomdesirehit", [_poke33]);
+                                    this.scene.runOtherAnim("doomdesirehit", [
+                                        _poke33,
+                                    ]);
                                 }
                                 if (_effect15.name === "Future Sight") {
-                                    this.scene.runOtherAnim("futuresighthit", [_poke33]);
+                                    this.scene.runOtherAnim("futuresighthit", [
+                                        _poke33,
+                                    ]);
                                 }
                             }
                     }
@@ -3093,7 +3273,11 @@ var Battle = (function () {
                         this.scene.resultAnim(_poke35, "Grudge", "neutral");
                         break;
                     case "destinybond":
-                        this.scene.resultAnim(_poke35, "Destiny Bond", "neutral");
+                        this.scene.resultAnim(
+                            _poke35,
+                            "Destiny Bond",
+                            "neutral"
+                        );
                         break;
                 }
 
@@ -3117,7 +3301,11 @@ var Battle = (function () {
                         if (kwArgs.damage) {
                             this.scene.resultAnim(_poke36, "Damage", "bad");
                         } else if (kwArgs.block) {
-                            this.scene.resultAnim(_poke36, "Blocked", "neutral");
+                            this.scene.resultAnim(
+                                _poke36,
+                                "Blocked",
+                                "neutral"
+                            );
                         }
                         break;
                     case "attract":
@@ -3143,10 +3331,15 @@ var Battle = (function () {
                     case "phantomforce":
                     case "shadowforce":
                     case "feint":
-                        this.scene.resultAnim(_poke36, "Protection broken", "bad");
+                        this.scene.resultAnim(
+                            _poke36,
+                            "Protection broken",
+                            "bad"
+                        );
                         _poke36.removeTurnstatus("protect");
                         for (
-                            var _i24 = 0, _poke36$side$pokemon = _poke36.side.pokemon;
+                            var _i24 = 0,
+                                _poke36$side$pokemon = _poke36.side.pokemon;
                             _i24 < _poke36$side$pokemon.length;
                             _i24++
                         ) {
@@ -3175,9 +3368,11 @@ var Battle = (function () {
                     case "wanderingspirit":
                         if (this.gen <= 4) break;
                         var pokeability =
-                            Dex.sanitizeName(kwArgs.ability) || _target3.ability;
+                            Dex.sanitizeName(kwArgs.ability) ||
+                            _target3.ability;
                         var targetability =
-                            Dex.sanitizeName(kwArgs.ability2) || _poke36.ability;
+                            Dex.sanitizeName(kwArgs.ability2) ||
+                            _poke36.ability;
                         if (pokeability) {
                             _poke36.ability = pokeability;
                             if (!_target3.baseAbility)
@@ -3205,7 +3400,8 @@ var Battle = (function () {
                             var foeActive = [];
                             for (
                                 var _i25 = 0,
-                                _poke36$side$foe$acti = _poke36.side.foe.active;
+                                    _poke36$side$foe$acti =
+                                        _poke36.side.foe.active;
                                 _i25 < _poke36$side$foe$acti.length;
                                 _i25++
                             ) {
@@ -3243,7 +3439,11 @@ var Battle = (function () {
                         break;
                     default:
                         if (kwArgs.broken) {
-                            this.scene.resultAnim(_poke36, "Protection broken", "bad");
+                            this.scene.resultAnim(
+                                _poke36,
+                                "Protection broken",
+                                "bad"
+                            );
                         }
                 }
 
@@ -3328,7 +3528,8 @@ var Battle = (function () {
                     case "gravity":
                         if (this.seeking !== null) break;
                         for (
-                            var _i26 = 0, _this$getAllActive5 = this.getAllActive();
+                            var _i26 = 0,
+                                _this$getAllActive5 = this.getAllActive();
                             _i26 < _this$getAllActive5.length;
                             _i26++
                         ) {
@@ -3383,7 +3584,9 @@ var Battle = (function () {
     };
     _proto3.parseDetails = function parseDetails(name, pokemonid, details) {
         var output =
-            arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+            arguments.length > 3 && arguments[3] !== undefined
+                ? arguments[3]
+                : {};
         var isTeamPreview = !name;
         output.details = details;
         output.name = name;
@@ -3415,7 +3618,9 @@ var Battle = (function () {
     };
     _proto3.parseHealth = function parseHealth(hpstring) {
         var output =
-            arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+            arguments.length > 1 && arguments[1] !== undefined
+                ? arguments[1]
+                : {};
         var _hpstring$split = hpstring.split(" "),
             hp = _hpstring$split[0],
             status = _hpstring$split[1];
@@ -3723,7 +3928,8 @@ var Battle = (function () {
                         this.totalTimeLeft = 0;
                     return;
                 } else if (args[1].slice(0, 9) === "You have ") {
-                    this.kickingInactive = parseInt(args[1].slice(9), 10) || true;
+                    this.kickingInactive =
+                        parseInt(args[1].slice(9), 10) || true;
                     return;
                 } else if (args[1].slice(-14) === " seconds left.") {
                     var _window$app, _window$app$user;
@@ -3732,13 +3938,15 @@ var Battle = (function () {
                         (_window$app = window.app) == null
                             ? void 0
                             : (_window$app$user = _window$app.user) == null
-                                ? void 0
-                                : _window$app$user.get("userid");
+                            ? void 0
+                            : _window$app$user.get("userid");
                     if (toID(args[1].slice(0, hasIndex)) === userid) {
                         this.kickingInactive =
                             parseInt(args[1].slice(hasIndex + 5), 10) || true;
                     }
-                } else if (args[1].slice(-27) === " 15 seconds left this turn.") {
+                } else if (
+                    args[1].slice(-27) === " 15 seconds left this turn."
+                ) {
                     if (this.isBlitz) return;
                 }
                 this.log(args, undefined, preempt);
@@ -3835,7 +4043,10 @@ var Battle = (function () {
                 break;
             }
             case "poke": {
-                var _pokemon6 = this.rememberTeamPreviewPokemon(args[1], args[2]);
+                var _pokemon6 = this.rememberTeamPreviewPokemon(
+                    args[1],
+                    args[2]
+                );
                 if (args[3] === "mail") {
                     _pokemon6.item = "(mail)";
                 } else if (args[3] === "item") {
@@ -3895,7 +4106,11 @@ var Battle = (function () {
             case "swap": {
                 if (isNaN(Number(args[2]))) {
                     var _poke42 = this.getPokemon(args[1]);
-                    _poke42.side.swapWith(_poke42, this.getPokemon(args[2]), kwArgs);
+                    _poke42.side.swapWith(
+                        _poke42,
+                        this.getPokemon(args[2]),
+                        kwArgs
+                    );
                 } else {
                     var _poke43 = this.getPokemon(args[1]);
                     var targetIndex = parseInt(args[2], 10);
@@ -4100,7 +4315,10 @@ var Battle = (function () {
         this.scene.animationOn();
         (_this$subscription10 = this.subscription) == null
             ? void 0
-            : _this$subscription10.call(this, this.paused ? "paused" : "playing");
+            : _this$subscription10.call(
+                  this,
+                  this.paused ? "paused" : "playing"
+              );
     };
     _proto3.shouldStep = function shouldStep() {
         if (this.atQueueEnd) return false;
