@@ -84,7 +84,9 @@ var choices = (function () {
                             var freedomDegrees =
                                 faintedLength -
                                 _.filter(
-                                    switchables.slice(this.battle.pokemonControlled),
+                                    switchables.slice(
+                                        this.battle.pokemonControlled
+                                    ),
                                     function (mon) {
                                         return !mon.fainted;
                                     }
@@ -114,8 +116,8 @@ var choices = (function () {
                         this.choice = {
                             choices: null,
                             teamPreview: [
-                                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-                                16, 17, 18, 19, 20, 21, 22, 23, 24,
+                                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                                15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
                             ].slice(0, switchables.length),
                             done: 0,
                             count: 1,
@@ -134,8 +136,11 @@ var choices = (function () {
                         }
                         // Request full team order if one of our Pokémon has Illusion
                         for (var i = 0; i < switchables.length && i < 6; i++) {
-                            if (toID(switchables[i].baseAbility) === "illusion") {
-                                this.choice.count = this.battle.myPokemon.length;
+                            if (
+                                toID(switchables[i].baseAbility) === "illusion"
+                            ) {
+                                this.choice.count =
+                                    this.battle.myPokemon.length;
                             }
                         }
                         if (this.battle.teamPreviewCount) {
@@ -170,7 +175,7 @@ var choices = (function () {
                     (switchables[this.choice.choices.length].fainted ||
                         switchables[this.choice.choices.length].commanding) &&
                     this.choice.choices.length + 1 <
-                    this.battle.nearSide.active.length
+                        this.battle.nearSide.active.length
                 ) {
                     this.choice.choices.push("pass");
                 }
@@ -259,7 +264,8 @@ var choices = (function () {
                     }
 
                     if (disabled) {
-                        targetMenus[0] += '<button disabled="disabled"></button> ';
+                        targetMenus[0] +=
+                            '<button disabled="disabled"></button> ';
                     } else if (!pokemon || pokemon.fainted) {
                         targetMenus[0] +=
                             '<button name="chooseMoveTarget" value="' +
@@ -276,18 +282,20 @@ var choices = (function () {
                             '"><span class="picon" style="' +
                             Dex.getPokemonIcon(pokemon) +
                             '"></span>' +
-                            (this.battle.ignoreOpponent || this.battle.ignoreNicks
+                            (this.battle.ignoreOpponent ||
+                            this.battle.ignoreNicks
                                 ? pokemon.speciesForme
                                 : BattleLog.escapeHTML(pokemon.name)) +
                             '<span class="' +
                             pokemon.getHPColorClass() +
                             '"><span style="width:' +
-                            (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
+                            (Math.round((pokemon.hp * 92) / pokemon.maxhp) ||
+                                1) +
                             'px"></span></span>' +
                             (pokemon.status
                                 ? '<span class="status ' +
-                                pokemon.status +
-                                '"></span>'
+                                  pokemon.status +
+                                  '"></span>'
                                 : "") +
                             "</button> ";
                     }
@@ -332,12 +340,13 @@ var choices = (function () {
                             '<span class="' +
                             pokemon.getHPColorClass() +
                             '"><span style="width:' +
-                            (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
+                            (Math.round((pokemon.hp * 92) / pokemon.maxhp) ||
+                                1) +
                             'px"></span></span>' +
                             (pokemon.status
                                 ? '<span class="status ' +
-                                pokemon.status +
-                                '"></span>'
+                                  pokemon.status +
+                                  '"></span>'
                                 : "") +
                             "</button> ";
                     }
@@ -345,17 +354,17 @@ var choices = (function () {
 
                 this.controls.html(
                     '<div class="controls">' +
-                    '<div class="whatdo">' +
-                    requestTitle +
-                    this.getTimerHTML() +
-                    "</div>" +
-                    '<div class="switchmenu" style="display:block">' +
-                    targetMenus[0] +
-                    '<div style="clear:both"></div> </div>' +
-                    '<div class="switchmenu" style="display:block">' +
-                    targetMenus[1] +
-                    "</div>" +
-                    "</div>"
+                        '<div class="whatdo">' +
+                        requestTitle +
+                        this.getTimerHTML() +
+                        "</div>" +
+                        '<div class="switchmenu" style="display:block">' +
+                        targetMenus[0] +
+                        '<div style="clear:both"></div> </div>' +
+                        '<div class="switchmenu" style="display:block">' +
+                        targetMenus[1] +
+                        "</div>" +
+                        "</div>"
                 );
             } else {
                 // Move chooser
@@ -364,8 +373,8 @@ var choices = (function () {
                     (hpRatio < 0.2
                         ? "critical"
                         : hpRatio < 0.5
-                            ? "weak"
-                            : "healthy") +
+                        ? "weak"
+                        : "healthy") +
                     '">HP ' +
                     switchables[pos].hp +
                     "/" +
@@ -452,7 +461,9 @@ var choices = (function () {
                                 classType +
                                 '" style="display:none">';
                         }
-                        var specialMoves = canZMove ? canZMove : maxMoves.maxMoves;
+                        var specialMoves = canZMove
+                            ? canZMove
+                            : maxMoves.maxMoves;
                         for (var i = 0; i < curActive.moves.length; i++) {
                             if (specialMoves[i]) {
                                 // when possible, use Z move to decide type, for cases like Z-Hidden Power
@@ -462,7 +473,9 @@ var choices = (function () {
                                 // might not exist, such as for Z status moves - fall back on base move to determine type then
                                 var specialMove =
                                     gigantamax ||
-                                    this.battle.dex.moves.get(specialMoves[i].move);
+                                    this.battle.dex.moves.get(
+                                        specialMoves[i].move
+                                    );
                                 var moveType = this.tooltips.getMoveType(
                                     specialMove.exists && !specialMove.isMax
                                         ? specialMove
@@ -470,8 +483,8 @@ var choices = (function () {
                                     typeValueTracker,
                                     specialMove.isMax
                                         ? gigantamax ||
-                                        switchables[pos].gigantamax ||
-                                        true
+                                              switchables[pos].gigantamax ||
+                                              true
                                         : undefined
                                 )[0];
                                 if (
@@ -480,10 +493,16 @@ var choices = (function () {
                                     !specialMove.id.startsWith("gmax")
                                 ) {
                                     specialMove =
-                                        this.tooltips.getMaxMoveFromType(moveType);
+                                        this.tooltips.getMaxMoveFromType(
+                                            moveType
+                                        );
                                 }
                                 var tooltipArgs =
-                                    classType + "move|" + baseMove.id + "|" + pos;
+                                    classType +
+                                    "move|" +
+                                    baseMove.id +
+                                    "|" +
+                                    pos;
                                 if (specialMove.id.startsWith("gmax"))
                                     tooltipArgs += "|" + specialMove.id;
                                 var isDisabled = specialMoves[i].disabled
@@ -499,7 +518,9 @@ var choices = (function () {
                                     '" data-move="' +
                                     BattleLog.escapeHTML(specialMoves[i].move) +
                                     '" data-target="' +
-                                    BattleLog.escapeHTML(specialMoves[i].target) +
+                                    BattleLog.escapeHTML(
+                                        specialMoves[i].target
+                                    ) +
                                     '" data-tooltip="' +
                                     BattleLog.escapeHTML(tooltipArgs) +
                                     '">';
@@ -601,10 +622,10 @@ var choices = (function () {
                         (pokemon.fainted
                             ? ",fainted"
                             : trapped
-                                ? ",trapped"
-                                : i < this.battle.nearSide.active.length
-                                    ? ",active"
-                                    : "") +
+                            ? ",trapped"
+                            : i < this.battle.nearSide.active.length
+                            ? ",active"
+                            : "") +
                         '" data-tooltip="' +
                         BattleLog.escapeHTML(tooltipArgs) +
                         '"><span class="picon" style="' +
@@ -613,15 +634,16 @@ var choices = (function () {
                         BattleLog.escapeHTML(pokemon.name) +
                         (pokemon.hp
                             ? '<span class="' +
-                            pokemon.getHPColorClass() +
-                            '"><span style="width:' +
-                            (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
-                            'px"></span></span>' +
-                            (pokemon.status
-                                ? '<span class="status ' +
-                                pokemon.status +
-                                '"></span>'
-                                : "")
+                              pokemon.getHPColorClass() +
+                              '"><span style="width:' +
+                              (Math.round((pokemon.hp * 92) / pokemon.maxhp) ||
+                                  1) +
+                              'px"></span></span>' +
+                              (pokemon.status
+                                  ? '<span class="status ' +
+                                    pokemon.status +
+                                    '"></span>'
+                                  : "")
                             : "") +
                         "</button> ";
                 } else {
@@ -640,7 +662,9 @@ var choices = (function () {
                         (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
                         'px"></span></span>' +
                         (pokemon.status
-                            ? '<span class="status ' + pokemon.status + '"></span>'
+                            ? '<span class="status ' +
+                              pokemon.status +
+                              '"></span>'
                             : "") +
                         "</button> ";
                 }
@@ -668,15 +692,15 @@ var choices = (function () {
                     BattleLog.escapeHTML(pokemon.name) +
                     (pokemon.hp
                         ? '<span class="' +
-                        pokemon.getHPColorClass() +
-                        '"><span style="width:' +
-                        (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
-                        'px"></span></span>' +
-                        (pokemon.status
-                            ? '<span class="status ' +
-                            pokemon.status +
-                            '"></span>'
-                            : "")
+                          pokemon.getHPColorClass() +
+                          '"><span style="width:' +
+                          (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
+                          'px"></span></span>' +
+                          (pokemon.status
+                              ? '<span class="status ' +
+                                pokemon.status +
+                                '"></span>'
+                              : "")
                         : "") +
                     "</button> ";
             }
@@ -736,16 +760,17 @@ var choices = (function () {
                             BattleLog.escapeHTML(pokemon.name) +
                             (!pokemon.fainted
                                 ? '<span class="' +
-                                pokemon.getHPColorClass() +
-                                '"><span style="width:' +
-                                (Math.round((pokemon.hp * 92) / pokemon.maxhp) ||
-                                    1) +
-                                'px"></span></span>' +
-                                (pokemon.status
-                                    ? '<span class="status ' +
-                                    pokemon.status +
-                                    '"></span>'
-                                    : "")
+                                  pokemon.getHPColorClass() +
+                                  '"><span style="width:' +
+                                  (Math.round(
+                                      (pokemon.hp * 92) / pokemon.maxhp
+                                  ) || 1) +
+                                  'px"></span></span>' +
+                                  (pokemon.status
+                                      ? '<span class="status ' +
+                                        pokemon.status +
+                                        '"></span>'
+                                      : "")
                                 : "") +
                             "</button> ";
                     } else if (!pokemon) {
@@ -763,12 +788,13 @@ var choices = (function () {
                             '<span class="' +
                             pokemon.getHPColorClass() +
                             '"><span style="width:' +
-                            (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
+                            (Math.round((pokemon.hp * 92) / pokemon.maxhp) ||
+                                1) +
                             'px"></span></span>' +
                             (pokemon.status
                                 ? '<span class="status ' +
-                                pokemon.status +
-                                '"></span>'
+                                  pokemon.status +
+                                  '"></span>'
                                 : "") +
                             "</button> ";
                     }
@@ -797,8 +823,8 @@ var choices = (function () {
                                 (pokemon.reviving
                                     ? ",active"
                                     : !pokemon.fainted
-                                        ? ",notfainted"
-                                        : "") +
+                                    ? ",notfainted"
+                                    : "") +
                                 '" data-tooltip="' +
                                 BattleLog.escapeHTML(tooltipArgs) +
                                 '">';
@@ -822,8 +848,8 @@ var choices = (function () {
                                 (pokemon.fainted
                                     ? ",fainted"
                                     : i < this.battle.pokemonControlled
-                                        ? ",active"
-                                        : "") +
+                                    ? ",active"
+                                    : "") +
                                 '" data-tooltip="' +
                                 BattleLog.escapeHTML(tooltipArgs) +
                                 '">';
@@ -843,15 +869,16 @@ var choices = (function () {
                         BattleLog.escapeHTML(pokemon.name) +
                         (!pokemon.fainted
                             ? '<span class="' +
-                            pokemon.getHPColorClass() +
-                            '"><span style="width:' +
-                            (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
-                            'px"></span></span>' +
-                            (pokemon.status
-                                ? '<span class="status ' +
-                                pokemon.status +
-                                '"></span>'
-                                : "")
+                              pokemon.getHPColorClass() +
+                              '"><span style="width:' +
+                              (Math.round((pokemon.hp * 92) / pokemon.maxhp) ||
+                                  1) +
+                              'px"></span></span>' +
+                              (pokemon.status
+                                  ? '<span class="status ' +
+                                    pokemon.status +
+                                    '"></span>'
+                                  : "")
                             : "") +
                         "</button> ";
                 }
@@ -901,5 +928,5 @@ var choices = (function () {
             }
             this.controls = controls;
         },
-    }
+    };
 })();
