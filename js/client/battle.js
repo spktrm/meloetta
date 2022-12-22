@@ -48,7 +48,7 @@
         this.itemEffect = "";
         this.prevItem = "";
         this.prevItemEffect = "";
-        this.teraType = "";
+        this.terastallized = "";
         this.boosts = {};
         this.status = "";
         this.statusStage = 0;
@@ -497,7 +497,6 @@
         }
         delete this.volatiles["transform"];
         delete this.volatiles["formechange"];
-        delete this.volatiles["terastallize"];
 
         pokemon.boosts = {};
         pokemon.volatiles = {};
@@ -515,9 +514,11 @@
             this.removeVolatile("typeadd");
         }
     };
-    _proto.getTypes = function getTypes(serverPokemon) {
+    _proto.getTypes = function getTypes(serverPokemon, preterastallized) {
         var types;
-        if (this.volatiles.typechange) {
+        if (this.terastallized && !preterastallized) {
+            types = [this.terastallized];
+        } else if (this.volatiles.typechange) {
             types = this.volatiles.typechange[1].split("/");
         } else {
             types = this.getSpecies(serverPokemon).types;
@@ -579,8 +580,8 @@
         }
         return ability.name;
     };
-    _proto.getTypeList = function getTypeList(serverPokemon) {
-        var _this$getTypes = this.getTypes(serverPokemon),
+    _proto.getTypeList = function getTypeList(serverPokemon, preterastallized) {
+        var _this$getTypes = this.getTypes(serverPokemon, preterastallized),
             types = _this$getTypes[0],
             addedType = _this$getTypes[1];
         return addedType ? types.concat(addedType) : types;
@@ -1050,6 +1051,7 @@ var Side = (function () {
 
         pokemon.fainted = true;
         pokemon.hp = 0;
+        pokemon.terastallized = "";
         if (pokemon.side.faintCounter < 100) pokemon.side.faintCounter++;
 
         this.battle.scene.animFaint(pokemon);
@@ -2851,7 +2853,7 @@ var Battle = (function () {
             case "-terastallize": {
                 var _poke31 = this.getPokemon(args[1]);
                 var type = Dex.types.get(args[2]).name;
-                _poke31.teraType = type;
+                _poke31.terastallized = type;
                 this.scene.animTransform(_poke31, true, true);
                 this.log(args, kwArgs);
                 break;
@@ -2866,6 +2868,7 @@ var Battle = (function () {
                 this.activateAbility(_ofpoke10 || _poke32, _fromeffect3);
                 switch (_effect14.id) {
                     case "typechange":
+                        if (_poke32.terastallized) break;
                         if (_ofpoke10 && _fromeffect3.id === "reflecttype") {
                             _poke32.copyTypesFrom(_ofpoke10);
                         } else {
@@ -3047,7 +3050,9 @@ var Battle = (function () {
                         break;
                 }
 
-                _poke32.addVolatile(_effect14.id);
+                if (!(_effect14.id === "typechange" && _poke32.terastallized)) {
+                    _poke32.addVolatile(_effect14.id);
+                }
                 this.scene.updateStatbar(_poke32);
                 this.log(args, kwArgs);
                 break;
