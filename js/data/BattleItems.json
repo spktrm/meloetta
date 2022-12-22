@@ -32,12 +32,8 @@
     "absorbbulb": {
         "name": "Absorb Bulb",
         "spritenum": 2,
-        "fling": {
-            "basePower": 30
-        },
-        "boosts": {
-            "spa": 1
-        },
+        "fling": { "basePower": 30 },
+        "boosts": { "spa": 1 },
         "num": 545,
         "gen": 5,
         "desc": "Raises holder's Sp. Atk by 1 stage if hit by a Water-type attack. Single use."
@@ -45,9 +41,7 @@
     "adamantorb": {
         "name": "Adamant Orb",
         "spritenum": 4,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "onBasePowerPriority": 15,
         "itemUser": ["Dialga"],
         "num": 135,
@@ -58,13 +52,9 @@
     "adrenalineorb": {
         "name": "Adrenaline Orb",
         "spritenum": 660,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBoostPriority": 1,
-        "boosts": {
-            "spe": 1
-        },
+        "boosts": { "spe": 1 },
         "num": 846,
         "gen": 7,
         "desc": "Raises holder's Speed by 1 stage if it gets affected by Intimidate. Single use."
@@ -95,10 +85,7 @@
         "name": "Aguav Berry",
         "spritenum": 5,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Dragon"
-        },
+        "naturalGift": { "basePower": 80, "type": "Dragon" },
         "num": 162,
         "gen": 3,
         "desc": "Restores 1/3 max HP at 1/4 max HP or less; confuses if -SpD Nature. Single use."
@@ -106,9 +93,7 @@
     "airballoon": {
         "name": "Air Balloon",
         "spritenum": 6,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 541,
         "gen": 5,
         "desc": "Holder is immune to Ground-type attacks. Pops when holder is hit."
@@ -162,10 +147,7 @@
         "name": "Apicot Berry",
         "spritenum": 10,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Ground"
-        },
+        "naturalGift": { "basePower": 100, "type": "Ground" },
         "num": 205,
         "gen": 3,
         "desc": "Raises holder's Sp. Def by 1 stage when at 1/4 max HP or less. Single use."
@@ -173,9 +155,7 @@
     "armorfossil": {
         "name": "Armor Fossil",
         "spritenum": 12,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 104,
         "gen": 4,
         "isNonstandard": "Past",
@@ -185,10 +165,7 @@
         "name": "Aspear Berry",
         "spritenum": 13,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Ice"
-        },
+        "naturalGift": { "basePower": 80, "type": "Ice" },
         "num": 153,
         "gen": 3,
         "desc": "Holder is cured if it is frozen. Single use."
@@ -196,9 +173,7 @@
     "assaultvest": {
         "name": "Assault Vest",
         "spritenum": 581,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "onModifySpDPriority": 1,
         "num": 640,
         "gen": 6,
@@ -225,10 +200,7 @@
         "name": "Babiri Berry",
         "spritenum": 17,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Steel"
-        },
+        "naturalGift": { "basePower": 80, "type": "Steel" },
         "num": 199,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Steel-type attack. Single use."
@@ -267,10 +239,7 @@
         "name": "Belue Berry",
         "spritenum": 21,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Electric"
-        },
+        "naturalGift": { "basePower": 100, "type": "Electric" },
         "onEat": false,
         "num": 183,
         "gen": 3,
@@ -280,9 +249,7 @@
     "berryjuice": {
         "name": "Berry Juice",
         "spritenum": 22,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 43,
         "gen": 2,
         "isNonstandard": "Past",
@@ -291,9 +258,7 @@
     "berrysweet": {
         "name": "Berry Sweet",
         "spritenum": 706,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 1111,
         "gen": 8,
         "desc": "Evolves Milcery into Alcremie when held and spun around."
@@ -301,9 +266,7 @@
     "bigroot": {
         "name": "Big Root",
         "spritenum": 29,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onTryHealPriority": 1,
         "num": 296,
         "gen": 4,
@@ -312,9 +275,7 @@
     "bindingband": {
         "name": "Binding Band",
         "spritenum": 31,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 544,
         "gen": 5,
         "desc": "Holder's partial-trapping moves deal 1/6 max HP per turn instead of 1/8."
@@ -322,9 +283,7 @@
     "blackbelt": {
         "name": "Black Belt",
         "spritenum": 32,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "num": 241,
         "gen": 2,
@@ -333,9 +292,7 @@
     "blacksludge": {
         "name": "Black Sludge",
         "spritenum": 34,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onResidualOrder": 5,
         "onResidualSubOrder": 4,
         "num": 281,
@@ -345,9 +302,7 @@
     "blackglasses": {
         "name": "Black Glasses",
         "spritenum": 35,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "num": 240,
         "gen": 2,
@@ -388,10 +343,7 @@
         "name": "Bluk Berry",
         "spritenum": 44,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Fire"
-        },
+        "naturalGift": { "basePower": 90, "type": "Fire" },
         "onEat": false,
         "num": 165,
         "gen": 3,
@@ -400,9 +352,7 @@
     "blunderpolicy": {
         "name": "Blunder Policy",
         "spritenum": 716,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 1121,
         "gen": 8,
         "desc": "If the holder misses due to accuracy, its Speed is raised by 2 stages. Single use."
@@ -417,9 +367,7 @@
     "bottlecap": {
         "name": "Bottle Cap",
         "spritenum": 696,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 795,
         "gen": 7,
         "desc": "Used for Hyper Training. One of a Pokemon's stats is calculated with an IV of 31."
@@ -427,9 +375,7 @@
     "brightpowder": {
         "name": "Bright Powder",
         "spritenum": 51,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onModifyAccuracyPriority": -2,
         "num": 213,
         "gen": 2,
@@ -493,12 +439,8 @@
     "cellbattery": {
         "name": "Cell Battery",
         "spritenum": 60,
-        "fling": {
-            "basePower": 30
-        },
-        "boosts": {
-            "atk": 1
-        },
+        "fling": { "basePower": 30 },
+        "boosts": { "atk": 1 },
         "num": 546,
         "gen": 5,
         "desc": "Raises holder's Attack by 1 if hit by an Electric-type attack. Single use."
@@ -506,9 +448,7 @@
     "charcoal": {
         "name": "Charcoal",
         "spritenum": 61,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "num": 249,
         "gen": 2,
@@ -540,10 +480,7 @@
         "name": "Charti Berry",
         "spritenum": 62,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Rock"
-        },
+        "naturalGift": { "basePower": 80, "type": "Rock" },
         "num": 195,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Rock-type attack. Single use."
@@ -552,10 +489,7 @@
         "name": "Cheri Berry",
         "spritenum": 63,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Fire"
-        },
+        "naturalGift": { "basePower": 80, "type": "Fire" },
         "num": 149,
         "gen": 3,
         "desc": "Holder cures itself if it is paralyzed. Single use."
@@ -573,10 +507,7 @@
         "name": "Chesto Berry",
         "spritenum": 65,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Water"
-        },
+        "naturalGift": { "basePower": 80, "type": "Water" },
         "num": 150,
         "gen": 3,
         "desc": "Holder wakes up if it is asleep. Single use."
@@ -585,10 +516,7 @@
         "name": "Chilan Berry",
         "spritenum": 66,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Normal"
-        },
+        "naturalGift": { "basePower": 80, "type": "Normal" },
         "num": 200,
         "gen": 4,
         "desc": "Halves damage taken from a Normal-type attack. Single use."
@@ -607,9 +535,7 @@
     "chippedpot": {
         "name": "Chipped Pot",
         "spritenum": 720,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 1254,
         "gen": 8,
         "desc": "Evolves Sinistea-Antique into Polteageist-Antique when used."
@@ -617,9 +543,7 @@
     "choiceband": {
         "name": "Choice Band",
         "spritenum": 68,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onModifyAtkPriority": 1,
         "isChoice": true,
         "num": 220,
@@ -629,9 +553,7 @@
     "choicescarf": {
         "name": "Choice Scarf",
         "spritenum": 69,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "isChoice": true,
         "num": 287,
         "gen": 4,
@@ -640,9 +562,7 @@
     "choicespecs": {
         "name": "Choice Specs",
         "spritenum": 70,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onModifySpAPriority": 1,
         "isChoice": true,
         "num": 297,
@@ -653,10 +573,7 @@
         "name": "Chople Berry",
         "spritenum": 71,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Fighting"
-        },
+        "naturalGift": { "basePower": 80, "type": "Fighting" },
         "num": 189,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Fighting-type attack. Single use."
@@ -664,9 +581,7 @@
     "clawfossil": {
         "name": "Claw Fossil",
         "spritenum": 72,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 100,
         "gen": 3,
         "isNonstandard": "Past",
@@ -682,9 +597,7 @@
     "cloversweet": {
         "name": "Clover Sweet",
         "spritenum": 707,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 1112,
         "gen": 8,
         "desc": "Evolves Milcery into Alcremie when held and spun around."
@@ -693,10 +606,7 @@
         "name": "Coba Berry",
         "spritenum": 76,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Flying"
-        },
+        "naturalGift": { "basePower": 80, "type": "Flying" },
         "num": 192,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Flying-type attack. Single use."
@@ -705,10 +615,7 @@
         "name": "Colbur Berry",
         "spritenum": 78,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Dark"
-        },
+        "naturalGift": { "basePower": 80, "type": "Dark" },
         "num": 198,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Dark-type attack. Single use."
@@ -717,10 +624,7 @@
         "name": "Cornn Berry",
         "spritenum": 81,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Bug"
-        },
+        "naturalGift": { "basePower": 90, "type": "Bug" },
         "onEat": false,
         "num": 175,
         "gen": 3,
@@ -730,9 +634,7 @@
     "coverfossil": {
         "name": "Cover Fossil",
         "spritenum": 85,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 572,
         "gen": 5,
         "isNonstandard": "Past",
@@ -740,9 +642,7 @@
     },
     "covertcloak": {
         "name": "Covert Cloak",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 0,
         "num": 1885,
         "gen": 9,
@@ -751,9 +651,7 @@
     "crackedpot": {
         "name": "Cracked Pot",
         "spritenum": 719,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 1253,
         "gen": 8,
         "desc": "Evolves Sinistea into Polteageist when used."
@@ -762,10 +660,7 @@
         "name": "Custap Berry",
         "spritenum": 86,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Ghost"
-        },
+        "naturalGift": { "basePower": 100, "type": "Ghost" },
         "onFractionalPriorityPriority": -2,
         "num": 210,
         "gen": 4,
@@ -775,9 +670,7 @@
     "damprock": {
         "name": "Damp Rock",
         "spritenum": 88,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "num": 285,
         "gen": 4,
         "desc": "Holder's use of Rain Dance lasts 8 turns instead of 5."
@@ -818,9 +711,7 @@
     "dawnstone": {
         "name": "Dawn Stone",
         "spritenum": 92,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 109,
         "gen": 4,
         "desc": "Evolves male Kirlia into Gallade and female Snorunt into Froslass when used.",
@@ -841,9 +732,7 @@
     "deepseascale": {
         "name": "Deep Sea Scale",
         "spritenum": 93,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onModifySpDPriority": 2,
         "itemUser": ["Clamperl"],
         "num": 227,
@@ -855,9 +744,7 @@
     "deepseatooth": {
         "name": "Deep Sea Tooth",
         "spritenum": 94,
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "onModifySpAPriority": 1,
         "itemUser": ["Clamperl"],
         "num": 226,
@@ -869,9 +756,7 @@
     "destinyknot": {
         "name": "Destiny Knot",
         "spritenum": 95,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onAttractPriority": -100,
         "num": 280,
         "gen": 4,
@@ -899,9 +784,7 @@
     "domefossil": {
         "name": "Dome Fossil",
         "spritenum": 102,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 102,
         "gen": 3,
         "isNonstandard": "Past",
@@ -932,9 +815,7 @@
     "dragonfang": {
         "name": "Dragon Fang",
         "spritenum": 106,
-        "fling": {
-            "basePower": 70
-        },
+        "fling": { "basePower": 70 },
         "onBasePowerPriority": 15,
         "num": 250,
         "gen": 2,
@@ -963,9 +844,7 @@
     "dragonscale": {
         "name": "Dragon Scale",
         "spritenum": 108,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 235,
         "gen": 2,
         "isNonstandard": "Past",
@@ -1006,9 +885,7 @@
     "dubiousdisc": {
         "name": "Dubious Disc",
         "spritenum": 113,
-        "fling": {
-            "basePower": 50
-        },
+        "fling": { "basePower": 50 },
         "num": 324,
         "gen": 4,
         "isNonstandard": "Past",
@@ -1018,10 +895,7 @@
         "name": "Durin Berry",
         "spritenum": 114,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Water"
-        },
+        "naturalGift": { "basePower": 100, "type": "Water" },
         "onEat": false,
         "num": 182,
         "gen": 3,
@@ -1039,9 +913,7 @@
     "duskstone": {
         "name": "Dusk Stone",
         "spritenum": 116,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 108,
         "gen": 4,
         "desc": "Evolves Murkrow into Honchkrow, Misdreavus into Mismagius, Lampent into Chandelure, and Doublade into Aegislash when used.",
@@ -1073,9 +945,7 @@
     "ejectbutton": {
         "name": "Eject Button",
         "spritenum": 118,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onAfterMoveSecondaryPriority": 2,
         "num": 547,
         "gen": 5,
@@ -1084,9 +954,7 @@
     "ejectpack": {
         "name": "Eject Pack",
         "spritenum": 714,
-        "fling": {
-            "basePower": 50
-        },
+        "fling": { "basePower": 50 },
         "num": 1119,
         "gen": 8,
         "desc": "If the holder's stat stages are lowered, it switches to a chosen ally. Single use."
@@ -1094,9 +962,7 @@
     "electirizer": {
         "name": "Electirizer",
         "spritenum": 119,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 322,
         "gen": 4,
         "isNonstandard": "Past",
@@ -1125,12 +991,8 @@
     "electricseed": {
         "name": "Electric Seed",
         "spritenum": 664,
-        "fling": {
-            "basePower": 10
-        },
-        "boosts": {
-            "def": 1
-        },
+        "fling": { "basePower": 10 },
+        "boosts": { "def": 1 },
         "num": 881,
         "gen": 7,
         "desc": "If the terrain is Electric Terrain, raises holder's Defense by 1 stage. Single use."
@@ -1151,9 +1013,7 @@
     "energypowder": {
         "name": "Energy Powder",
         "spritenum": 123,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 34,
         "gen": 2,
         "desc": "Restores 60 HP to one Pokemon."
@@ -1162,10 +1022,7 @@
         "name": "Enigma Berry",
         "spritenum": 124,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Bug"
-        },
+        "naturalGift": { "basePower": 100, "type": "Bug" },
         "num": 208,
         "gen": 3,
         "isNonstandard": "Unobtainable",
@@ -1174,9 +1031,7 @@
     "eviolite": {
         "name": "Eviolite",
         "spritenum": 130,
-        "fling": {
-            "basePower": 40
-        },
+        "fling": { "basePower": 40 },
         "onModifyDefPriority": 2,
         "onModifySpDPriority": 2,
         "num": 538,
@@ -1186,9 +1041,7 @@
     "expertbelt": {
         "name": "Expert Belt",
         "spritenum": 132,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 268,
         "gen": 4,
         "desc": "Holder's attacks that are super effective against the target do 1.2x damage."
@@ -1271,10 +1124,7 @@
         "name": "Figy Berry",
         "spritenum": 140,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Bug"
-        },
+        "naturalGift": { "basePower": 80, "type": "Bug" },
         "num": 159,
         "gen": 3,
         "desc": "Restores 1/3 max HP at 1/4 max HP or less; confuses if -Atk Nature. Single use."
@@ -1302,9 +1152,7 @@
     "firestone": {
         "name": "Fire Stone",
         "spritenum": 142,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 82,
         "gen": 1,
         "desc": "Evolves Vulpix into Ninetales, Growlithe into Arcanine, Eevee into Flareon, and Pansear into Simisear when used.",
@@ -1337,10 +1185,7 @@
     "flameorb": {
         "name": "Flame Orb",
         "spritenum": 145,
-        "fling": {
-            "basePower": 30,
-            "status": "brn"
-        },
+        "fling": { "basePower": 30, "status": "brn" },
         "onResidualOrder": 28,
         "onResidualSubOrder": 3,
         "num": 273,
@@ -1361,9 +1206,7 @@
     "floatstone": {
         "name": "Float Stone",
         "spritenum": 147,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 539,
         "gen": 5,
         "desc": "Holder's weight is halved."
@@ -1371,9 +1214,7 @@
     "flowersweet": {
         "name": "Flower Sweet",
         "spritenum": 708,
-        "fling": {
-            "basePower": 0
-        },
+        "fling": { "basePower": 0 },
         "num": 1113,
         "gen": 8,
         "desc": "Evolves Milcery into Alcremie when held and spun around."
@@ -1414,9 +1255,7 @@
     "focusband": {
         "name": "Focus Band",
         "spritenum": 150,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onDamagePriority": -40,
         "num": 230,
         "gen": 2,
@@ -1425,9 +1264,7 @@
     "focussash": {
         "name": "Focus Sash",
         "spritenum": 151,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onDamagePriority": -40,
         "num": 275,
         "gen": 4,
@@ -1436,9 +1273,7 @@
     "fossilizedbird": {
         "name": "Fossilized Bird",
         "spritenum": 700,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 1105,
         "gen": 8,
         "isNonstandard": "Past",
@@ -1447,9 +1282,7 @@
     "fossilizeddino": {
         "name": "Fossilized Dino",
         "spritenum": 703,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 1108,
         "gen": 8,
         "isNonstandard": "Past",
@@ -1458,9 +1291,7 @@
     "fossilizeddrake": {
         "name": "Fossilized Drake",
         "spritenum": 702,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 1107,
         "gen": 8,
         "isNonstandard": "Past",
@@ -1469,9 +1300,7 @@
     "fossilizedfish": {
         "name": "Fossilized Fish",
         "spritenum": 701,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 1106,
         "gen": 8,
         "isNonstandard": "Past",
@@ -1488,9 +1317,7 @@
     "fullincense": {
         "name": "Full Incense",
         "spritenum": 155,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onFractionalPriority": -0.1,
         "num": 316,
         "gen": 4,
@@ -1500,9 +1327,7 @@
     "galaricacuff": {
         "name": "Galarica Cuff",
         "spritenum": 739,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 1582,
         "gen": 8,
         "isNonstandard": "Past",
@@ -1511,9 +1336,7 @@
     "galaricawreath": {
         "name": "Galarica Wreath",
         "spritenum": 740,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 1592,
         "gen": 8,
         "isNonstandard": "Past",
@@ -1534,10 +1357,7 @@
         "name": "Ganlon Berry",
         "spritenum": 158,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Ice"
-        },
+        "naturalGift": { "basePower": 100, "type": "Ice" },
         "num": 202,
         "gen": 3,
         "desc": "Raises holder's Defense by 1 stage when at 1/4 max HP or less. Single use."
@@ -1622,9 +1442,7 @@
     "goldbottlecap": {
         "name": "Gold Bottle Cap",
         "spritenum": 697,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 796,
         "gen": 7,
         "desc": "Used for Hyper Training. All of a Pokemon's stats are calculated with an IV of 31."
@@ -1665,12 +1483,8 @@
     "grassyseed": {
         "name": "Grassy Seed",
         "spritenum": 667,
-        "fling": {
-            "basePower": 10
-        },
-        "boosts": {
-            "def": 1
-        },
+        "fling": { "basePower": 10 },
+        "boosts": { "def": 1 },
         "num": 884,
         "gen": 7,
         "desc": "If the terrain is Grassy Terrain, raises holder's Defense by 1 stage. Single use."
@@ -1687,10 +1501,7 @@
         "name": "Grepa Berry",
         "spritenum": 178,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Flying"
-        },
+        "naturalGift": { "basePower": 90, "type": "Flying" },
         "onEat": false,
         "num": 173,
         "gen": 3,
@@ -1699,9 +1510,7 @@
     "gripclaw": {
         "name": "Grip Claw",
         "spritenum": 179,
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "num": 286,
         "gen": 4,
         "desc": "Holder's partial-trapping moves always last 7 turns."
@@ -1709,9 +1518,7 @@
     "griseousorb": {
         "name": "Griseous Orb",
         "spritenum": 180,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "onBasePowerPriority": 15,
         "forcedForme": "Giratina-Origin",
         "itemUser": ["Giratina-Origin"],
@@ -1768,10 +1575,7 @@
         "name": "Haban Berry",
         "spritenum": 185,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Dragon"
-        },
+        "naturalGift": { "basePower": 80, "type": "Dragon" },
         "num": 197,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Dragon-type attack. Single use."
@@ -1779,9 +1583,7 @@
     "hardstone": {
         "name": "Hard Stone",
         "spritenum": 187,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "onBasePowerPriority": 15,
         "num": 238,
         "gen": 2,
@@ -1798,9 +1600,7 @@
     "heatrock": {
         "name": "Heat Rock",
         "spritenum": 193,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "num": 284,
         "gen": 4,
         "desc": "Holder's use of Sunny Day lasts 8 turns instead of 5."
@@ -1816,9 +1616,7 @@
     "heavydutyboots": {
         "name": "Heavy-Duty Boots",
         "spritenum": 715,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 1120,
         "gen": 8,
         "desc": "When switching in, the holder is unaffected by hazards on its side of the field."
@@ -1826,9 +1624,7 @@
     "helixfossil": {
         "name": "Helix Fossil",
         "spritenum": 195,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 101,
         "gen": 3,
         "isNonstandard": "Past",
@@ -1849,10 +1645,7 @@
         "name": "Hondew Berry",
         "spritenum": 213,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Ground"
-        },
+        "naturalGift": { "basePower": 90, "type": "Ground" },
         "onEat": false,
         "num": 172,
         "gen": 3,
@@ -1873,10 +1666,7 @@
         "name": "Iapapa Berry",
         "spritenum": 217,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Dark"
-        },
+        "naturalGift": { "basePower": 80, "type": "Dark" },
         "num": 163,
         "gen": 3,
         "desc": "Restores 1/3 max HP at 1/4 max HP or less; confuses if -Def Nature. Single use."
@@ -1904,9 +1694,7 @@
     "icestone": {
         "name": "Ice Stone",
         "spritenum": 693,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 849,
         "gen": 7,
         "desc": "Evolves Alolan Sandshrew into Alolan Sandslash, Alolan Vulpix into Alolan Ninetales, Eevee into Glaceon, and Galarian Darumaka into Galarian Darmanitan when used.",
@@ -1939,9 +1727,7 @@
     "icyrock": {
         "name": "Icy Rock",
         "spritenum": 221,
-        "fling": {
-            "basePower": 40
-        },
+        "fling": { "basePower": 40 },
         "num": 282,
         "gen": 4,
         "desc": "Holder's use of Hail lasts 8 turns instead of 5."
@@ -1972,9 +1758,7 @@
     "ironball": {
         "name": "Iron Ball",
         "spritenum": 224,
-        "fling": {
-            "basePower": 130
-        },
+        "fling": { "basePower": 130 },
         "num": 278,
         "gen": 4,
         "desc": "Holder is grounded, Speed halved. If Flying type, takes neutral Ground damage."
@@ -1994,10 +1778,7 @@
         "name": "Jaboca Berry",
         "spritenum": 230,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Dragon"
-        },
+        "naturalGift": { "basePower": 100, "type": "Dragon" },
         "num": 211,
         "gen": 4,
         "isNonstandard": "Unobtainable",
@@ -2006,9 +1787,7 @@
     "jawfossil": {
         "name": "Jaw Fossil",
         "spritenum": 694,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 710,
         "gen": 6,
         "isNonstandard": "Past",
@@ -2018,10 +1797,7 @@
         "name": "Kasib Berry",
         "spritenum": 233,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Ghost"
-        },
+        "naturalGift": { "basePower": 80, "type": "Ghost" },
         "num": 196,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Ghost-type attack. Single use."
@@ -2030,10 +1806,7 @@
         "name": "Kebia Berry",
         "spritenum": 234,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Poison"
-        },
+        "naturalGift": { "basePower": 80, "type": "Poison" },
         "num": 190,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Poison-type attack. Single use."
@@ -2042,10 +1815,7 @@
         "name": "Kee Berry",
         "spritenum": 593,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Fairy"
-        },
+        "naturalGift": { "basePower": 100, "type": "Fairy" },
         "num": 687,
         "gen": 6,
         "isNonstandard": "Unobtainable",
@@ -2055,10 +1825,7 @@
         "name": "Kelpsy Berry",
         "spritenum": 235,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Fighting"
-        },
+        "naturalGift": { "basePower": 90, "type": "Fighting" },
         "onEat": false,
         "num": 170,
         "gen": 3,
@@ -2078,10 +1845,7 @@
     "kingsrock": {
         "name": "King's Rock",
         "spritenum": 236,
-        "fling": {
-            "basePower": 30,
-            "volatileStatus": "flinch"
-        },
+        "fling": { "basePower": 30, "volatileStatus": "flinch" },
         "onModifyMovePriority": -1,
         "num": 221,
         "gen": 2,
@@ -2103,9 +1867,7 @@
     "laggingtail": {
         "name": "Lagging Tail",
         "spritenum": 237,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onFractionalPriority": -0.1,
         "num": 279,
         "gen": 4,
@@ -2115,10 +1877,7 @@
         "name": "Lansat Berry",
         "spritenum": 238,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Flying"
-        },
+        "naturalGift": { "basePower": 100, "type": "Flying" },
         "num": 206,
         "gen": 3,
         "desc": "Holder gains the Focus Energy effect when at 1/4 max HP or less. Single use."
@@ -2148,9 +1907,7 @@
     "laxincense": {
         "name": "Lax Incense",
         "spritenum": 240,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onModifyAccuracyPriority": -2,
         "num": 255,
         "gen": 3,
@@ -2160,9 +1917,7 @@
     "leafstone": {
         "name": "Leaf Stone",
         "spritenum": 241,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 85,
         "gen": 1,
         "desc": "Evolves Gloom into Vileplume, Weepinbell into Victreebel, Exeggcute into Exeggutor or Alolan Exeggutor, Eevee into Leafeon, Nuzleaf into Shiftry, and Pansage into Simisage when used.",
@@ -2170,9 +1925,7 @@
     },
     "leek": {
         "name": "Leek",
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "spritenum": 475,
         "itemUser": [
             "Farfetch\u2019d",
@@ -2187,9 +1940,7 @@
     "leftovers": {
         "name": "Leftovers",
         "spritenum": 242,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onResidualOrder": 5,
         "onResidualSubOrder": 4,
         "num": 234,
@@ -2200,10 +1951,7 @@
         "name": "Leppa Berry",
         "spritenum": 244,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Fighting"
-        },
+        "naturalGift": { "basePower": 80, "type": "Fighting" },
         "num": 154,
         "gen": 3,
         "desc": "Restores 10 PP to the first of the holder's moves to reach 0 PP. Single use."
@@ -2220,10 +1968,7 @@
         "name": "Liechi Berry",
         "spritenum": 248,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Grass"
-        },
+        "naturalGift": { "basePower": 100, "type": "Grass" },
         "num": 201,
         "gen": 3,
         "desc": "Raises holder's Attack by 1 stage when at 1/4 max HP or less. Single use."
@@ -2231,9 +1976,7 @@
     "lifeorb": {
         "name": "Life Orb",
         "spritenum": 249,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 270,
         "gen": 4,
         "desc": "Holder's attacks do 1.3x damage, and it loses 1/10 its max HP after the attack."
@@ -2241,10 +1984,7 @@
     "lightball": {
         "name": "Light Ball",
         "spritenum": 251,
-        "fling": {
-            "basePower": 30,
-            "status": "par"
-        },
+        "fling": { "basePower": 30, "status": "par" },
         "onModifyAtkPriority": 1,
         "onModifySpAPriority": 1,
         "itemUser": [
@@ -2272,9 +2012,7 @@
     "lightclay": {
         "name": "Light Clay",
         "spritenum": 252,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 269,
         "gen": 4,
         "desc": "Holder's use of Aurora Veil, Light Screen, or Reflect lasts 8 turns instead of 5."
@@ -2308,9 +2046,7 @@
     "lovesweet": {
         "name": "Love Sweet",
         "spritenum": 705,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 1110,
         "gen": 8,
         "desc": "Evolves Milcery into Alcremie when held and spun around."
@@ -2329,9 +2065,7 @@
     "luckypunch": {
         "name": "Lucky Punch",
         "spritenum": 261,
-        "fling": {
-            "basePower": 40
-        },
+        "fling": { "basePower": 40 },
         "itemUser": ["Chansey"],
         "num": 256,
         "gen": 2,
@@ -2342,10 +2076,7 @@
         "name": "Lum Berry",
         "spritenum": 262,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Flying"
-        },
+        "naturalGift": { "basePower": 80, "type": "Flying" },
         "onAfterSetStatusPriority": -1,
         "num": 157,
         "gen": 3,
@@ -2354,12 +2085,8 @@
     "luminousmoss": {
         "name": "Luminous Moss",
         "spritenum": 595,
-        "fling": {
-            "basePower": 30
-        },
-        "boosts": {
-            "spd": 1
-        },
+        "fling": { "basePower": 30 },
+        "boosts": { "spd": 1 },
         "num": 648,
         "gen": 6,
         "desc": "Raises holder's Sp. Def by 1 stage if hit by a Water-type attack. Single use."
@@ -2387,9 +2114,7 @@
     "lustrousorb": {
         "name": "Lustrous Orb",
         "spritenum": 265,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "onBasePowerPriority": 15,
         "itemUser": ["Palkia"],
         "num": 136,
@@ -2421,9 +2146,7 @@
         "name": "Macho Brace",
         "spritenum": 269,
         "ignoreKlutz": true,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "num": 215,
         "gen": 3,
         "desc": "Holder's Speed is halved. The Klutz Ability does not ignore this effect."
@@ -2431,9 +2154,7 @@
     "magmarizer": {
         "name": "Magmarizer",
         "spritenum": 272,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 323,
         "gen": 4,
         "desc": "Evolves Magmar into Magmortar when traded."
@@ -2441,9 +2162,7 @@
     "magnet": {
         "name": "Magnet",
         "spritenum": 273,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "num": 242,
         "gen": 2,
@@ -2453,10 +2172,7 @@
         "name": "Mago Berry",
         "spritenum": 274,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Ghost"
-        },
+        "naturalGift": { "basePower": 80, "type": "Ghost" },
         "num": 161,
         "gen": 3,
         "desc": "Restores 1/3 max HP at 1/4 max HP or less; confuses if -Spe Nature. Single use."
@@ -2465,10 +2181,7 @@
         "name": "Magost Berry",
         "spritenum": 275,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Rock"
-        },
+        "naturalGift": { "basePower": 90, "type": "Rock" },
         "onEat": false,
         "num": 176,
         "gen": 3,
@@ -2504,10 +2217,7 @@
         "name": "Maranga Berry",
         "spritenum": 597,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Dark"
-        },
+        "naturalGift": { "basePower": 100, "type": "Dark" },
         "num": 688,
         "gen": 6,
         "isNonstandard": "Unobtainable",
@@ -2569,9 +2279,7 @@
     "mentalherb": {
         "name": "Mental Herb",
         "spritenum": 285,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 219,
         "gen": 3,
         "desc": "Cures holder of Attract, Disable, Encore, Heal Block, Taunt, Torment. Single use."
@@ -2590,9 +2298,7 @@
     "metalcoat": {
         "name": "Metal Coat",
         "spritenum": 286,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "num": 233,
         "gen": 2,
@@ -2601,9 +2307,7 @@
     },
     "metalpowder": {
         "name": "Metal Powder",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 287,
         "onModifyDefPriority": 2,
         "itemUser": ["Ditto"],
@@ -2614,12 +2318,8 @@
     "metronome": {
         "name": "Metronome",
         "spritenum": 289,
-        "fling": {
-            "basePower": 30
-        },
-        "condition": {
-            "onTryMovePriority": -2
-        },
+        "fling": { "basePower": 30 },
+        "condition": { "onTryMovePriority": -2 },
         "num": 277,
         "gen": 4,
         "desc": "Damage of moves used on consecutive turns is increased. Max 2x after 5 turns."
@@ -2662,13 +2362,8 @@
         "name": "Micle Berry",
         "spritenum": 290,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Rock"
-        },
-        "condition": {
-            "duration": 2
-        },
+        "naturalGift": { "basePower": 100, "type": "Rock" },
+        "condition": { "duration": 2 },
         "num": 209,
         "gen": 4,
         "isNonstandard": "Unobtainable",
@@ -2704,9 +2399,7 @@
     },
     "miracleseed": {
         "name": "Miracle Seed",
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "spritenum": 292,
         "onBasePowerPriority": 15,
         "num": 239,
@@ -2715,9 +2408,7 @@
     },
     "mirrorherb": {
         "name": "Mirror Herb",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 0,
         "num": 1883,
         "gen": 9,
@@ -2726,12 +2417,8 @@
     "mistyseed": {
         "name": "Misty Seed",
         "spritenum": 666,
-        "fling": {
-            "basePower": 10
-        },
-        "boosts": {
-            "spd": 1
-        },
+        "fling": { "basePower": 10 },
+        "boosts": { "spd": 1 },
         "num": 883,
         "gen": 7,
         "desc": "If the terrain is Misty Terrain, raises holder's Sp. Def by 1 stage. Single use."
@@ -2747,9 +2434,7 @@
     "moonstone": {
         "name": "Moon Stone",
         "spritenum": 295,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 81,
         "gen": 1,
         "desc": "Evolves Nidorina into Nidoqueen, Nidorino into Nidoking, Clefairy into Clefable, Jigglypuff into Wigglytuff, Skitty into Delcatty, and Munna into Musharna when used.",
@@ -2758,9 +2443,7 @@
     "muscleband": {
         "name": "Muscle Band",
         "spritenum": 297,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 16,
         "num": 266,
         "gen": 4,
@@ -2769,9 +2452,7 @@
     "mysticwater": {
         "name": "Mystic Water",
         "spritenum": 300,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "num": 243,
         "gen": 2,
@@ -2781,10 +2462,7 @@
         "name": "Nanab Berry",
         "spritenum": 302,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Water"
-        },
+        "naturalGift": { "basePower": 90, "type": "Water" },
         "onEat": false,
         "num": 166,
         "gen": 3,
@@ -2810,9 +2488,7 @@
     "nevermeltice": {
         "name": "Never-Melt Ice",
         "spritenum": 305,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "num": 246,
         "gen": 2,
@@ -2822,10 +2498,7 @@
         "name": "Nomel Berry",
         "spritenum": 306,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Dragon"
-        },
+        "naturalGift": { "basePower": 90, "type": "Dragon" },
         "onEat": false,
         "num": 178,
         "gen": 3,
@@ -2855,10 +2528,7 @@
         "name": "Occa Berry",
         "spritenum": 311,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Fire"
-        },
+        "naturalGift": { "basePower": 80, "type": "Fire" },
         "num": 184,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Fire-type attack. Single use."
@@ -2866,9 +2536,7 @@
     "oddincense": {
         "name": "Odd Incense",
         "spritenum": 312,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 15,
         "num": 314,
         "gen": 4,
@@ -2878,9 +2546,7 @@
     "oldamber": {
         "name": "Old Amber",
         "spritenum": 314,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 103,
         "gen": 3,
         "isNonstandard": "Past",
@@ -2890,10 +2556,7 @@
         "name": "Oran Berry",
         "spritenum": 319,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Poison"
-        },
+        "naturalGift": { "basePower": 80, "type": "Poison" },
         "num": 155,
         "gen": 3,
         "desc": "Restores 10 HP when at 1/2 max HP or less. Single use."
@@ -2901,9 +2564,7 @@
     "ovalstone": {
         "name": "Oval Stone",
         "spritenum": 321,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 110,
         "gen": 4,
         "desc": "Evolves Happiny into Chansey when held and leveled up during the day."
@@ -2912,10 +2573,7 @@
         "name": "Pamtre Berry",
         "spritenum": 323,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Steel"
-        },
+        "naturalGift": { "basePower": 90, "type": "Steel" },
         "onEat": false,
         "num": 180,
         "gen": 3,
@@ -2935,10 +2593,7 @@
         "name": "Passho Berry",
         "spritenum": 329,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Water"
-        },
+        "naturalGift": { "basePower": 80, "type": "Water" },
         "num": 185,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Water-type attack. Single use."
@@ -2947,10 +2602,7 @@
         "name": "Payapa Berry",
         "spritenum": 330,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Psychic"
-        },
+        "naturalGift": { "basePower": 80, "type": "Psychic" },
         "num": 193,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Psychic-type attack. Single use."
@@ -2959,10 +2611,7 @@
         "name": "Pecha Berry",
         "spritenum": 333,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Electric"
-        },
+        "naturalGift": { "basePower": 80, "type": "Electric" },
         "num": 151,
         "gen": 3,
         "desc": "Holder is cured if it is poisoned. Single use."
@@ -2971,10 +2620,7 @@
         "name": "Persim Berry",
         "spritenum": 334,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Ground"
-        },
+        "naturalGift": { "basePower": 80, "type": "Ground" },
         "num": 156,
         "gen": 3,
         "desc": "Holder is cured if it is confused. Single use."
@@ -2983,10 +2629,7 @@
         "name": "Petaya Berry",
         "spritenum": 335,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Poison"
-        },
+        "naturalGift": { "basePower": 100, "type": "Poison" },
         "num": 204,
         "gen": 3,
         "desc": "Raises holder's Sp. Atk by 1 stage when at 1/4 max HP or less. Single use."
@@ -3038,10 +2681,7 @@
         "name": "Pinap Berry",
         "spritenum": 337,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Grass"
-        },
+        "naturalGift": { "basePower": 90, "type": "Grass" },
         "onEat": false,
         "num": 168,
         "gen": 3,
@@ -3072,9 +2712,7 @@
     "plumefossil": {
         "name": "Plume Fossil",
         "spritenum": 339,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 573,
         "gen": 5,
         "isNonstandard": "Past",
@@ -3083,10 +2721,7 @@
     "poisonbarb": {
         "name": "Poison Barb",
         "spritenum": 343,
-        "fling": {
-            "basePower": 70,
-            "status": "psn"
-        },
+        "fling": { "basePower": 70, "status": "psn" },
         "onBasePowerPriority": 15,
         "num": 245,
         "gen": 2,
@@ -3137,10 +2772,7 @@
         "name": "Pomeg Berry",
         "spritenum": 351,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Ice"
-        },
+        "naturalGift": { "basePower": 90, "type": "Ice" },
         "onEat": false,
         "num": 169,
         "gen": 3,
@@ -3150,9 +2782,7 @@
         "name": "Power Anklet",
         "spritenum": 354,
         "ignoreKlutz": true,
-        "fling": {
-            "basePower": 70
-        },
+        "fling": { "basePower": 70 },
         "num": 293,
         "gen": 4,
         "desc": "Holder's Speed is halved. The Klutz Ability does not ignore this effect."
@@ -3161,9 +2791,7 @@
         "name": "Power Band",
         "spritenum": 355,
         "ignoreKlutz": true,
-        "fling": {
-            "basePower": 70
-        },
+        "fling": { "basePower": 70 },
         "num": 292,
         "gen": 4,
         "desc": "Holder's Speed is halved. The Klutz Ability does not ignore this effect."
@@ -3172,9 +2800,7 @@
         "name": "Power Belt",
         "spritenum": 356,
         "ignoreKlutz": true,
-        "fling": {
-            "basePower": 70
-        },
+        "fling": { "basePower": 70 },
         "num": 290,
         "gen": 4,
         "desc": "Holder's Speed is halved. The Klutz Ability does not ignore this effect."
@@ -3183,9 +2809,7 @@
         "name": "Power Bracer",
         "spritenum": 357,
         "ignoreKlutz": true,
-        "fling": {
-            "basePower": 70
-        },
+        "fling": { "basePower": 70 },
         "num": 289,
         "gen": 4,
         "desc": "Holder's Speed is halved. The Klutz Ability does not ignore this effect."
@@ -3193,9 +2817,7 @@
     "powerherb": {
         "name": "Power Herb",
         "spritenum": 358,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 271,
         "gen": 4,
         "desc": "Holder's two-turn moves complete in one turn (except Sky Drop). Single use."
@@ -3204,9 +2826,7 @@
         "name": "Power Lens",
         "spritenum": 359,
         "ignoreKlutz": true,
-        "fling": {
-            "basePower": 70
-        },
+        "fling": { "basePower": 70 },
         "num": 291,
         "gen": 4,
         "desc": "Holder's Speed is halved. The Klutz Ability does not ignore this effect."
@@ -3215,9 +2835,7 @@
         "name": "Power Weight",
         "spritenum": 360,
         "ignoreKlutz": true,
-        "fling": {
-            "basePower": 70
-        },
+        "fling": { "basePower": 70 },
         "num": 294,
         "gen": 4,
         "desc": "Holder's Speed is halved. The Klutz Ability does not ignore this effect."
@@ -3245,9 +2863,7 @@
     "prismscale": {
         "name": "Prism Scale",
         "spritenum": 365,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 537,
         "gen": 5,
         "isNonstandard": "Past",
@@ -3256,9 +2872,7 @@
     "protectivepads": {
         "name": "Protective Pads",
         "spritenum": 663,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 880,
         "gen": 7,
         "desc": "Holder's moves are protected from adverse contact effects, except Pickpocket."
@@ -3266,9 +2880,7 @@
     "protector": {
         "name": "Protector",
         "spritenum": 367,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 321,
         "gen": 4,
         "isNonstandard": "Past",
@@ -3297,12 +2909,8 @@
     "psychicseed": {
         "name": "Psychic Seed",
         "spritenum": 665,
-        "fling": {
-            "basePower": 10
-        },
-        "boosts": {
-            "spd": 1
-        },
+        "fling": { "basePower": 10 },
+        "boosts": { "spd": 1 },
         "num": 882,
         "gen": 7,
         "desc": "If the terrain is Psychic Terrain, raises holder's Sp. Def by 1 stage. Single use."
@@ -3332,10 +2940,7 @@
         "name": "Qualot Berry",
         "spritenum": 371,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Poison"
-        },
+        "naturalGift": { "basePower": 90, "type": "Poison" },
         "onEat": false,
         "num": 171,
         "gen": 3,
@@ -3353,9 +2958,7 @@
         "onFractionalPriorityPriority": -2,
         "name": "Quick Claw",
         "spritenum": 373,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 217,
         "gen": 2,
         "desc": "Each turn, holder has a 20% chance to move first in its priority bracket."
@@ -3363,9 +2966,7 @@
     "quickpowder": {
         "name": "Quick Powder",
         "spritenum": 374,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "itemUser": ["Ditto"],
         "num": 274,
         "gen": 4,
@@ -3375,10 +2976,7 @@
         "name": "Rabuta Berry",
         "spritenum": 375,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Ghost"
-        },
+        "naturalGift": { "basePower": 90, "type": "Ghost" },
         "onEat": false,
         "num": 177,
         "gen": 3,
@@ -3388,9 +2986,7 @@
     "rarebone": {
         "name": "Rare Bone",
         "spritenum": 379,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 106,
         "gen": 4,
         "desc": "No competitive use other than when used with Fling."
@@ -3399,10 +2995,7 @@
         "name": "Rawst Berry",
         "spritenum": 381,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Grass"
-        },
+        "naturalGift": { "basePower": 80, "type": "Grass" },
         "num": 152,
         "gen": 3,
         "desc": "Holder is cured if it is burned. Single use."
@@ -3410,9 +3003,7 @@
     "razorclaw": {
         "name": "Razor Claw",
         "spritenum": 382,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 326,
         "gen": 4,
         "desc": "Holder's critical hit ratio is raised by 1 stage. Evolves Sneasel into Weavile when held and leveled up during the night.",
@@ -3421,10 +3012,7 @@
     "razorfang": {
         "name": "Razor Fang",
         "spritenum": 383,
-        "fling": {
-            "basePower": 30,
-            "volatileStatus": "flinch"
-        },
+        "fling": { "basePower": 30, "volatileStatus": "flinch" },
         "onModifyMovePriority": -1,
         "num": 327,
         "gen": 4,
@@ -3436,10 +3024,7 @@
         "name": "Razz Berry",
         "spritenum": 384,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Steel"
-        },
+        "naturalGift": { "basePower": 80, "type": "Steel" },
         "onEat": false,
         "num": 164,
         "gen": 3,
@@ -3449,9 +3034,7 @@
     "reapercloth": {
         "name": "Reaper Cloth",
         "spritenum": 385,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 325,
         "gen": 4,
         "isNonstandard": "Past",
@@ -3460,9 +3043,7 @@
     "redcard": {
         "name": "Red Card",
         "spritenum": 387,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 542,
         "gen": 5,
         "desc": "If holder survives a hit, attacker is forced to switch to a random ally. Single use."
@@ -3487,9 +3068,7 @@
     "ribbonsweet": {
         "name": "Ribbon Sweet",
         "spritenum": 710,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 1115,
         "gen": 8,
         "desc": "Evolves Milcery into Alcremie when held and spun around."
@@ -3498,10 +3077,7 @@
         "name": "Rindo Berry",
         "spritenum": 409,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Grass"
-        },
+        "naturalGift": { "basePower": 80, "type": "Grass" },
         "num": 187,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Grass-type attack. Single use."
@@ -3509,9 +3085,7 @@
     "ringtarget": {
         "name": "Ring Target",
         "spritenum": 410,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onNegateImmunity": false,
         "num": 543,
         "gen": 5,
@@ -3529,9 +3103,7 @@
     "rockincense": {
         "name": "Rock Incense",
         "spritenum": 416,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 15,
         "num": 315,
         "gen": 4,
@@ -3565,9 +3137,7 @@
     "rockyhelmet": {
         "name": "Rocky Helmet",
         "spritenum": 417,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "onDamagingHitOrder": 2,
         "num": 540,
         "gen": 5,
@@ -3576,12 +3146,8 @@
     "roomservice": {
         "name": "Room Service",
         "spritenum": 717,
-        "fling": {
-            "basePower": 100
-        },
-        "boosts": {
-            "spe": -1
-        },
+        "fling": { "basePower": 100 },
+        "boosts": { "spe": -1 },
         "num": 1122,
         "gen": 8,
         "desc": "If Trick Room is active, the holder's Speed is lowered by 1 stage. Single use."
@@ -3589,9 +3155,7 @@
     "rootfossil": {
         "name": "Root Fossil",
         "spritenum": 418,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 99,
         "gen": 3,
         "isNonstandard": "Past",
@@ -3600,9 +3164,7 @@
     "roseincense": {
         "name": "Rose Incense",
         "spritenum": 419,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 15,
         "num": 318,
         "gen": 4,
@@ -3613,10 +3175,7 @@
         "name": "Roseli Berry",
         "spritenum": 603,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Fairy"
-        },
+        "naturalGift": { "basePower": 80, "type": "Fairy" },
         "num": 686,
         "gen": 6,
         "desc": "Halves damage taken from a supereffective Fairy-type attack. Single use."
@@ -3625,10 +3184,7 @@
         "name": "Rowap Berry",
         "spritenum": 420,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Dark"
-        },
+        "naturalGift": { "basePower": 100, "type": "Dark" },
         "num": 212,
         "gen": 4,
         "isNonstandard": "Unobtainable",
@@ -3666,9 +3222,7 @@
     "sachet": {
         "name": "Sachet",
         "spritenum": 691,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 647,
         "gen": 6,
         "isNonstandard": "Past",
@@ -3685,9 +3239,7 @@
     "safetygoggles": {
         "name": "Safety Goggles",
         "spritenum": 604,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 650,
         "gen": 6,
         "desc": "Holder is immune to powder moves and damage from Sandstorm or Hail."
@@ -3695,9 +3247,7 @@
     "sailfossil": {
         "name": "Sail Fossil",
         "spritenum": 695,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 711,
         "gen": 6,
         "isNonstandard": "Past",
@@ -3707,10 +3257,7 @@
         "name": "Salac Berry",
         "spritenum": 426,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Fighting"
-        },
+        "naturalGift": { "basePower": 100, "type": "Fighting" },
         "num": 203,
         "gen": 3,
         "desc": "Raises holder's Speed by 1 stage when at 1/4 max HP or less. Single use."
@@ -3751,9 +3298,7 @@
     "scopelens": {
         "name": "Scope Lens",
         "spritenum": 429,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 232,
         "gen": 2,
         "desc": "Holder's critical hit ratio is raised by 1 stage."
@@ -3761,9 +3306,7 @@
     "seaincense": {
         "name": "Sea Incense",
         "spritenum": 430,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 15,
         "num": 254,
         "gen": 3,
@@ -3773,9 +3316,7 @@
     "sharpbeak": {
         "name": "Sharp Beak",
         "spritenum": 436,
-        "fling": {
-            "basePower": 50
-        },
+        "fling": { "basePower": 50 },
         "onBasePowerPriority": 15,
         "num": 244,
         "gen": 2,
@@ -3795,9 +3336,7 @@
     "shedshell": {
         "name": "Shed Shell",
         "spritenum": 437,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onTrapPokemonPriority": -10,
         "num": 295,
         "gen": 4,
@@ -3806,9 +3345,7 @@
     "shellbell": {
         "name": "Shell Bell",
         "spritenum": 438,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onAfterMoveSecondarySelfPriority": -1,
         "num": 253,
         "gen": 3,
@@ -3817,9 +3354,7 @@
     "shinystone": {
         "name": "Shiny Stone",
         "spritenum": 439,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 107,
         "gen": 4,
         "desc": "Evolves Togetic into Togekiss, Roselia into Roserade, Minccino into Cinccino, and Floette into Florges when used.",
@@ -3840,10 +3375,7 @@
         "name": "Shuca Berry",
         "spritenum": 443,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Ground"
-        },
+        "naturalGift": { "basePower": 80, "type": "Ground" },
         "num": 191,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Ground-type attack. Single use."
@@ -3851,9 +3383,7 @@
     "silkscarf": {
         "name": "Silk Scarf",
         "spritenum": 444,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 15,
         "num": 251,
         "gen": 3,
@@ -3862,9 +3392,7 @@
     "silverpowder": {
         "name": "Silver Powder",
         "spritenum": 447,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 15,
         "num": 222,
         "gen": 2,
@@ -3874,10 +3402,7 @@
         "name": "Sitrus Berry",
         "spritenum": 448,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Psychic"
-        },
+        "naturalGift": { "basePower": 80, "type": "Psychic" },
         "num": 158,
         "gen": 3,
         "desc": "Restores 1/4 max HP when at 1/2 max HP or less. Single use."
@@ -3885,9 +3410,7 @@
     "skullfossil": {
         "name": "Skull Fossil",
         "spritenum": 449,
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "num": 105,
         "gen": 4,
         "isNonstandard": "Past",
@@ -3918,9 +3441,7 @@
     "smoothrock": {
         "name": "Smooth Rock",
         "spritenum": 453,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 283,
         "gen": 4,
         "desc": "Holder's use of Sandstorm lasts 8 turns instead of 5."
@@ -3940,12 +3461,8 @@
     "snowball": {
         "name": "Snowball",
         "spritenum": 606,
-        "fling": {
-            "basePower": 30
-        },
-        "boosts": {
-            "atk": 1
-        },
+        "fling": { "basePower": 30 },
+        "boosts": { "atk": 1 },
         "num": 649,
         "gen": 6,
         "desc": "Raises holder's Attack by 1 if hit by an Ice-type attack. Single use."
@@ -3953,9 +3470,7 @@
     "softsand": {
         "name": "Soft Sand",
         "spritenum": 456,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 15,
         "num": 237,
         "gen": 2,
@@ -3976,9 +3491,7 @@
     "souldew": {
         "name": "Soul Dew",
         "spritenum": 459,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "itemUser": ["Latios", "Latias"],
         "num": 225,
@@ -3989,9 +3502,7 @@
     "spelltag": {
         "name": "Spell Tag",
         "spritenum": 461,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "num": 247,
         "gen": 2,
@@ -4001,10 +3512,7 @@
         "name": "Spelon Berry",
         "spritenum": 462,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Dark"
-        },
+        "naturalGift": { "basePower": 90, "type": "Dark" },
         "onEat": false,
         "num": 179,
         "gen": 3,
@@ -4045,10 +3553,7 @@
         "name": "Starf Berry",
         "spritenum": 472,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Psychic"
-        },
+        "naturalGift": { "basePower": 100, "type": "Psychic" },
         "num": 207,
         "gen": 3,
         "desc": "Raises a random stat by 2 when at 1/4 max HP or less (not acc/eva). Single use."
@@ -4056,9 +3561,7 @@
     "starsweet": {
         "name": "Star Sweet",
         "spritenum": 709,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 1114,
         "gen": 8,
         "desc": "Evolves Milcery into Alcremie when held and spun around."
@@ -4109,9 +3612,7 @@
     },
     "stick": {
         "name": "Stick",
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "spritenum": 475,
         "itemUser": ["Farfetch\u2019d"],
         "num": 259,
@@ -4122,9 +3623,7 @@
     "stickybarb": {
         "name": "Sticky Barb",
         "spritenum": 476,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "onResidualOrder": 28,
         "onResidualSubOrder": 3,
         "num": 288,
@@ -4145,9 +3644,7 @@
     "strawberrysweet": {
         "name": "Strawberry Sweet",
         "spritenum": 704,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 1109,
         "gen": 8,
         "desc": "Evolves Milcery into Alcremie when held and spun around."
@@ -4155,9 +3652,7 @@
     "sunstone": {
         "name": "Sun Stone",
         "spritenum": 480,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 80,
         "gen": 2,
         "desc": "Evolves Gloom into Bellossom, Sunkern into Sunflora, Cottonee into Whimsicott, Petilil into Lilligant, and Helioptile into Heliolisk when used.",
@@ -4177,9 +3672,7 @@
     "sweetapple": {
         "name": "Sweet Apple",
         "spritenum": 711,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 1116,
         "gen": 8,
         "desc": "Evolves Applin into Appletun when used."
@@ -4188,10 +3681,7 @@
         "name": "Tamato Berry",
         "spritenum": 486,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Psychic"
-        },
+        "naturalGift": { "basePower": 90, "type": "Psychic" },
         "onEat": false,
         "num": 174,
         "gen": 3,
@@ -4201,10 +3691,7 @@
         "name": "Tanga Berry",
         "spritenum": 487,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Bug"
-        },
+        "naturalGift": { "basePower": 80, "type": "Bug" },
         "num": 194,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Bug-type attack. Single use."
@@ -4224,9 +3711,7 @@
     "tartapple": {
         "name": "Tart Apple",
         "spritenum": 712,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 1117,
         "gen": 8,
         "desc": "Evolves Applin into Flapple when used."
@@ -4234,9 +3719,7 @@
     "terrainextender": {
         "name": "Terrain Extender",
         "spritenum": 662,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "num": 879,
         "gen": 7,
         "desc": "Holder's use of Electric/Grassy/Misty/Psychic Terrain lasts 8 turns instead of 5."
@@ -4244,9 +3727,7 @@
     "thickclub": {
         "name": "Thick Club",
         "spritenum": 491,
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "onModifyAtkPriority": 1,
         "itemUser": [
             "Marowak",
@@ -4262,12 +3743,8 @@
     "throatspray": {
         "name": "Throat Spray",
         "spritenum": 713,
-        "fling": {
-            "basePower": 30
-        },
-        "boosts": {
-            "spa": 1
-        },
+        "fling": { "basePower": 30 },
+        "boosts": { "spa": 1 },
         "num": 1118,
         "gen": 8,
         "desc": "Raises holder's Special Attack by 1 stage after it uses a sound move. Single use."
@@ -4275,9 +3752,7 @@
     "thunderstone": {
         "name": "Thunder Stone",
         "spritenum": 492,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 83,
         "gen": 1,
         "desc": "Evolves Pikachu into Raichu or Alolan Raichu, Eevee into Jolteon, Eelektrik into Eelektross, and Charjabug into Vikavolt when used.",
@@ -4294,10 +3769,7 @@
     "toxicorb": {
         "name": "Toxic Orb",
         "spritenum": 515,
-        "fling": {
-            "basePower": 30,
-            "status": "tox"
-        },
+        "fling": { "basePower": 30, "status": "tox" },
         "onResidualOrder": 28,
         "onResidualSubOrder": 3,
         "num": 272,
@@ -4317,9 +3789,7 @@
     },
     "tr00": {
         "name": "TR00",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 721,
         "num": 1130,
         "gen": 8,
@@ -4328,9 +3798,7 @@
     },
     "tr01": {
         "name": "TR01",
-        "fling": {
-            "basePower": 85
-        },
+        "fling": { "basePower": 85 },
         "spritenum": 721,
         "num": 1131,
         "gen": 8,
@@ -4339,9 +3807,7 @@
     },
     "tr02": {
         "name": "TR02",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 730,
         "num": 1132,
         "gen": 8,
@@ -4350,9 +3816,7 @@
     },
     "tr03": {
         "name": "TR03",
-        "fling": {
-            "basePower": 110
-        },
+        "fling": { "basePower": 110 },
         "spritenum": 731,
         "num": 1133,
         "gen": 8,
@@ -4361,9 +3825,7 @@
     },
     "tr04": {
         "name": "TR04",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 731,
         "num": 1134,
         "gen": 8,
@@ -4372,9 +3834,7 @@
     },
     "tr05": {
         "name": "TR05",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 735,
         "num": 1135,
         "gen": 8,
@@ -4383,9 +3843,7 @@
     },
     "tr06": {
         "name": "TR06",
-        "fling": {
-            "basePower": 110
-        },
+        "fling": { "basePower": 110 },
         "spritenum": 735,
         "num": 1136,
         "gen": 8,
@@ -4394,9 +3852,7 @@
     },
     "tr07": {
         "name": "TR07",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 722,
         "num": 1137,
         "gen": 8,
@@ -4405,9 +3861,7 @@
     },
     "tr08": {
         "name": "TR08",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 733,
         "num": 1138,
         "gen": 8,
@@ -4416,9 +3870,7 @@
     },
     "tr09": {
         "name": "TR09",
-        "fling": {
-            "basePower": 110
-        },
+        "fling": { "basePower": 110 },
         "spritenum": 733,
         "num": 1139,
         "gen": 8,
@@ -4427,9 +3879,7 @@
     },
     "tr10": {
         "name": "TR10",
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "spritenum": 725,
         "num": 1140,
         "gen": 8,
@@ -4438,9 +3888,7 @@
     },
     "tr11": {
         "name": "TR11",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 734,
         "num": 1141,
         "gen": 8,
@@ -4449,9 +3897,7 @@
     },
     "tr12": {
         "name": "TR12",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 734,
         "num": 1142,
         "gen": 8,
@@ -4460,9 +3906,7 @@
     },
     "tr13": {
         "name": "TR13",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 721,
         "num": 1143,
         "gen": 8,
@@ -4471,9 +3915,7 @@
     },
     "tr14": {
         "name": "TR14",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 721,
         "num": 1144,
         "gen": 8,
@@ -4482,9 +3924,7 @@
     },
     "tr15": {
         "name": "TR15",
-        "fling": {
-            "basePower": 110
-        },
+        "fling": { "basePower": 110 },
         "spritenum": 730,
         "num": 1145,
         "gen": 8,
@@ -4493,9 +3933,7 @@
     },
     "tr16": {
         "name": "TR16",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 731,
         "num": 1146,
         "gen": 8,
@@ -4504,9 +3942,7 @@
     },
     "tr17": {
         "name": "TR17",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 734,
         "num": 1147,
         "gen": 8,
@@ -4515,9 +3951,7 @@
     },
     "tr18": {
         "name": "TR18",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 727,
         "num": 1148,
         "gen": 8,
@@ -4526,9 +3960,7 @@
     },
     "tr19": {
         "name": "TR19",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 721,
         "num": 1149,
         "gen": 8,
@@ -4537,9 +3969,7 @@
     },
     "tr20": {
         "name": "TR20",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 721,
         "num": 1150,
         "gen": 8,
@@ -4548,9 +3978,7 @@
     },
     "tr21": {
         "name": "TR21",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 722,
         "num": 1151,
         "gen": 8,
@@ -4559,9 +3987,7 @@
     },
     "tr22": {
         "name": "TR22",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 724,
         "num": 1152,
         "gen": 8,
@@ -4570,9 +3996,7 @@
     },
     "tr23": {
         "name": "TR23",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 725,
         "num": 1153,
         "gen": 8,
@@ -4581,9 +4005,7 @@
     },
     "tr24": {
         "name": "TR24",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 736,
         "num": 1154,
         "gen": 8,
@@ -4592,9 +4014,7 @@
     },
     "tr25": {
         "name": "TR25",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 734,
         "num": 1155,
         "gen": 8,
@@ -4603,9 +4023,7 @@
     },
     "tr26": {
         "name": "TR26",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 721,
         "num": 1156,
         "gen": 8,
@@ -4614,9 +4032,7 @@
     },
     "tr27": {
         "name": "TR27",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 721,
         "num": 1157,
         "gen": 8,
@@ -4625,9 +4041,7 @@
     },
     "tr28": {
         "name": "TR28",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 727,
         "num": 1158,
         "gen": 8,
@@ -4636,9 +4050,7 @@
     },
     "tr29": {
         "name": "TR29",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 721,
         "num": 1159,
         "gen": 8,
@@ -4647,9 +4059,7 @@
     },
     "tr30": {
         "name": "TR30",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 721,
         "num": 1160,
         "gen": 8,
@@ -4658,9 +4068,7 @@
     },
     "tr31": {
         "name": "TR31",
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "spritenum": 729,
         "num": 1161,
         "gen": 8,
@@ -4669,9 +4077,7 @@
     },
     "tr32": {
         "name": "TR32",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 737,
         "num": 1162,
         "gen": 8,
@@ -4680,9 +4086,7 @@
     },
     "tr33": {
         "name": "TR33",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 728,
         "num": 1163,
         "gen": 8,
@@ -4691,9 +4095,7 @@
     },
     "tr34": {
         "name": "TR34",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 734,
         "num": 1164,
         "gen": 8,
@@ -4702,9 +4104,7 @@
     },
     "tr35": {
         "name": "TR35",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 721,
         "num": 1165,
         "gen": 8,
@@ -4713,9 +4113,7 @@
     },
     "tr36": {
         "name": "TR36",
-        "fling": {
-            "basePower": 95
-        },
+        "fling": { "basePower": 95 },
         "spritenum": 730,
         "num": 1166,
         "gen": 8,
@@ -4724,9 +4122,7 @@
     },
     "tr37": {
         "name": "TR37",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 737,
         "num": 1167,
         "gen": 8,
@@ -4735,9 +4131,7 @@
     },
     "tr38": {
         "name": "TR38",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 734,
         "num": 1168,
         "gen": 8,
@@ -4746,9 +4140,7 @@
     },
     "tr39": {
         "name": "TR39",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 722,
         "num": 1169,
         "gen": 8,
@@ -4757,9 +4149,7 @@
     },
     "tr40": {
         "name": "TR40",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 734,
         "num": 1170,
         "gen": 8,
@@ -4768,9 +4158,7 @@
     },
     "tr41": {
         "name": "TR41",
-        "fling": {
-            "basePower": 85
-        },
+        "fling": { "basePower": 85 },
         "spritenum": 730,
         "num": 1171,
         "gen": 8,
@@ -4779,9 +4167,7 @@
     },
     "tr42": {
         "name": "TR42",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 721,
         "num": 1172,
         "gen": 8,
@@ -4790,9 +4176,7 @@
     },
     "tr43": {
         "name": "TR43",
-        "fling": {
-            "basePower": 130
-        },
+        "fling": { "basePower": 130 },
         "spritenum": 730,
         "num": 1173,
         "gen": 8,
@@ -4801,9 +4185,7 @@
     },
     "tr44": {
         "name": "TR44",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 734,
         "num": 1174,
         "gen": 8,
@@ -4812,9 +4194,7 @@
     },
     "tr45": {
         "name": "TR45",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 731,
         "num": 1175,
         "gen": 8,
@@ -4823,9 +4203,7 @@
     },
     "tr46": {
         "name": "TR46",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 729,
         "num": 1176,
         "gen": 8,
@@ -4834,9 +4212,7 @@
     },
     "tr47": {
         "name": "TR47",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 736,
         "num": 1177,
         "gen": 8,
@@ -4845,9 +4221,7 @@
     },
     "tr48": {
         "name": "TR48",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 722,
         "num": 1178,
         "gen": 8,
@@ -4856,9 +4230,7 @@
     },
     "tr49": {
         "name": "TR49",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 734,
         "num": 1179,
         "gen": 8,
@@ -4867,9 +4239,7 @@
     },
     "tr50": {
         "name": "TR50",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 732,
         "num": 1180,
         "gen": 8,
@@ -4878,9 +4248,7 @@
     },
     "tr51": {
         "name": "TR51",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 736,
         "num": 1181,
         "gen": 8,
@@ -4889,9 +4257,7 @@
     },
     "tr52": {
         "name": "TR52",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 729,
         "num": 1182,
         "gen": 8,
@@ -4900,9 +4266,7 @@
     },
     "tr53": {
         "name": "TR53",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 722,
         "num": 1183,
         "gen": 8,
@@ -4911,9 +4275,7 @@
     },
     "tr54": {
         "name": "TR54",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 724,
         "num": 1184,
         "gen": 8,
@@ -4922,9 +4284,7 @@
     },
     "tr55": {
         "name": "TR55",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 730,
         "num": 1185,
         "gen": 8,
@@ -4933,9 +4293,7 @@
     },
     "tr56": {
         "name": "TR56",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 722,
         "num": 1186,
         "gen": 8,
@@ -4944,9 +4302,7 @@
     },
     "tr57": {
         "name": "TR57",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 724,
         "num": 1187,
         "gen": 8,
@@ -4955,9 +4311,7 @@
     },
     "tr58": {
         "name": "TR58",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 737,
         "num": 1188,
         "gen": 8,
@@ -4966,9 +4320,7 @@
     },
     "tr59": {
         "name": "TR59",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 732,
         "num": 1189,
         "gen": 8,
@@ -4977,9 +4329,7 @@
     },
     "tr60": {
         "name": "TR60",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 727,
         "num": 1190,
         "gen": 8,
@@ -4988,9 +4338,7 @@
     },
     "tr61": {
         "name": "TR61",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 727,
         "num": 1191,
         "gen": 8,
@@ -4999,9 +4347,7 @@
     },
     "tr62": {
         "name": "TR62",
-        "fling": {
-            "basePower": 85
-        },
+        "fling": { "basePower": 85 },
         "spritenum": 736,
         "num": 1192,
         "gen": 8,
@@ -5010,9 +4356,7 @@
     },
     "tr63": {
         "name": "TR63",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 726,
         "num": 1193,
         "gen": 8,
@@ -5021,9 +4365,7 @@
     },
     "tr64": {
         "name": "TR64",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 722,
         "num": 1194,
         "gen": 8,
@@ -5032,9 +4374,7 @@
     },
     "tr65": {
         "name": "TR65",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 732,
         "num": 1195,
         "gen": 8,
@@ -5043,9 +4383,7 @@
     },
     "tr66": {
         "name": "TR66",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 723,
         "num": 1196,
         "gen": 8,
@@ -5054,9 +4392,7 @@
     },
     "tr67": {
         "name": "TR67",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 725,
         "num": 1197,
         "gen": 8,
@@ -5065,9 +4401,7 @@
     },
     "tr68": {
         "name": "TR68",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 737,
         "num": 1198,
         "gen": 8,
@@ -5076,9 +4410,7 @@
     },
     "tr69": {
         "name": "TR69",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 734,
         "num": 1199,
         "gen": 8,
@@ -5087,9 +4419,7 @@
     },
     "tr70": {
         "name": "TR70",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 729,
         "num": 1200,
         "gen": 8,
@@ -5098,9 +4428,7 @@
     },
     "tr71": {
         "name": "TR71",
-        "fling": {
-            "basePower": 130
-        },
+        "fling": { "basePower": 130 },
         "spritenum": 732,
         "num": 1201,
         "gen": 8,
@@ -5109,9 +4437,7 @@
     },
     "tr72": {
         "name": "TR72",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 732,
         "num": 1202,
         "gen": 8,
@@ -5120,9 +4446,7 @@
     },
     "tr73": {
         "name": "TR73",
-        "fling": {
-            "basePower": 120
-        },
+        "fling": { "basePower": 120 },
         "spritenum": 724,
         "num": 1203,
         "gen": 8,
@@ -5131,9 +4455,7 @@
     },
     "tr74": {
         "name": "TR74",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 729,
         "num": 1204,
         "gen": 8,
@@ -5142,9 +4464,7 @@
     },
     "tr75": {
         "name": "TR75",
-        "fling": {
-            "basePower": 100
-        },
+        "fling": { "basePower": 100 },
         "spritenum": 726,
         "num": 1205,
         "gen": 8,
@@ -5153,9 +4473,7 @@
     },
     "tr76": {
         "name": "TR76",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 726,
         "num": 1206,
         "gen": 8,
@@ -5164,9 +4482,7 @@
     },
     "tr77": {
         "name": "TR77",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 732,
         "num": 1207,
         "gen": 8,
@@ -5175,9 +4491,7 @@
     },
     "tr78": {
         "name": "TR78",
-        "fling": {
-            "basePower": 95
-        },
+        "fling": { "basePower": 95 },
         "spritenum": 724,
         "num": 1208,
         "gen": 8,
@@ -5186,9 +4500,7 @@
     },
     "tr79": {
         "name": "TR79",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 729,
         "num": 1209,
         "gen": 8,
@@ -5197,9 +4509,7 @@
     },
     "tr80": {
         "name": "TR80",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 733,
         "num": 1210,
         "gen": 8,
@@ -5208,9 +4518,7 @@
     },
     "tr81": {
         "name": "TR81",
-        "fling": {
-            "basePower": 95
-        },
+        "fling": { "basePower": 95 },
         "spritenum": 737,
         "num": 1211,
         "gen": 8,
@@ -5219,9 +4527,7 @@
     },
     "tr82": {
         "name": "TR82",
-        "fling": {
-            "basePower": 20
-        },
+        "fling": { "basePower": 20 },
         "spritenum": 734,
         "num": 1212,
         "gen": 8,
@@ -5230,9 +4536,7 @@
     },
     "tr83": {
         "name": "TR83",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 734,
         "num": 1213,
         "gen": 8,
@@ -5241,9 +4545,7 @@
     },
     "tr84": {
         "name": "TR84",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 731,
         "num": 1214,
         "gen": 8,
@@ -5252,9 +4554,7 @@
     },
     "tr85": {
         "name": "TR85",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 721,
         "num": 1215,
         "gen": 8,
@@ -5263,9 +4563,7 @@
     },
     "tr86": {
         "name": "TR86",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 733,
         "num": 1216,
         "gen": 8,
@@ -5274,9 +4572,7 @@
     },
     "tr87": {
         "name": "TR87",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 725,
         "num": 1217,
         "gen": 8,
@@ -5285,9 +4581,7 @@
     },
     "tr88": {
         "name": "TR88",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 730,
         "num": 1218,
         "gen": 8,
@@ -5296,9 +4590,7 @@
     },
     "tr89": {
         "name": "TR89",
-        "fling": {
-            "basePower": 110
-        },
+        "fling": { "basePower": 110 },
         "spritenum": 723,
         "num": 1219,
         "gen": 8,
@@ -5307,9 +4599,7 @@
     },
     "tr90": {
         "name": "TR90",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 738,
         "num": 1220,
         "gen": 8,
@@ -5318,9 +4608,7 @@
     },
     "tr91": {
         "name": "TR91",
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "spritenum": 724,
         "num": 1221,
         "gen": 8,
@@ -5329,9 +4617,7 @@
     },
     "tr92": {
         "name": "TR92",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 738,
         "num": 1222,
         "gen": 8,
@@ -5340,9 +4626,7 @@
     },
     "tr93": {
         "name": "TR93",
-        "fling": {
-            "basePower": 85
-        },
+        "fling": { "basePower": 85 },
         "spritenum": 737,
         "num": 1223,
         "gen": 8,
@@ -5351,9 +4635,7 @@
     },
     "tr94": {
         "name": "TR94",
-        "fling": {
-            "basePower": 95
-        },
+        "fling": { "basePower": 95 },
         "spritenum": 725,
         "num": 1224,
         "gen": 8,
@@ -5362,9 +4644,7 @@
     },
     "tr95": {
         "name": "TR95",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 737,
         "num": 1225,
         "gen": 8,
@@ -5373,9 +4653,7 @@
     },
     "tr96": {
         "name": "TR96",
-        "fling": {
-            "basePower": 90
-        },
+        "fling": { "basePower": 90 },
         "spritenum": 727,
         "num": 1226,
         "gen": 8,
@@ -5384,9 +4662,7 @@
     },
     "tr97": {
         "name": "TR97",
-        "fling": {
-            "basePower": 85
-        },
+        "fling": { "basePower": 85 },
         "spritenum": 734,
         "num": 1227,
         "gen": 8,
@@ -5395,9 +4671,7 @@
     },
     "tr98": {
         "name": "TR98",
-        "fling": {
-            "basePower": 85
-        },
+        "fling": { "basePower": 85 },
         "spritenum": 731,
         "num": 1228,
         "gen": 8,
@@ -5406,9 +4680,7 @@
     },
     "tr99": {
         "name": "TR99",
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "spritenum": 722,
         "num": 1229,
         "gen": 8,
@@ -5418,9 +4690,7 @@
     "twistedspoon": {
         "name": "Twisted Spoon",
         "spritenum": 520,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "onBasePowerPriority": 15,
         "num": 248,
         "gen": 2,
@@ -5460,9 +4730,7 @@
     "upgrade": {
         "name": "Up-Grade",
         "spritenum": 523,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 252,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5471,9 +4739,7 @@
     "utilityumbrella": {
         "name": "Utility Umbrella",
         "spritenum": 718,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "num": 1123,
         "gen": 8,
         "desc": "The holder ignores rain- and sun-based effects. Damage and accuracy calculations from attacks used by the holder are affected by rain and sun, but not attacks used against the holder.",
@@ -5494,10 +4760,7 @@
         "name": "Wacan Berry",
         "spritenum": 526,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Electric"
-        },
+        "naturalGift": { "basePower": 80, "type": "Electric" },
         "num": 186,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Electric-type attack. Single use."
@@ -5525,9 +4788,7 @@
     "waterstone": {
         "name": "Water Stone",
         "spritenum": 529,
-        "fling": {
-            "basePower": 30
-        },
+        "fling": { "basePower": 30 },
         "num": 84,
         "gen": 1,
         "desc": "Evolves Poliwhirl into Poliwrath, Shellder into Cloyster, Staryu into Starmie, Eevee into Vaporeon, Lombre into Ludicolo, and Panpour into Simipour when used.",
@@ -5550,10 +4811,7 @@
         "name": "Watmel Berry",
         "spritenum": 530,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 100,
-            "type": "Fire"
-        },
+        "naturalGift": { "basePower": 100, "type": "Fire" },
         "onEat": false,
         "num": 181,
         "gen": 3,
@@ -5563,9 +4821,7 @@
     "waveincense": {
         "name": "Wave Incense",
         "spritenum": 531,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 15,
         "num": 317,
         "gen": 4,
@@ -5575,13 +4831,8 @@
     "weaknesspolicy": {
         "name": "Weakness Policy",
         "spritenum": 609,
-        "fling": {
-            "basePower": 80
-        },
-        "boosts": {
-            "atk": 2,
-            "spa": 2
-        },
+        "fling": { "basePower": 80 },
+        "boosts": { "atk": 2, "spa": 2 },
         "num": 639,
         "gen": 6,
         "desc": "If holder is hit super effectively, raises Attack, Sp. Atk by 2 stages. Single use."
@@ -5590,10 +4841,7 @@
         "name": "Wepear Berry",
         "spritenum": 533,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 90,
-            "type": "Electric"
-        },
+        "naturalGift": { "basePower": 90, "type": "Electric" },
         "onEat": false,
         "num": 167,
         "gen": 3,
@@ -5603,9 +4851,7 @@
     "whippeddream": {
         "name": "Whipped Dream",
         "spritenum": 692,
-        "fling": {
-            "basePower": 80
-        },
+        "fling": { "basePower": 80 },
         "num": 646,
         "gen": 6,
         "isNonstandard": "Past",
@@ -5614,9 +4860,7 @@
     "whiteherb": {
         "name": "White Herb",
         "spritenum": 535,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "num": 214,
         "gen": 3,
         "desc": "Restores all lowered stat stages to 0 when one is less than 0. Single use."
@@ -5624,9 +4868,7 @@
     "widelens": {
         "name": "Wide Lens",
         "spritenum": 537,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onSourceModifyAccuracyPriority": -2,
         "num": 265,
         "gen": 4,
@@ -5636,10 +4878,7 @@
         "name": "Wiki Berry",
         "spritenum": 538,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Rock"
-        },
+        "naturalGift": { "basePower": 80, "type": "Rock" },
         "num": 160,
         "gen": 3,
         "desc": "Restores 1/3 max HP at 1/4 max HP or less; confuses if -SpA Nature. Single use."
@@ -5647,9 +4886,7 @@
     "wiseglasses": {
         "name": "Wise Glasses",
         "spritenum": 539,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onBasePowerPriority": 16,
         "num": 267,
         "gen": 4,
@@ -5659,10 +4896,7 @@
         "name": "Yache Berry",
         "spritenum": 567,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Ice"
-        },
+        "naturalGift": { "basePower": 80, "type": "Ice" },
         "num": 188,
         "gen": 4,
         "desc": "Halves damage taken from a supereffective Ice-type attack. Single use."
@@ -5681,9 +4915,7 @@
     "zoomlens": {
         "name": "Zoom Lens",
         "spritenum": 574,
-        "fling": {
-            "basePower": 10
-        },
+        "fling": { "basePower": 10 },
         "onSourceModifyAccuracyPriority": -2,
         "num": 276,
         "gen": 4,
@@ -5692,9 +4924,7 @@
     "berserkgene": {
         "name": "Berserk Gene",
         "spritenum": 388,
-        "boosts": {
-            "atk": 2
-        },
+        "boosts": { "atk": 2 },
         "num": 0,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5704,10 +4934,7 @@
         "name": "Berry",
         "spritenum": 319,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Poison"
-        },
+        "naturalGift": { "basePower": 80, "type": "Poison" },
         "onResidualOrder": 5,
         "num": 155,
         "gen": 2,
@@ -5718,10 +4945,7 @@
         "name": "Bitter Berry",
         "spritenum": 334,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Ground"
-        },
+        "naturalGift": { "basePower": 80, "type": "Ground" },
         "num": 156,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5731,10 +4955,7 @@
         "name": "Burnt Berry",
         "spritenum": 13,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Ice"
-        },
+        "naturalGift": { "basePower": 80, "type": "Ice" },
         "num": 153,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5744,10 +4965,7 @@
         "name": "Gold Berry",
         "spritenum": 448,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Psychic"
-        },
+        "naturalGift": { "basePower": 80, "type": "Psychic" },
         "onResidualOrder": 5,
         "num": 158,
         "gen": 2,
@@ -5758,10 +4976,7 @@
         "name": "Ice Berry",
         "spritenum": 381,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Grass"
-        },
+        "naturalGift": { "basePower": 80, "type": "Grass" },
         "num": 152,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5771,10 +4986,7 @@
         "name": "Mint Berry",
         "spritenum": 65,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Water"
-        },
+        "naturalGift": { "basePower": 80, "type": "Water" },
         "num": 150,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5784,10 +4996,7 @@
         "name": "Miracle Berry",
         "spritenum": 262,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Flying"
-        },
+        "naturalGift": { "basePower": 80, "type": "Flying" },
         "num": 157,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5797,10 +5006,7 @@
         "name": "Mystery Berry",
         "spritenum": 244,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Fighting"
-        },
+        "naturalGift": { "basePower": 80, "type": "Fighting" },
         "num": 154,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5826,10 +5032,7 @@
         "name": "PRZ Cure Berry",
         "spritenum": 63,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Fire"
-        },
+        "naturalGift": { "basePower": 80, "type": "Fire" },
         "num": 149,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5839,10 +5042,7 @@
         "name": "PSN Cure Berry",
         "spritenum": 333,
         "isBerry": true,
-        "naturalGift": {
-            "basePower": 80,
-            "type": "Electric"
-        },
+        "naturalGift": { "basePower": 80, "type": "Electric" },
         "num": 151,
         "gen": 2,
         "isNonstandard": "Past",
@@ -5862,9 +5062,7 @@
     "vilevial": {
         "name": "Vile Vial",
         "spritenum": 752,
-        "fling": {
-            "basePower": 60
-        },
+        "fling": { "basePower": 60 },
         "onBasePowerPriority": 15,
         "forcedForme": "Venomicon-Epilogue",
         "itemUser": ["Venomicon-Epilogue"],

@@ -26,6 +26,8 @@ Then, see the code in [test.py](https://github.com/spktrm/meloetta/blob/main/tes
 
 ```bash
 git clone https://github.com/smogon/pokemon-showdown-client.git
+cd pokemon-showdown-client
+node build
 ```
 
 Then run these commands in node (remeber to use the other backslash `\` on windows).
@@ -36,6 +38,7 @@ node pokemon-showdown-client/build-tools/build-learnsets
 ```
 
 Then finally run `extract.py` from the main directory. This will copy over the necessary source files.
+Optionally run `npx prettier -w --tab-width 4 js` to format the files neatly.
 
 # Example Output
 
