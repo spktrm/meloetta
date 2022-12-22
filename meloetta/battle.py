@@ -5,11 +5,14 @@ SRC = [
     "js/predef.js",
     "js/polyfill.js",
     "js/cycle.js",
-    "js/client/abilities.js",
     "js/client/aliases.js",
+    "js/client/abilities.js",
     "js/client/items.js",
     "js/client/moves.js",
     "js/client/pokedex.js",
+    "js/client/typechart.js",
+    "js/client/formats-data.js",
+    "js/client/teambuilder-tables.js",
     "js/client/battle-scene-stub.js",
     "js/client/battle-choices.js",
     "js/client/battle-dex.js",
@@ -77,19 +80,19 @@ class Battle:
         self._ctx.execute("engine.start()")
 
     def add(self, data: str = ""):
-        self._ctx.call("engine.add", data)
+        return self._ctx.call("engine.add", data)
 
     def instantAdd(self, data: str):
-        self._ctx.call("engine.instandAdd", data)
+        return self._ctx.call("engine.instandAdd", data)
 
     def push_to_step_queue(self, data: str):
-        self._ctx.call("engine.addToStepQueue", data)
+        return self._ctx.call("engine.addToStepQueue", data)
 
     def seek_turn(self, turn: int, force_reset: bool):
-        self._ctx.call("engine.seekTurn", turn, force_reset)
+        return self._ctx.call("engine.seekTurn", turn, force_reset)
 
     def setPerspective(self, sideid: str):
-        self._ctx.call("engine.setPerspective", sideid)
+        return self._ctx.call("engine.setPerspective", sideid)
 
     def parsePokemonId(self, pokemonid: str):
         return self._ctx.call("engine.parsePokemonId", pokemonid)
@@ -102,6 +105,21 @@ class Battle:
 
     def get_choices(self, request):
         return self._ctx.call("engine.getChoices", request)
+
+    def get_species(self, species):
+        return self._ctx.call("engine.getSpecies", species)
+
+    def get_move(self, move):
+        return self._ctx.call("engine.getMove", move)
+
+    def get_item(self, item):
+        return self._ctx.call("engine.getItem", item)
+
+    def get_ability(self, ability):
+        return self._ctx.call("engine.getAbility", ability)
+
+    def get_type(self, type):
+        return self._ctx.call("engine.getType", type)
 
     def reset(self):
         self._ctx.execute("engine.reset()")
