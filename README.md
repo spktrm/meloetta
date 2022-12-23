@@ -1,7 +1,7 @@
 # Meloetta
 
 <p align="center">
-  <img src="meloetta.png" alt="Sublime's custom image"/>
+  <img src="meloetta.png" alt="meloetta"/>
 </p>
 
 ```bash
