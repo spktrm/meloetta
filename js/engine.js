@@ -22,6 +22,11 @@ var engine = (function () {
             return 0;
         },
 
+        setGen: function (gen) {
+            battle.dex = Dex.forGen(gen)
+            return 0;
+        },
+
         add: function (command) {
             battle.add(command);
             return 0;
