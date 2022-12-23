@@ -86,7 +86,7 @@ class SelfPlayWorker:
 
 def main():
     procs = []
-    for i in range(20): # num workes (check with os.cpu_count())
+    for i in range(2): # num workes (check with os.cpu_count())
         worker = SelfPlayWorker(i, 1) # 2 is players per worker
         # This config will spawn 20 workers with 2 players each
         # for a total of 40 players, playing 20 games.

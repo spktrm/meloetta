@@ -9,6 +9,9 @@ __pycache__/
 # .vscode
 /.vscode
 
+# pretrained tensors
+**/*.pt
+
 # Distribution / packaging
 .Python
 build/

@@ -121,6 +121,9 @@ class Battle:
     def get_type(self, type):
         return self._ctx.call("engine.getType", type)
 
+    def set_gen(self, gen):
+        return self._ctx.call("engine.setGen", gen)
+
     def reset(self):
         self._ctx.execute("engine.reset()")
         self._battle_tag = None
