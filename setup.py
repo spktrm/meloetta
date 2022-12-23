@@ -22,14 +22,10 @@ setup(
     url="https://github.com/spktrm/meloetta",
     author="Joseph Twin",
     author_email="joseph.twin14@gmail.com",
+    long_description=open("README.md").read(),
     packages=find_packages(),
     setup_requires=["wheel"],
     install_requires=requirements,
-    package_data={
-        "": [
-            "*.ini",
-        ]
-    },
     extras_require=dict(
         core_tests=pretrain_requirements,
     ),
