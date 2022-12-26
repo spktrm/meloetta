@@ -1,5 +1,6 @@
 import os
 import json
+import numpy as np
 
 DATA_DIR = "js/data"
 
@@ -47,3 +48,7 @@ with open(os.path.join(DATA_DIR, "BattleTypeChart.json"), "r") as f:
 
 with open(os.path.join(DATA_DIR, "Formats.json"), "r") as f:
     Formats = json.loads(f.read())
+
+
+def load_feature_embedding(type: str, gen: int):
+    return np.load(os.path.join("pretrained", f"gen{gen}", type + ".npy"))
