@@ -2811,7 +2811,7 @@
         "tier": "Illegal",
         "natDexTier": "UU"
     },
-    "rufflet": { "tier": "LC" },
+    "rufflet": { "tier": "NFE" },
     "braviary": { "tier": "UU", "doublesTier": "DUU", "natDexTier": "UU" },
     "braviaryhisui": { "isNonstandard": "Unobtainable", "tier": "Unreleased" },
     "vullaby": {
