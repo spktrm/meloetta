@@ -2,24 +2,28 @@ import re
 import os
 import json
 import shutil
+import platform
 
 from py_mini_racer import MiniRacer
 
 
 PS_CLIENT_DIR = "pokemon-showdown-client"
 
+OS_NAME = "windows" if platform.system() == "Windows" else "unix"
+DATA_DIR = {"windows": ".data-dist", "unix": "dist/data"}
+
 CLIENT_SRC = [
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/abilities.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/aliases.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/items.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/moves.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/pokedex.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/typechart.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/natures.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/conditions.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/learnsets.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/formats-data.js",
-    f"{PS_CLIENT_DIR}/data/pokemon-showdown/dist/data/tags.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/abilities.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/aliases.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/items.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/moves.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/pokedex.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/typechart.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/natures.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/conditions.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/learnsets.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/formats-data.js",
+    f"{PS_CLIENT_DIR}/data/pokemon-showdown/{DATA_DIR[OS_NAME]}/tags.js",
     f"{PS_CLIENT_DIR}/data/teambuilder-tables.js",
     f"{PS_CLIENT_DIR}/js/battle-scene-stub.js",
     f"{PS_CLIENT_DIR}/js/battle-choices.js",
