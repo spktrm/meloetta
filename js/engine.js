@@ -23,7 +23,7 @@ var engine = (function () {
         },
 
         setGen: function (gen) {
-            battle.dex = Dex.forGen(gen)
+            battle.dex = Dex.forGen(gen);
             return 0;
         },
 

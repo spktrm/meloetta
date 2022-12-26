@@ -81,6 +81,7 @@
             "Meditite",
             "Misdreavus",
             "Murkrow",
+            "Rufflet",
             "Scyther",
             "Sneasel",
             "Moody",
@@ -141,7 +142,9 @@
             "Acupressure",
             "Hypnosis",
             "Perish Song",
-            "Sing"
+            "Sing",
+            "Spore",
+            "Yawn"
         ]
     },
     {
@@ -818,6 +821,7 @@
             "Illusion",
             "Innards Out",
             "Magnet Pull",
+            "Moody",
             "Neutralizing Gas",
             "Parental Bond",
             "Pure Power",
