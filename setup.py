@@ -31,7 +31,6 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
-    setup_requires=["wheel"],
     install_requires=requirements,
     extras_require=dict(
         core_tests=pretrain_requirements,
