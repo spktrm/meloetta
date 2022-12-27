@@ -3,6 +3,7 @@ from typing import Union, NamedTuple, List, Dict, Any
 from meloetta.data import (
     BOOSTS,
     VOLATILES,
+    PSEUDOWEATHERS,
     get_item_effect_token,
     get_status_token,
     get_gender_token,
@@ -11,6 +12,8 @@ from meloetta.data import (
     get_item_token,
     get_move_token,
     get_type_token,
+    get_weather_token,
+    get_pseudoweather_token,
 )
 
 
@@ -87,7 +90,9 @@ class PseudoWeather(NamedTuple):
 class State(NamedTuple):
     p1: Side
     p2: Side
-    weather: str
+    weather: int
+    weather_time_left: int
+    weather_min_time_left: int
     pseudo_weather: str
     turn: int
     last_move: str
@@ -107,12 +112,18 @@ class VectorizedState:
 
     def vectorize(self):
         p1, p2 = self._vectorize_sides()
+        pseudoweathers = [
+            (get_pseudoweather_token(to_id(pseudoweather)), t1, t2)
+            for pseudoweather, t1, t2 in self.state["pseudoWeather"]
+        ]
         return State(
             p1=p1,
             p2=p2,
             last_move=self.state["lastMove"],
-            weather=self.state["weather"],
-            pseudo_weather=self.state["pseudoWeather"],
+            weather=get_weather_token(self.state["weather"]),
+            weather_time_left=self.state["weatherTimeLeft"],
+            weather_min_time_left=self.state["weatherMinTimeLeft"],
+            pseudo_weather=pseudoweathers,
             turn=self.state["turn"],
             log=self.state["stepQueue"],
         )
@@ -202,9 +213,3 @@ class VectorizedState:
             last_move=get_move_token(self.gen, "name", pokemon["lastMove"]),
             times_attacked=pokemon["timesAttacked"],
         )
-
-    def _vectorize_weather(self):
-        return
-
-    def _vectorize_pseudo_weather(self):
-        return self.state["pseudoWeather"]
