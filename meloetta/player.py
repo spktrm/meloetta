@@ -6,6 +6,7 @@ from typing import Dict, Union, Any, List
 
 from meloetta.client import Client
 from meloetta.battle import Battle
+from meloetta.state import VectorizedState
 
 
 class ChoiceBuilder:
@@ -256,6 +257,10 @@ class Player:
     def get_state(self, raw: bool = False):
         self.state = self.battle.get_state(raw=raw)
         return self.state
+
+    def get_vectorized_state(self):
+        state = self.battle.get_state(raw=False)
+        return VectorizedState(self, state)
 
     def get_choices(self):
         nchoices = self.state["pokemonControlled"]
