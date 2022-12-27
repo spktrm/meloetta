@@ -68,6 +68,8 @@ def main():
             with open(f"js/data/{export}.json", "w") as f:
                 json.dump(obj, f)
 
+    os.system("npx prettier -w --tab-width 4 js")
+
 
 if __name__ == "__main__":
     main()
