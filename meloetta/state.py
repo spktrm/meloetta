@@ -3,12 +3,14 @@ from typing import Union, NamedTuple, List, Dict, Any
 from meloetta.data import (
     BOOSTS,
     VOLATILES,
+    get_item_effect_token,
     get_status_token,
     get_gender_token,
     get_species_token,
     get_ability_token,
     get_item_token,
     get_move_token,
+    get_type_token,
 )
 
 
@@ -27,22 +29,24 @@ class Side(NamedTuple):
 
 
 class ReservePokemon(NamedTuple):
-    species: str
+    species: int
+    forme: int
     slot: int
     hp: int
-    fainted: bool
-    maxhp: int
+    fainted: int
     level: int
     gender: int
     moves: List[str]
-    ability: str
-    base_ability: str
-    item: str
-    prev_item: str
-    terastallized: str
-    status: str
+    ability: int
+    base_ability: int
+    item: int
+    item_effect: int
+    prev_item: int
+    prev_item_effect: int
+    terastallized: int
+    status: int
     status_stage: int
-    last_move: str
+    last_move: int
     times_attacked: int
 
 
@@ -51,19 +55,20 @@ class ActivePokemon(NamedTuple):
     forme: int
     slot: int
     hp: int
-    fainted: bool
-    maxhp: int
+    fainted: int
     level: int
     gender: int
     moves: List[str]
-    ability: str
-    base_ability: str
-    item: str
-    prev_item: str
-    terastallized: str
-    status: str
+    ability: int
+    base_ability: int
+    item: int
+    item_effect: int
+    prev_item: int
+    prev_item_effect: int
+    terastallized: int
+    status: int
     status_stage: int
-    last_move: str
+    last_move: int
     times_attacked: int
     boosts: Dict[str, Any]
     volatiles: Dict[str, Any]
@@ -119,14 +124,14 @@ class VectorizedState:
 
     def _vectorize_side(self, side_id: str):
         side = self.state[side_id]
+        active = [self._vectorize_public_active_pokemon(p) for p in side["active"]]
+        reserve = [self._vectorize_public_reserve_pokemon(p) for p in side["pokemon"]]
         return Side(
             n=side["n"],
             total_pokemon=side["totalPokemon"],
             faint_counter=side["faintCounter"],
-            active=[self._vectorize_public_active_pokemon(p) for p in side["active"]],
-            reserve=[
-                self._vectorize_public_reserve_pokemon(p) for p in side["pokemon"]
-            ],
+            active=active,
+            reserve=reserve,
             side_conditions=side["sideConditions"],
             wisher=side["wisher"],
         )
@@ -140,26 +145,29 @@ class VectorizedState:
             for move, pp in pokemon["moveTrack"]
         ]
         boosts = [pokemon["boosts"].get(boost, 0) for boost in BOOSTS]
-        volatiles = [pokemon["volatiles"].get(volatile, 0) for volatile in VOLATILES]
+        volatiles = [
+            1 if volatile in pokemon["volatiles"] else 0 for volatile in VOLATILES
+        ]
         forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
         return ActivePokemon(
             species=get_species_token(self.gen, "name", pokemon["name"]),
             forme=get_species_token(self.gen, "forme", forme),
             slot=pokemon["slot"],
-            hp=pokemon["hp"],
-            maxhp=pokemon["maxhp"],
-            fainted=pokemon["fainted"],
+            hp=pokemon["hp"] / pokemon["maxhp"],
+            fainted=1 if pokemon["fainted"] else 0,
             level=pokemon["level"],
             gender=get_gender_token(pokemon["gender"]),
             moves=moves,
             ability=get_ability_token(self.gen, "name", pokemon["ability"]),
             base_ability=get_ability_token(self.gen, "name", pokemon["baseAbility"]),
             item=get_item_token(self.gen, "name", pokemon["item"]),
+            item_effect=get_item_effect_token(pokemon["itemEffect"]),
             prev_item=get_item_token(self.gen, "name", pokemon["prevItem"]),
-            terastallized=pokemon["terastallized"],
+            prev_item_effect=get_item_effect_token(pokemon["prevItemEffect"]),
+            terastallized=get_type_token(self.gen, pokemon["terastallized"]),
             status=get_status_token(pokemon["status"]),
             status_stage=pokemon["statusStage"],
-            last_move=get_move_token(self.gen, "name", pokemon["lastMove"]),
+            last_move=get_move_token(self.gen, "id", pokemon["lastMove"]),
             times_attacked=pokemon["timesAttacked"],
             boosts=boosts,
             volatiles=volatiles,
@@ -168,23 +176,30 @@ class VectorizedState:
         )
 
     def _vectorize_public_reserve_pokemon(self, pokemon):
+        moves = [
+            (get_move_token(self.gen, "name", move), pp)
+            for move, pp in pokemon["moveTrack"]
+        ]
+        forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
         return ReservePokemon(
-            species=pokemon["speciesForme"],
+            species=get_species_token(self.gen, "name", pokemon["name"]),
+            forme=get_species_token(self.gen, "forme", forme),
             slot=pokemon["slot"],
-            hp=pokemon["hp"],
-            maxhp=pokemon["maxhp"],
-            fainted=pokemon["fainted"],
+            hp=pokemon["hp"] / pokemon["maxhp"],
+            fainted=1 if pokemon["fainted"] else 0,
             level=pokemon["level"],
-            gender=pokemon["gender"],
-            moves=pokemon["moveTrack"],
-            ability=pokemon["ability"],
-            base_ability=pokemon["baseAbility"],
-            item=pokemon["item"],
-            prev_item=pokemon["prevItem"],
-            terastallized=pokemon["terastallized"],
-            status=pokemon["status"],
+            gender=get_gender_token(pokemon["gender"]),
+            moves=moves,
+            ability=get_ability_token(self.gen, "name", pokemon["ability"]),
+            base_ability=get_ability_token(self.gen, "name", pokemon["baseAbility"]),
+            item=get_item_token(self.gen, "name", pokemon["item"]),
+            item_effect=get_item_effect_token(pokemon["itemEffect"]),
+            prev_item=get_item_token(self.gen, "name", pokemon["prevItem"]),
+            prev_item_effect=get_item_effect_token(pokemon["prevItemEffect"]),
+            terastallized=get_type_token(self.gen, pokemon["terastallized"]),
+            status=get_status_token(pokemon["status"]),
             status_stage=pokemon["statusStage"],
-            last_move=pokemon["lastMove"],
+            last_move=get_move_token(self.gen, "name", pokemon["lastMove"]),
             times_attacked=pokemon["timesAttacked"],
         )
 

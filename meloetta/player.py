@@ -260,7 +260,7 @@ class Player:
 
     def get_vectorized_state(self):
         state = self.battle.get_state(raw=False)
-        return VectorizedState.from_battle(self, state)
+        return VectorizedState.from_battle(self.battle, state)
 
     def get_choices(self):
         nchoices = self.state["pokemonControlled"]
