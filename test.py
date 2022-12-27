@@ -43,7 +43,7 @@ class SelfPlayWorker:
         await player.client.login()
         await asyncio.sleep(1)
 
-        battle_format = "gen1randombattle"
+        battle_format = "gen3randombattle"
         team = "null"
 
         progress = tqdm(range(10)) if player_index == 0 else range(10)
@@ -68,6 +68,7 @@ class SelfPlayWorker:
 
                 if action_required:
                     state = player.get_state()
+                    vstate = player.get_vectorized_state()
                     choices = player.get_choices()
                     # The magic
                     choice = (
@@ -104,5 +105,5 @@ def main():
 
 
 if __name__ == "__main__":
-    mp.set_start_method("spawn")
+    mp.set_start_method("fork")
     main()
