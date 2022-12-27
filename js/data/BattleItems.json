@@ -5,7 +5,7 @@
         "ignoreKlutz": true,
         "num": 1881,
         "gen": 9,
-        "desc": "Holder's Ability cannot be changed by any effect."
+        "desc": "Holder's Ability cannot be changed by another Pokemon."
     },
     "abomasite": {
         "name": "Abomasite",
@@ -194,8 +194,7 @@
         "name": "Auspicious Armor",
         "spritenum": 0,
         "num": 2344,
-        "gen": 9,
-        "desc": "Evolves Charcadet into Armarouge when used."
+        "gen": 9
     },
     "babiriberry": {
         "name": "Babiri Berry",
@@ -363,7 +362,7 @@
         "spritenum": 0,
         "num": 1880,
         "gen": 9,
-        "desc": "Activates the Protosynthesis or Quark Drive Abilities. Single use."
+        "desc": "Activates the Protosynthesis or Quark Drive abilities. Single use."
     },
     "bottlecap": {
         "name": "Bottle Cap",
@@ -593,7 +592,7 @@
         "spritenum": 0,
         "num": 1882,
         "gen": 9,
-        "desc": "Prevents other Pokemon from lowering the holder's stat stages."
+        "desc": "Prevents other Pokemon from lowering this Pokemon's stat stages."
     },
     "cloversweet": {
         "name": "Clover Sweet",
@@ -2023,7 +2022,7 @@
         "spritenum": 0,
         "num": 1886,
         "gen": 9,
-        "desc": "Holder's moves that hit 2-5 times hit 4-5 times; Population Bomb hits 4-10 times."
+        "desc": "Holder's 5 hit multi-hit attacks will always hit at least 4 times."
     },
     "lopunnite": {
         "name": "Lopunnite",
@@ -2201,8 +2200,7 @@
         "name": "Malicious Armor",
         "spritenum": 0,
         "num": 1861,
-        "gen": 9,
-        "desc": "Evolves Charcadet into Ceruledge when used."
+        "gen": 9
     },
     "manectite": {
         "name": "Manectite",
@@ -2414,7 +2412,7 @@
         "spritenum": 0,
         "num": 1883,
         "gen": 9,
-        "desc": "When an opposing Pokemon raises a stat stage, the holder copies it. Single use."
+        "desc": "When an opposing Pokemon recieves stat boosts, those boosts are copied. Single use."
     },
     "mistyseed": {
         "name": "Misty Seed",
@@ -2936,7 +2934,7 @@
         "onBasePowerPriority": 23,
         "num": 1884,
         "gen": 9,
-        "desc": "Holder's punch-based attacks have 1.1x power and do not make contact."
+        "desc": "Holder's punch-based attacks do 1.1x damage and avoid adverse contact effects."
     },
     "qualotberry": {
         "name": "Qualot Berry",
