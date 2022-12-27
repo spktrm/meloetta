@@ -1,19 +1,13 @@
-from abc import ABC, abstractmethod
 import os
-import re
 import json
 import traceback
 import numpy as np
 
-from typing import Callable, List, Union, Dict, Any
-from regex import E
-from torch import ge
-
+from copy import deepcopy
+from abc import ABC
 from tqdm import tqdm
-
+from typing import Callable, List, Dict, Any
 from collections.abc import MutableMapping
-
-from sklearn.preprocessing import OneHotEncoder
 
 from meloetta.battle import Battle
 
@@ -157,8 +151,8 @@ class Pokedex(Dex):
         self.dex = self.get_dex(table, gen)
         data = {o: battle.get_species(o) for o in self.dex}
         self.data = {k: v for k, v in data.items() if v.get("exists", False)}
-        self.schema = get_schema(data)
-        self.schema = {k: v for k, v in self.schema.items() if k in self.FEATURES}
+        self.raw_schema = get_schema(data)
+        self.schema = {k: v for k, v in self.raw_schema.items() if k in self.FEATURES}
 
         self.abilities = set()
         for d in data.values():
@@ -247,8 +241,8 @@ class Movedex(Dex):
     def __init__(self, battle: Battle, moves: List[str], gen: int):
         data = {move: battle.get_move(move) for move in moves}
         self.data = {k: v for k, v in data.items() if v.get("exists", False)}
-        self.schema = get_schema(data)
-        self.schema = {k: v for k, v in self.schema.items() if k in self.FEATURES}
+        self.raw_schema = get_schema(data)
+        self.schema = {k: v for k, v in self.raw_schema.items() if k in self.FEATURES}
 
         keys_to_pop = []
         if gen < 7:
@@ -279,8 +273,8 @@ class Itemdex(Dex):
         self.dex = self.get_dex(table, gen)
         data = {o: battle.get_item(o) for o in self.dex}
         self.data = {k: v for k, v in data.items() if v.get("exists", False)}
-        self.schema = get_schema(data)
-        self.schema = {k: v for k, v in self.schema.items() if k in self.FEATURES}
+        self.raw_schema = get_schema(data)
+        self.schema = {k: v for k, v in self.raw_schema.items() if k in self.FEATURES}
 
     def get_dex(self, table, gen):
         try:
@@ -299,12 +293,13 @@ class Abilitydex(Dex):
     def __init__(self, battle: Battle, abilities: List[str], gen: int):
         data = {ability: battle.get_ability(ability) for ability in abilities}
         self.data = {k: v for k, v in data.items() if v.get("exists", False)}
-        self.schema = get_schema(data)
-        self.schema = {k: v for k, v in self.schema.items() if k in self.FEATURES}
+        self.raw_schema = get_schema(data)
+        self.schema = {k: v for k, v in self.raw_schema.items() if k in self.FEATURES}
 
 
 def main():
 
+    schema = {}
     for gen in range(1, 10):
         battle = Battle()
         battle.set_gen(gen)
@@ -320,6 +315,8 @@ def main():
         movedex = Movedex(battle, pokedex.moves, gen)
         abilitydex = Abilitydex(battle, pokedex.abilities, gen)
         itemdex = Itemdex(battle, teambuilder_table, gen)
+
+        schema[f"gen{gen}"] = {}
 
         for dex in [
             pokedex,
@@ -348,7 +345,14 @@ def main():
             except:
                 traceback.print_exc()
             else:
+                schema[f"gen{gen}"][dex_name] = deepcopy(dex.raw_schema)
+                for key, values in schema[f"gen{gen}"][dex_name].items():
+                    for index, value in enumerate(values):
+                        schema[f"gen{gen}"][dex_name][key][index] = json.loads(value)
                 np.save(os.path.join(save_dir, dex_name), data)
+
+    with open("pretrained/schema.json", "w") as f:
+        json.dump(schema, f)
 
 
 if __name__ == "__main__":

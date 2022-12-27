@@ -2,6 +2,10 @@ import os
 import json
 import numpy as np
 
+from copy import deepcopy
+from typing import Any
+
+
 DATA_DIR = "js/data"
 
 with open(os.path.join(DATA_DIR, "BattleAbilities.json"), "r") as f:
@@ -50,5 +54,63 @@ with open(os.path.join(DATA_DIR, "Formats.json"), "r") as f:
     Formats = json.loads(f.read())
 
 
+BOOSTS = ["atk", "def", "spa", "spd", "spe", "evasion", "accuracy", "spc"]
+
+
 def load_feature_embedding(type: str, gen: int):
     return np.load(os.path.join("pretrained", f"gen{gen}", type + ".npy"))
+
+
+with open("pretrained/schema.json", "r") as f:
+    schema = json.loads(f.read())
+
+tokenized_schema = deepcopy(schema)
+
+for gen in tokenized_schema:
+    for dex_type in schema[gen]:
+        for key, values in schema[gen][dex_type].items():
+            tokenized_schema[gen][dex_type][key] = {
+                str(values): index for index, values in enumerate(values)
+            }
+
+
+def get_species_token(gen: int, key: int, value: Any):
+    lookup = tokenized_schema[f"gen{gen}"]["pokedex"][key]
+    return lookup.get(value, -1)
+
+
+def get_move_token(gen: int, key: int, value: Any):
+    lookup = tokenized_schema[f"gen{gen}"]["movedex"][key]
+    return lookup.get(value, -1)
+
+
+def get_ability_token(gen: int, key: int, value: Any):
+    lookup = tokenized_schema[f"gen{gen}"]["abilitydex"][key]
+    return lookup.get(value, -1)
+
+
+def get_item_token(gen: int, key: int, value: Any):
+    lookup = tokenized_schema[f"gen{gen}"]["itemdex"][key]
+    return lookup.get(value, -1)
+
+
+GENDERS = {"M": 0, "F": 1, "N": 2}
+STATUS = {"par": 0, "psn": 1, "frz": 2, "slp": 3, "brn": 4}
+
+
+def get_gender_token(value: str):
+    return GENDERS.get(value, -1)
+
+
+def get_status_token(value: str):
+    return STATUS.get(value, -1)
+
+
+with open("pretrained/wsnc.json", "r") as f:
+    WSNC = json.loads(f.read())
+
+VOLATILES = WSNC["volatiles"]
+WEATHERS = WSNC["weathers"]
+PSEUDOWEATHER = WSNC["pseudoweather"]
+TERRAIN = WSNC["terrain"]
+ITEM_EFFECTS = WSNC["item_effects"]
