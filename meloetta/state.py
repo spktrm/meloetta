@@ -2,7 +2,7 @@ from typing import NamedTuple
 
 
 class Side(NamedTuple):
-    
+    pass
 
 
 class VectorizedState:
