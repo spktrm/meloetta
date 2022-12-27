@@ -46,7 +46,8 @@ class SelfPlayWorker:
         battle_format = "gen8randombattle"
         team = "null"
 
-        progress = tqdm(range(10)) if player_index == 0 else range(10)
+        num_games = range(100)
+        progress = tqdm(num_games) if player_index == 0 else num_games
         for _ in progress:  # 10 battles each player-player pair
             if player_index % 2 == 0:
                 await player.client.challenge_user(
@@ -87,7 +88,7 @@ class SelfPlayWorker:
 
 def main():
     procs = []
-    for i in range(2):  # num workes (check with os.cpu_count())
+    for i in range(20):  # num workes (check with os.cpu_count())
         worker = SelfPlayWorker(i, 1)  # 2 is players per worker
         # This config will spawn 20 workers with 2 players each
         # for a total of 40 players, playing 20 games.

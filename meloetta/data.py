@@ -123,16 +123,21 @@ VOLATILES = {v: i for i, v in enumerate(VOLATILES)}
 WEATHERS = WSNC["weathers"]
 WEATHERS = {v: i for i, v in enumerate(WEATHERS)}
 
-PSEUDOWEATHER = WSNC["pseudoweather"]
-PSEUDOWEATHER = {v: i for i, v in enumerate(PSEUDOWEATHER)}
-
+PSEUDOWEATHERS = WSNC["pseudoweather"]
 TERRAIN = WSNC["terrain"]
-TERRAIN = {v: i for i, v in enumerate(TERRAIN)}
+PSEUDOWEATHERS = {v: i for i, v in enumerate(PSEUDOWEATHERS + TERRAIN)}
 
 ITEM_EFFECTS = WSNC["item_effects"]
 ITEM_EFFECTS = {v: i for i, v in enumerate(ITEM_EFFECTS)}
 
 
 def get_item_effect_token(name):
-    lookup = ITEM_EFFECTS
-    return lookup.get(name, -1)
+    return ITEM_EFFECTS.get(name, -1)
+
+
+def get_weather_token(name):
+    return WEATHERS.get(name, -1)
+
+
+def get_pseudoweather_token(name):
+    return PSEUDOWEATHERS.get(name, -1)

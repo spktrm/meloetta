@@ -1,13 +1,13 @@
 {
     "weathers": [
-        "DeltaStream",
-        "DesolateLand",
-        "Hail",
-        "PrimordialSea",
-        "RainDance",
-        "Sandstorm",
-        "Snow",
-        "SunnyDay"
+        "deltastream",
+        "desolateland",
+        "hail",
+        "primordialsea",
+        "raindance",
+        "sandstorm",
+        "snow",
+        "sunnyday"
     ],
     "volatiles": [
         "airballoon",

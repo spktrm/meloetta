@@ -9,7 +9,7 @@ MOVES_PATH = f"pokemon-showdown-client/data/pokemon-showdown/data/moves.ts"
 
 
 def main():
-    # os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
+    os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
 
     src = ""
     with open(CONDITIONS_PATH, "r") as f:
@@ -43,7 +43,7 @@ def main():
     volatile_status.sort()
 
     weathers = re.findall(r"[\"|\']-weather[\"|\'],\s*[\"|\'](.*)[\"|\'],", src)
-    weathers = list(sorted(set(weathers)))
+    weathers = list(map(lambda s: s.lower(), sorted(set(weathers))))
 
     side_conditions = re.findall(r"sideCondition:\s*[\"|\'](.*)[\"|\'],", src)
     side_conditions = list(sorted(set(side_conditions)))
