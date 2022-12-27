@@ -6,9 +6,10 @@ import numpy as np
 from copy import deepcopy
 from abc import ABC
 from tqdm import tqdm
-from typing import Callable, List, Dict, Any
+from typing import Callable, List, Dict, Any, Set
 from collections.abc import MutableMapping
 
+from meloetta.data import GMAX_MOVES
 from meloetta.battle import Battle
 
 
@@ -159,6 +160,12 @@ class Pokedex(Dex):
             abilities = set(d.get("abilities", {}).values())
             self.abilities.update(abilities)
 
+        for ability, d in (
+            table.get(f"gen{gen}", {}).get("overrideAbilityData", {}).items()
+        ):
+            if "isNonstandard" in d and d["isNonstandard"] is None:
+                self.abilities.add(ability)
+
         self.moves = set()
         for name in self.dex:
             if name in table["learnsets"]:
@@ -169,6 +176,10 @@ class Pokedex(Dex):
                         if str(gen) in gens
                     ]
                 )
+
+        for move, d in table.get(f"gen{gen}", {}).get("overrideMoveData", {}).items():
+            if "isNonstandard" in d and d["isNonstandard"] is None:
+                self.moves.add(move)
 
     def get_dex(self, table, gen):
         try:
@@ -238,7 +249,9 @@ class Movedex(Dex):
         "zMove.effect": one_hot_enc,
     }
 
-    def __init__(self, battle: Battle, moves: List[str], gen: int):
+    def __init__(self, battle: Battle, moves: Set[str], gen: int):
+        if gen == 8:
+            moves.update(GMAX_MOVES)
         data = {move: battle.get_move(move) for move in moves}
         self.data = {k: v for k, v in data.items() if v.get("exists", False)}
         self.raw_schema = get_schema(data)

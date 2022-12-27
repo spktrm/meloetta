@@ -2,8 +2,7 @@ import os
 import re
 import json
 
-from extract import PS_CLIENT_DIR, OS_NAME, DATA_DIR
-
+from extract import PS_CLIENT_DIR
 
 CONDITIONS_PATH = f"pokemon-showdown-client/data/pokemon-showdown/data/conditions.ts"
 MOVES_PATH = f"pokemon-showdown-client/data/pokemon-showdown/data/moves.ts"
@@ -25,8 +24,8 @@ def main():
             ) as f:
                 src += f.read()
 
-    with open("wsnc", "w", encoding="utf-8") as f:
-        f.write(src)
+    # with open("wsnc", "w", encoding="utf-8") as f:
+    #     f.write(src)
 
     volatile_status = set()
     volatile_status.update(
@@ -41,6 +40,7 @@ def main():
     volatile_status = list(volatile_status)
     for i, vs in enumerate(volatile_status):
         volatile_status[i] = "".join(c for c in vs if c.isalnum()).lower()
+    volatile_status.sort()
 
     weathers = re.findall(r"[\"|\']-weather[\"|\'],\s*[\"|\'](.*)[\"|\'],", src)
     weathers = list(sorted(set(weathers)))
@@ -57,10 +57,9 @@ def main():
     item_effects = re.findall(r"itemEffect = [\"|\'](.*?)[\"|\']", src)
     item_effects = list(sorted(set(item_effects)))
     item_effects.pop(1)
-    new_item_effects = []
-    for item_effect in item_effects[1:]:
-        new_item_effects.append(f"({item_effect})")
-    item_effects += new_item_effects
+    item_effects = set(item_effects)
+    item_effects.update(["eaten", "popped", "consumed", "held up"])
+    item_effects = list(sorted(item_effects))
 
     wsnc = {
         "weathers": weathers,

@@ -54,6 +54,9 @@ with open(os.path.join(DATA_DIR, "Formats.json"), "r") as f:
     Formats = json.loads(f.read())
 
 
+GMAX_MOVES = [move for move in BattleMovedex if "gmax" in move]
+
+
 BOOSTS = ["atk", "def", "spa", "spd", "spe", "evasion", "accuracy", "spc"]
 
 
@@ -72,6 +75,11 @@ for gen in tokenized_schema:
             tokenized_schema[gen][dex_type][key] = {
                 str(values): index for index, values in enumerate(values)
             }
+
+
+def get_type_token(gen: int, value: Any):
+    lookup = tokenized_schema[f"gen{gen}"]["movedex"]["type"]
+    return lookup.get(value, -1)
 
 
 def get_species_token(gen: int, key: int, value: Any):
@@ -110,7 +118,21 @@ with open("pretrained/wsnc.json", "r") as f:
     WSNC = json.loads(f.read())
 
 VOLATILES = WSNC["volatiles"]
+VOLATILES = {v: i for i, v in enumerate(VOLATILES)}
+
 WEATHERS = WSNC["weathers"]
+WEATHERS = {v: i for i, v in enumerate(WEATHERS)}
+
 PSEUDOWEATHER = WSNC["pseudoweather"]
+PSEUDOWEATHER = {v: i for i, v in enumerate(PSEUDOWEATHER)}
+
 TERRAIN = WSNC["terrain"]
+TERRAIN = {v: i for i, v in enumerate(TERRAIN)}
+
 ITEM_EFFECTS = WSNC["item_effects"]
+ITEM_EFFECTS = {v: i for i, v in enumerate(ITEM_EFFECTS)}
+
+
+def get_item_effect_token(name):
+    lookup = ITEM_EFFECTS
+    return lookup.get(name, -1)
