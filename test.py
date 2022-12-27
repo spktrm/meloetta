@@ -43,7 +43,7 @@ class SelfPlayWorker:
         await player.client.login()
         await asyncio.sleep(1)
 
-        battle_format = "gen3randombattle"
+        battle_format = "gen8randombattle"
         team = "null"
 
         progress = tqdm(range(10)) if player_index == 0 else range(10)
@@ -87,8 +87,8 @@ class SelfPlayWorker:
 
 def main():
     procs = []
-    for i in range(2): # num workes (check with os.cpu_count())
-        worker = SelfPlayWorker(i, 1) # 2 is players per worker
+    for i in range(2):  # num workes (check with os.cpu_count())
+        worker = SelfPlayWorker(i, 1)  # 2 is players per worker
         # This config will spawn 20 workers with 2 players each
         # for a total of 40 players, playing 20 games.
         # it is recommended to have an even number of players per worker
@@ -105,5 +105,5 @@ def main():
 
 
 if __name__ == "__main__":
-    mp.set_start_method("fork")
+    mp.set_start_method("spawn")
     main()

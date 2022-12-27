@@ -2,47 +2,59 @@ import os
 import re
 import json
 
-CLIENT_SRC = "pokemon-showdown-client/js"
+from extract import PS_CLIENT_DIR, OS_NAME, DATA_DIR
 
 
-CONDITIONS_PATH = "pokemon-showdown-client/data/pokemon-showdown/data/conditions.ts"
-MOVES_PATH = "pokemon-showdown-client/data/pokemon-showdown/data/moves.ts"
+CONDITIONS_PATH = f"pokemon-showdown-client/data/pokemon-showdown/data/conditions.ts"
+MOVES_PATH = f"pokemon-showdown-client/data/pokemon-showdown/data/moves.ts"
 
 
 def main():
+    # os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
+
     src = ""
     with open(CONDITIONS_PATH, "r") as f:
         src += f.read()
     with open(MOVES_PATH, "r") as f:
         src += f.read()
 
-    for file in os.listdir(CLIENT_SRC):
+    for file in os.listdir(os.path.join(PS_CLIENT_DIR, "js")):
         if file.endswith(".js"):
-            with open(os.path.join(CLIENT_SRC, file), "r") as f:
+            with open(
+                os.path.join(PS_CLIENT_DIR, "js", file), "r", encoding="utf-8"
+            ) as f:
                 src += f.read()
 
-    volatile_status = re.findall(r"removeVolatile\(\"(.*?)\"\)", src)
-    volatile_status += re.findall(r"hasVolatile\(\"(.*?)\"\)", src)
-    volatile_status += re.findall(r"volatiles\[\"(.*?)\"\]", src)
-    volatile_status += re.findall(r"volatiles\.(.*?)[\[|\)| ]", src)
-    volatile_status += re.findall(r"volatileStatus:\s*\"(.*)\",", src)
+    with open("wsnc", "w", encoding="utf-8") as f:
+        f.write(src)
+
+    volatile_status = set()
+    volatile_status.update(
+        set(re.findall(r"removeVolatile\([\"|\'](.*?)[\"|\']\)", src))
+    )
+    volatile_status.update(set(re.findall(r"hasVolatile\([\"|\'](.*?)[\"|\']\)", src)))
+    volatile_status.update(set(re.findall(r"volatiles\[[\"|\'](.*?)[\"|\']\]", src)))
+    volatile_status.update(set(re.findall(r"volatiles\.(.*?)[\[|\)| ]", src)))
+    volatile_status.update(
+        set(re.findall(r"volatileStatus:\s*[\"|\'](.*)[\"|\'],", src))
+    )
+    volatile_status = list(volatile_status)
     for i, vs in enumerate(volatile_status):
         volatile_status[i] = "".join(c for c in vs if c.isalnum()).lower()
-    volatile_status = list(sorted(set(volatile_status)))
 
-    weathers = re.findall(r"\"-weather\",\s*\"(.*)\",", src)
+    weathers = re.findall(r"[\"|\']-weather[\"|\'],\s*[\"|\'](.*)[\"|\'],", src)
     weathers = list(sorted(set(weathers)))
 
-    side_conditions = re.findall(r"sideCondition:\s*\"(.*)\",", src)
+    side_conditions = re.findall(r"sideCondition:\s*[\"|\'](.*)[\"|\'],", src)
     side_conditions = list(sorted(set(side_conditions)))
 
-    terrain = re.findall(r"terrain:\s*\"(.*)\",", src)
+    terrain = re.findall(r"terrain:\s*[\"|\'](.*)[\"|\'],", src)
     terrain = list(sorted(set(terrain)))
 
-    pseudo_weather = re.findall(r"pseudoWeather\: \"(.*?)\"", src)
-    pseudo_weather = list(sorted(set(pseudo_weather)))
+    pseudoweather = re.findall(r"pseudoWeather\:\s[\"|\'](.*?)[\"|\']", src)
+    pseudoweather = list(sorted(set(pseudoweather)))
 
-    item_effects = re.findall(r"itemEffect \= \"(.*?)\"", src)
+    item_effects = re.findall(r"itemEffect = [\"|\'](.*?)[\"|\']", src)
     item_effects = list(sorted(set(item_effects)))
     item_effects.pop(1)
     new_item_effects = []
@@ -50,7 +62,15 @@ def main():
         new_item_effects.append(f"({item_effect})")
     item_effects += new_item_effects
 
-    print()
+    wsnc = {
+        "weathers": weathers,
+        "volatiles": volatile_status,
+        "pseudoweather": pseudoweather,
+        "terrain": terrain,
+        "item_effects": item_effects,
+    }
+    with open("pretrained/wsnc.json", "w") as f:
+        json.dump(wsnc, f)
 
 
 if __name__ == "__main__":

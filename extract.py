@@ -8,7 +8,6 @@ from py_mini_racer import MiniRacer
 
 
 PS_CLIENT_DIR = "pokemon-showdown-client"
-
 OS_NAME = "windows" if platform.system() == "Windows" else "unix"
 DATA_DIR = {"windows": ".data-dist", "unix": "dist/data"}
 
@@ -71,7 +70,9 @@ def main():
     try:
         os.system("npx prettier -w --tab-width 4 js")
     except:
-        print("[OPTIONAL] run `npx install prettier` to format javascript files after copying")
+        print(
+            "[OPTIONAL] run `npx install prettier` to format javascript files after copying"
+        )
 
 
 if __name__ == "__main__":
