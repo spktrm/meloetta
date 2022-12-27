@@ -38,7 +38,6 @@ node pokemon-showdown-client/build-tools/build-learnsets
 ```
 
 Then finally run `extract.py` from the main directory. This will copy over the necessary source files.
-Optionally run `npx prettier -w --tab-width 4 js` to format the files neatly.
 
 # Example Output
 

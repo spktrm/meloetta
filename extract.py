@@ -68,7 +68,10 @@ def main():
             with open(f"js/data/{export}.json", "w") as f:
                 json.dump(obj, f)
 
-    os.system("npx prettier -w --tab-width 4 js")
+    try:
+        os.system("npx prettier -w --tab-width 4 js")
+    except:
+        print("[OPTIONAL] run `npx install prettier` to format javascript files after copying")
 
 
 if __name__ == "__main__":
