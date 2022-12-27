@@ -504,7 +504,11 @@
         pokemon.statusStage = 0;
     };
     _proto.copyTypesFrom = function copyTypesFrom(pokemon) {
-        var _pokemon$getTypes = pokemon.getTypes(),
+        var preterastallized =
+            arguments.length > 1 && arguments[1] !== undefined
+                ? arguments[1]
+                : false;
+        var _pokemon$getTypes = pokemon.getTypes(undefined, preterastallized),
             types = _pokemon$getTypes[0],
             addedType = _pokemon$getTypes[1];
         this.addVolatile("typechange", types.join("/"));
@@ -514,7 +518,11 @@
             this.removeVolatile("typeadd");
         }
     };
-    _proto.getTypes = function getTypes(serverPokemon, preterastallized) {
+    _proto.getTypes = function getTypes(serverPokemon) {
+        var preterastallized =
+            arguments.length > 1 && arguments[1] !== undefined
+                ? arguments[1]
+                : false;
         var types;
         if (this.terastallized && !preterastallized) {
             types = [this.terastallized];
@@ -580,7 +588,11 @@
         }
         return ability.name;
     };
-    _proto.getTypeList = function getTypeList(serverPokemon, preterastallized) {
+    _proto.getTypeList = function getTypeList(serverPokemon) {
+        var preterastallized =
+            arguments.length > 1 && arguments[1] !== undefined
+                ? arguments[1]
+                : false;
         var _this$getTypes = this.getTypes(serverPokemon, preterastallized),
             types = _this$getTypes[0],
             addedType = _this$getTypes[1];
@@ -731,7 +743,7 @@ var Side = (function () {
                 this.rollTrainerSprites();
         }
     };
-    _proto2.addSideCondition = function addSideCondition(effect) {
+    _proto2.addSideCondition = function addSideCondition(effect, persist) {
         var condition = effect.id;
         if (this.sideConditions[condition]) {
             if (condition === "spikes" || condition === "toxicspikes") {
@@ -754,7 +766,12 @@ var Side = (function () {
                 ];
                 break;
             case "safeguard":
-                this.sideConditions[condition] = [effect.name, 1, 5, 0];
+                this.sideConditions[condition] = [
+                    effect.name,
+                    1,
+                    persist ? 7 : 5,
+                    0,
+                ];
                 break;
             case "lightscreen":
                 this.sideConditions[condition] = [
@@ -771,7 +788,7 @@ var Side = (function () {
                 this.sideConditions[condition] = [
                     effect.name,
                     1,
-                    this.battle.gen >= 5 ? 4 : 3,
+                    this.battle.gen >= 5 ? (persist ? 6 : 4) : persist ? 5 : 3,
                     0,
                 ];
                 break;
@@ -1940,10 +1957,6 @@ var Battle = (function () {
                             _poke.fainted = false;
                             _poke.status = "";
                             this.scene.updateSidebar(side);
-
-                            if (!side.active[_poke.slot]) {
-                                _poke.side.replace(_poke);
-                            }
                             break;
                     }
                 }
@@ -2778,7 +2791,7 @@ var Battle = (function () {
                 }
 
                 _poke28.boosts = Object.assign({}, tpoke.boosts);
-                _poke28.copyTypesFrom(tpoke);
+                _poke28.copyTypesFrom(tpoke, true);
                 _poke28.ability = tpoke.ability;
                 _poke28.timesAttacked = tpoke.timesAttacked;
                 var targetForme = tpoke.volatiles.formechange;
@@ -3442,6 +3455,9 @@ var Battle = (function () {
                     case "quickclaw":
                         _poke36.item = "Quick Claw";
                         break;
+                    case "abilityshield":
+                        _poke36.item = "Ability Shield";
+                        break;
                     default:
                         if (kwArgs.broken) {
                             this.scene.resultAnim(
@@ -3458,7 +3474,7 @@ var Battle = (function () {
             case "-sidestart": {
                 var _side = this.getSide(args[1]);
                 var _effect19 = Dex.getEffect(args[2]);
-                _side.addSideCondition(_effect19);
+                _side.addSideCondition(_effect19, !!kwArgs.persistent);
 
                 switch (_effect19.id) {
                     case "tailwind":
@@ -3516,6 +3532,7 @@ var Battle = (function () {
                 var _poke38 = this.getPokemon(kwArgs.of);
                 var _fromeffect5 = Dex.getEffect(kwArgs.from);
                 this.activateAbility(_poke38, _fromeffect5);
+                var minTimeLeft = 5;
                 var maxTimeLeft = 0;
                 if (_effect22.id.endsWith("terrain")) {
                     for (var i = this.pseudoWeather.length - 1; i >= 0; i--) {
@@ -3527,7 +3544,8 @@ var Battle = (function () {
                     }
                     if (this.gen > 6) maxTimeLeft = 8;
                 }
-                this.addPseudoWeather(_effect22.name, 5, maxTimeLeft);
+                if (kwArgs.persistent) minTimeLeft += 2;
+                this.addPseudoWeather(_effect22.name, minTimeLeft, maxTimeLeft);
 
                 switch (_effect22.id) {
                     case "gravity":

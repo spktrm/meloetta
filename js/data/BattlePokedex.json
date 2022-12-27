@@ -18701,7 +18701,7 @@
         "color": "White",
         "evos": ["Braviary", "Braviary-Hisui"],
         "eggGroups": ["Flying"],
-        "tier": "NFE"
+        "tier": "LC"
     },
     "braviary": {
         "num": 628,
@@ -22246,8 +22246,8 @@
         "weightkg": 180,
         "color": "White",
         "prevo": "Crabrawler",
-        "evoType": "useItem",
-        "evoItem": "Ice Stone",
+        "evoType": "levelExtra",
+        "evoCondition": "at Mount Lanakila",
         "eggGroups": ["Water 3"],
         "tier": "UU"
     },
@@ -27860,7 +27860,7 @@
         "weightkg": 43,
         "color": "Purple",
         "prevo": "Sneasel-Hisui",
-        "evoType": "levelHold",
+        "evoType": "useItem",
         "evoItem": "Razor Claw",
         "evoCondition": "during the day",
         "eggGroups": ["Field"],
@@ -29097,6 +29097,7 @@
         "prevo": "Capsakid",
         "evoType": "useItem",
         "evoItem": "Fire Stone",
+        "evoLevel": 30,
         "eggGroups": ["Grass"],
         "tier": "UU"
     },
@@ -30211,7 +30212,7 @@
         "color": "Yellow",
         "prevo": "Gimmighoul",
         "evoType": "other",
-        "evoCondition": "Level up with 999 Coins in the bag",
+        "evoCondition": "Give 999 Coins",
         "eggGroups": ["Undiscovered"],
         "tier": "OU"
     },
