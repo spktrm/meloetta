@@ -10,7 +10,7 @@ from typing import Callable, List, Dict, Any, Set
 from collections.abc import MutableMapping
 
 from meloetta.data import GMAX_MOVES
-from meloetta.battle import Battle
+from meloetta.room import BattleRoom
 
 
 def bin_enc(v, n):
@@ -148,7 +148,7 @@ class Pokedex(Dex):
         "evos": lambda v: one_hot_enc(int(True if v else False), 2),
     }
 
-    def __init__(self, battle: Battle, table: Dict[str, Any], gen: int):
+    def __init__(self, battle: BattleRoom, table: Dict[str, Any], gen: int):
         self.dex = self.get_dex(table, gen)
         data = {o: battle.get_species(o) for o in self.dex}
         self.data = {k: v for k, v in data.items() if v.get("exists", False)}
@@ -249,7 +249,7 @@ class Movedex(Dex):
         "zMove.effect": one_hot_enc,
     }
 
-    def __init__(self, battle: Battle, moves: Set[str], gen: int):
+    def __init__(self, battle: BattleRoom, moves: Set[str], gen: int):
         if gen == 8:
             moves.update(GMAX_MOVES)
         data = {move: battle.get_move(move) for move in moves}
@@ -282,7 +282,7 @@ class Itemdex(Dex):
         "onPlate": one_hot_enc,
     }
 
-    def __init__(self, battle: Battle, table: Dict[str, Any], gen: int):
+    def __init__(self, battle: BattleRoom, table: Dict[str, Any], gen: int):
         self.dex = self.get_dex(table, gen)
         data = {o: battle.get_item(o) for o in self.dex}
         self.data = {k: v for k, v in data.items() if v.get("exists", False)}
@@ -303,7 +303,7 @@ class Abilitydex(Dex):
         "isPermanent": one_hot_enc,
     }
 
-    def __init__(self, battle: Battle, abilities: List[str], gen: int):
+    def __init__(self, battle: BattleRoom, abilities: List[str], gen: int):
         data = {ability: battle.get_ability(ability) for ability in abilities}
         self.data = {k: v for k, v in data.items() if v.get("exists", False)}
         self.raw_schema = get_schema(data)
@@ -314,7 +314,7 @@ def main():
 
     schema = {}
     for gen in range(1, 10):
-        battle = Battle()
+        battle = BattleRoom()
         battle.set_gen(gen)
 
         with open("js/data/BattleTeambuilderTable.json", "r") as f:

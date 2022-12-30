@@ -8,6 +8,14 @@ from typing import Any
 from tqdm import tqdm
 
 
+def waiting_for_opp(battle):
+    state = battle.get_state()
+    controls = state["controls"]["controls"]
+    return (
+        "Waiting for opponent" in controls or " will switch in, replacing" in controls
+    )
+
+
 class SelfPlayWorker:
     def __init__(
         self,
@@ -43,8 +51,10 @@ class SelfPlayWorker:
         await player.client.login()
         await asyncio.sleep(1)
 
-        battle_format = "gen8randombattle"
+        battle_format = "gen3randombattle"
         team = "null"
+        # battle_format = "gen8ou"
+        # team = "Charizard||HeavyDutyBoots|Blaze|hurricane,fireblast,toxic,roost||85,,85,85,85,85||,0,,,,||88|]Venusaur||BlackSludge|Chlorophyll|leechseed,substitute,sleeppowder,sludgebomb||85,,85,85,85,85||,0,,,,||82|]Blastoise||WhiteHerb|Torrent|shellsmash,earthquake,icebeam,hydropump||85,85,85,85,85,85||||86|"
 
         num_games = range(100)
         progress = tqdm(num_games) if player_index == 0 else num_games
@@ -67,21 +77,24 @@ class SelfPlayWorker:
                     else:
                         print(message)
 
-                if action_required:
-                    state = player.get_state()
-                    vstate = player.get_vectorized_state()
+                while (
+                    action_required
+                    and not waiting_for_opp(player)
+                    and not player.state["battle"]["ended"]
+                ):
                     choices = player.get_choices()
-                    # The magic
-                    choice = (
-                        "/choose " + random.choice(choices)
-                        if choices
-                        else "/choose default"
-                    )
-                    msg_list = [choice, player.rqid]
-                    await player.client.send_message(player.battle.battle_tag, msg_list)
+                    _, func, args, kwargs = random.choice(choices)
+                    func(*args, **kwargs)
 
-                if player.battle.ended:
-                    await player.client.leave_battle(player.battle.battle_tag)
+                outgoing_message = player.state.get("outgoing_message", "")
+                if outgoing_message:
+                    player.room.pop_outgoing()
+                    await player.client.websocket.send(
+                        player.room.battle_tag + "|" + outgoing_message
+                    )
+
+                if player.state["battle"].get("ended", False):
+                    await player.client.leave_battle(player.room.battle_tag)
                     player.reset()
                     break
 

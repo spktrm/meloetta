@@ -14522,6 +14522,8 @@
         "weightkg": 850,
         "color": "White",
         "eggGroups": ["Undiscovered"],
+        "requiredItem": "Adamant Crystal",
+        "changesFrom": "Dialga",
         "gen": 8,
         "tier": "Unreleased",
         "isNonstandard": "Unobtainable"
@@ -14570,6 +14572,8 @@
         "weightkg": 660,
         "color": "Purple",
         "eggGroups": ["Undiscovered"],
+        "requiredItem": "Lustrous Globe",
+        "changesFrom": "Palkia",
         "gen": 8,
         "tier": "Unreleased",
         "isNonstandard": "Unobtainable"
@@ -14662,7 +14666,7 @@
         "weightkg": 650,
         "color": "Black",
         "eggGroups": ["Undiscovered"],
-        "requiredItem": "Griseous Orb",
+        "requiredItem": "Griseous Core",
         "changesFrom": "Giratina",
         "tier": "Unreleased",
         "isNonstandard": "Unobtainable"
@@ -18701,7 +18705,7 @@
         "color": "White",
         "evos": ["Braviary", "Braviary-Hisui"],
         "eggGroups": ["Flying"],
-        "tier": "LC"
+        "tier": "NFE"
     },
     "braviary": {
         "num": 628,
@@ -22246,8 +22250,8 @@
         "weightkg": 180,
         "color": "White",
         "prevo": "Crabrawler",
-        "evoType": "levelExtra",
-        "evoCondition": "at Mount Lanakila",
+        "evoType": "useItem",
+        "evoItem": "Ice Stone",
         "eggGroups": ["Water 3"],
         "tier": "UU"
     },
@@ -27860,7 +27864,7 @@
         "weightkg": 43,
         "color": "Purple",
         "prevo": "Sneasel-Hisui",
-        "evoType": "useItem",
+        "evoType": "levelHold",
         "evoItem": "Razor Claw",
         "evoCondition": "during the day",
         "eggGroups": ["Field"],
@@ -29097,7 +29101,6 @@
         "prevo": "Capsakid",
         "evoType": "useItem",
         "evoItem": "Fire Stone",
-        "evoLevel": 30,
         "eggGroups": ["Grass"],
         "tier": "UU"
     },
@@ -30212,7 +30215,7 @@
         "color": "Yellow",
         "prevo": "Gimmighoul",
         "evoType": "other",
-        "evoCondition": "Give 999 Coins",
+        "evoCondition": "Level up with 999 Coins in the bag",
         "eggGroups": ["Undiscovered"],
         "tier": "OU"
     },
