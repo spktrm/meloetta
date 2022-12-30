@@ -29,6 +29,8 @@ CLIENT_SRC = [
     f"{PS_CLIENT_DIR}/js/battle-dex.js",
     f"{PS_CLIENT_DIR}/js/battle-dex-data.js",
     f"{PS_CLIENT_DIR}/js/battle-text-parser.js",
+    f"{PS_CLIENT_DIR}/js/battle-log.js",
+    f"{PS_CLIENT_DIR}/js/battle-tooltips.js",
     f"{PS_CLIENT_DIR}/js/battle.js",
 ]
 

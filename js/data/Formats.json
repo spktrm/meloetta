@@ -81,6 +81,7 @@
             "Meditite",
             "Misdreavus",
             "Murkrow",
+            "Rufflet",
             "Scyther",
             "Sneasel",
             "Moody",
@@ -124,6 +125,7 @@
             "Max Team Size = 3",
             "Standard",
             "Terastal Clause",
+            "Sleep Moves Clause",
             "Accuracy Moves Clause",
             "!Sleep Clause Mod"
         ],
@@ -139,9 +141,7 @@
             "King's Rock",
             "Quick Claw",
             "Acupressure",
-            "Hypnosis",
-            "Perish Song",
-            "Sing"
+            "Perish Song"
         ]
     },
     {
@@ -308,6 +308,7 @@
         ],
         "banlist": [
             "ND Uber",
+            "ND AG",
             "Arena Trap",
             "Moody",
             "Power Construct",
@@ -320,7 +321,30 @@
         ]
     },
     {
+        "name": "[Gen 9] National Dex Ubers",
+        "threads": [
+            "&bullet; <a href=\"https://www.smogon.com/forums/threads/3712168/\">National Dex Ubers Metagame Discussion</a>",
+            "&bullet; <a href=\"https://www.smogon.com/forums/threads/3712170/\">National Dex Ubers Sample Teams</a>",
+            "&bullet; <a href=\"https://www.smogon.com/forums/threads/3712169/\">National Dex Ubers Viability List</a>"
+        ],
+        "mod": "gen9",
+        "searchShow": false,
+        "ruleset": [
+            "Standard NatDex",
+            "OHKO Clause",
+            "Evasion Moves Clause",
+            "Evasion Items Clause",
+            "Species Clause",
+            "Sleep Clause Mod",
+            "Mega Rayquaza Clause"
+        ],
+        "banlist": ["ND AG", "Assist", "Baton Pass"]
+    },
+    {
         "name": "[Gen 9] National Dex UU",
+        "threads": [
+            "&bullet; <a href=\"https://www.smogon.com/forums/threads/3711752/\">National Dex UU Metagame Discussion</a>"
+        ],
         "mod": "gen9",
         "ruleset": ["[Gen 9] National Dex"],
         "banlist": ["ND OU", "ND UUBL"]
@@ -360,10 +384,12 @@
             "Groudon",
             "Ho-Oh",
             "Hoopa-Unbound",
+            "Houndstone",
             "Kangaskhan-Mega",
             "Kartana",
             "Koraidon",
             "Kyogre",
+            "Kyurem-Black",
             "Kyurem-White",
             "Lucario-Mega",
             "Lugia",
@@ -392,14 +418,18 @@
             "Zamazenta",
             "Zamazenta-Crowned",
             "Zekrom",
+            "Zygarde-Base",
             "Zygarde-Complete",
             "Moody",
             "Shadow Tag",
             "Power Construct",
             "Booster Energy",
+            "Damp Rock",
             "Focus Band",
+            "Icy Rock",
             "King's Rock",
             "Quick Claw",
+            "Smooth Rock",
             "Terrain Extender",
             "Baton Pass"
         ]
@@ -654,6 +684,7 @@
         "ruleset": [
             "Standard OMs",
             "Evasion Abilities Clause",
+            "Evasion Items Clause",
             "Sleep Moves Clause",
             "Min Source Gen = 9"
         ],
@@ -679,7 +710,9 @@
             "Mold Breaker",
             "Moody",
             "Poison Heal",
+            "Prankster",
             "Pure Power",
+            "Purifying Salt",
             "Queenly Majesty",
             "Quick Draw",
             "Quick Feet",
@@ -818,6 +851,7 @@
             "Illusion",
             "Innards Out",
             "Magnet Pull",
+            "Moody",
             "Neutralizing Gas",
             "Parental Bond",
             "Pure Power",
@@ -1041,6 +1075,7 @@
         "searchShow": false,
         "ruleset": ["Standard Doubles", "Dynamax Clause"],
         "banlist": [
+            "Flutter Mane",
             "Koraidon",
             "Miraidon",
             "Huge Power",
@@ -1048,9 +1083,9 @@
             "Pure Power",
             "Shadow Tag",
             "Ally Switch",
+            "Revival Blessing",
             "Swagger"
-        ],
-        "onSwitchInPriority": 2
+        ]
     },
     {
         "name": "[Gen 9] Pokebilities",
@@ -5114,7 +5149,7 @@
     {
         "name": "[Gen 1] 1v1",
         "threads": [
-            "&bullet; <a href=\"https://www.smogon.com/forums/posts/8031462\">RBY 1v1</a>"
+            "&bullet; <a href=\"https://www.smogon.com/forums/posts/8031468\">RBY 1v1</a>"
         ],
         "mod": "gen1",
         "searchShow": false,

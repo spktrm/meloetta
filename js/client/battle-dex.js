@@ -80,7 +80,6 @@ var PSUtils = new ((function () {
         if (Array.isArray(a)) {
             for (var i = 0; i < a.length; i++) {
                 var comparison = PSUtils.compare(a[i], b[i]);
-
                 if (comparison) return comparison;
             }
             return 0;
@@ -661,7 +660,6 @@ var Dex = new ((function () {
                 options.mod +
                 "/audio/" +
                 toID(species.baseSpecies);
-
             spriteData.cryurl += ".mp3";
         }
 
@@ -832,7 +830,6 @@ var Dex = new ((function () {
             (_pokemon5 = pokemon) != null && _pokemon5.fainted
                 ? ";opacity:.3;filter:grayscale(100%) brightness(.5)"
                 : "";
-
         return (
             "background:transparent url(" +
             Dex.resourcePrefix +

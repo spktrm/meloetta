@@ -710,12 +710,10 @@
                     _id7,
                     kwArgs.msg ? "" : "NODEFAULT"
                 );
-
                 var line1 = this.maybeAbility(
                     kwArgs.from,
                     kwArgs.of || _pokemon4
                 );
-
                 return (
                     line1 +
                     _template2
@@ -732,7 +730,6 @@
                     kwArgs.from,
                     this.own(_side3)
                 );
-
                 return _template3
                     .replace("[TRAINER]", this.trainer(_side3))
                     .replace("[NICKNAME]", this.pokemonName(_pokemon5))
@@ -768,7 +765,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon8
                 );
-
                 if (kwArgs.zeffect) {
                     _line2 = this.template("zEffect").replace(
                         "[POKEMON]",
@@ -874,7 +870,6 @@
                         "start",
                         _id8.slice(0, _id8.length - 3)
                     );
-
                     return (
                         _line4 +
                         _template15
@@ -900,7 +895,11 @@
                 ) {
                     templateId += "FromItem";
                 }
-                var _template10 = this.template(templateId, _effect3);
+                var _template10 = this.template(
+                    templateId,
+                    kwArgs.from,
+                    _effect3
+                );
                 return (
                     _line4 +
                     _template10
@@ -978,7 +977,6 @@
                         "changeAbility",
                         kwArgs.from
                     );
-
                     return (
                         _line6 +
                         _template20
@@ -1006,7 +1004,6 @@
                     ability,
                     "NODEFAULT"
                 );
-
                 return (
                     _line6 +
                     _template18.replace("[POKEMON]", this.pokemon(_pokemon12))
@@ -1021,7 +1018,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon13
                 );
-
                 var _template22 = this.template("start", "Gastro Acid");
                 return (
                     _line7 +
@@ -1043,7 +1039,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon14
                 );
-
                 if (
                     [
                         "thief",
@@ -1072,7 +1067,6 @@
                         hasTarget ? "activate" : "activateNoTarget",
                         "Frisk"
                     );
-
                     return (
                         _line8 +
                         _template25
@@ -1104,7 +1098,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon15
                 );
-
                 if (kwArgs.eat) {
                     var _template28 = this.template("eatItem", kwArgs.from);
                     return (
@@ -1159,7 +1152,6 @@
                         "[ITEM]",
                         this.effect(_item)
                     );
-
                 return (
                     _line9 +
                     _template27
@@ -1175,7 +1167,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon16
                 );
-
                 if (BattleTextParser.effectId(kwArgs.from) === "rest") {
                     var _template34 = this.template("startFromRest", status);
                     return (
@@ -1208,7 +1199,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon17
                 );
-
                 if (
                     (_kwArgs$from3 = kwArgs.from) != null &&
                     _kwArgs$from3.startsWith("item:")
@@ -1269,7 +1259,6 @@
                         "[EFFECT]",
                         this.effect(_effect5)
                     );
-
                 return (
                     _line12 +
                     _template39
@@ -1288,7 +1277,6 @@
                         "[EFFECT]",
                         this.effect(_effect6)
                     );
-
                 return _template41
                     .replace("[TEAM]", this.team(_side5))
                     .replace("[PARTY]", this.party(_side5));
@@ -1303,7 +1291,6 @@
                         "[EFFECT]",
                         this.effect(_effect7)
                     );
-
                 return _template42
                     .replace("[TEAM]", this.team(_side6))
                     .replace("[PARTY]", this.party(_side6));
@@ -1317,13 +1304,11 @@
                         kwArgs.from,
                         "NODEFAULT"
                     );
-
                     if (!_template44)
                         return this.template("endFieldEffect").replace(
                             "[EFFECT]",
                             this.effect(weather)
                         );
-
                     return _template44;
                 }
                 if (kwArgs.upkeep) {
@@ -1347,7 +1332,6 @@
                         "[EFFECT]",
                         this.effect(weather)
                     );
-
                 return _line13 + _template43;
             }
 
@@ -1377,7 +1361,6 @@
                         "[EFFECT]",
                         this.effect(_effect8)
                     );
-
                 return (
                     _line14 +
                     _template45.replace("[POKEMON]", this.pokemon(kwArgs.of))
@@ -1392,7 +1375,6 @@
                         "[EFFECT]",
                         this.effect(_effect9)
                     );
-
                 return _template46;
             }
 
@@ -1461,7 +1443,6 @@
                         _id14 === "mummy" ? "Mummy" : "Lingering Aroma",
                         _target2
                     );
-
                     var _template49 = this.template("changeAbility", _id14);
                     return (
                         _line15 +
@@ -1544,12 +1525,10 @@
                     kwArgs.from,
                     "NODEFAULT"
                 );
-
                 var _line16 = this.maybeAbility(
                     kwArgs.from,
                     kwArgs.of || _pokemon21
                 );
-
                 var _id15 = BattleTextParser.effectId(kwArgs.from);
                 if (_template51) {
                     return (
@@ -1565,7 +1544,6 @@
                     _template51 = this.template(
                         percentage ? "damagePercentage" : "damage"
                     );
-
                     return (
                         _line16 +
                         _template51
@@ -1577,7 +1555,6 @@
                     _template51 = this.template(
                         kwArgs.of ? "damageFromPokemon" : "damageFromItem"
                     );
-
                     return (
                         _line16 +
                         _template51
@@ -1654,7 +1631,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon23
                 );
-
                 var _templateId5 = cmd.slice(1);
                 if (amount >= 3) _templateId5 += "3";
                 else if (amount >= 2) _templateId5 += "2";
@@ -1672,7 +1648,6 @@
                         _templateId5 + "FromItem",
                         kwArgs.from
                     );
-
                     return (
                         _line18 +
                         _template54
@@ -1711,7 +1686,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon25
                 );
-
                 var _id16 = BattleTextParser.effectId(kwArgs.from);
                 var _templateId6 = "swapBoost";
                 if (_id16 === "guardswap") _templateId6 = "swapDefensiveBoost";
@@ -1732,7 +1706,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon26
                 );
-
                 var _template57 = this.template("copyBoost", kwArgs.from);
                 return (
                     _line21 +
@@ -1751,7 +1724,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon27
                 );
-
                 var _templateId7 = "clearBoost";
                 if (kwArgs.zeffect) _templateId7 = "clearBoostFromZEffect";
                 var _template58 = this.template(_templateId7, kwArgs.from);
@@ -1769,7 +1741,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon28
                 );
-
                 var _template59 = this.template("invertBoost", kwArgs.from);
                 return (
                     _line23 +
@@ -1832,7 +1803,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon31
                 );
-
                 var _templateId10 = "block";
                 if (
                     ["desolateland", "primordialsea"].includes(blocker) &&
@@ -1864,7 +1834,6 @@
                         _stat3 ? "failSingular" : "fail",
                         "unboost"
                     );
-
                     return (
                         _line25 +
                         _template62
@@ -1903,7 +1872,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon32
                 );
-
                 var _template63 = this.template("block", kwArgs.from);
                 if (!_template63) {
                     var _templateId11 = kwArgs.ohko ? "immuneOHKO" : "immune";
@@ -1925,7 +1893,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon33
                 );
-
                 if (!_pokemon33) {
                     var _template65 = this.template("missNoPokemon");
                     return (

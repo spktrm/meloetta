@@ -153,7 +153,6 @@
             damage[3] + damage[0],
             this.hpcolor
         );
-
         if (damage[0] === 0) {
             return [0, newrange[1] - newrange[0]];
         }
@@ -187,7 +186,6 @@
                 var percent = Math.round(
                     (Math.ceil((damage * 48) / 100) / 48) * 100
                 );
-
                 var pixels = Math.ceil((damage * 48) / 100);
                 return [pixels, 48, percent];
             }
@@ -320,7 +318,6 @@
                 0,
                 recursionSource
             );
-
             moveName = "*" + moveName;
         }
         for (
@@ -514,7 +511,6 @@
         var _pokemon$getTypes = pokemon.getTypes(undefined, preterastallized),
             types = _pokemon$getTypes[0],
             addedType = _pokemon$getTypes[1];
-
         this.addVolatile("typechange", types.join("/"));
         if (addedType) {
             this.addVolatile("typeadd", addedType);
@@ -600,7 +596,6 @@
         var _this$getTypes = this.getTypes(serverPokemon, preterastallized),
             types = _this$getTypes[0],
             addedType = _this$getTypes[1];
-
         return addedType ? types.concat(addedType) : types;
     };
     _proto.getSpeciesForme = function getSpeciesForme(serverPokemon) {
@@ -659,7 +654,6 @@
             return (
                 ((100 * pokemon.hp) / pokemon.maxhp).toFixed(precision) + "%"
             );
-
         var range = Pokemon.getPixelRange(pokemon.hp, pokemon.hpcolor);
         return Pokemon.getFormattedRange(range, precision, "–");
     };
@@ -770,7 +764,6 @@ var Side = (function () {
                     5,
                     this.battle.gen >= 4 ? 8 : 0,
                 ];
-
                 break;
             case "safeguard":
                 this.sideConditions[condition] = [
@@ -779,7 +772,6 @@ var Side = (function () {
                     persist ? 7 : 5,
                     0,
                 ];
-
                 break;
             case "lightscreen":
                 this.sideConditions[condition] = [
@@ -788,7 +780,6 @@ var Side = (function () {
                     5,
                     this.battle.gen >= 4 ? 8 : 0,
                 ];
-
                 break;
             case "mist":
                 this.sideConditions[condition] = [effect.name, 1, 5, 0];
@@ -800,7 +791,6 @@ var Side = (function () {
                     this.battle.gen >= 5 ? (persist ? 6 : 4) : persist ? 5 : 3,
                     0,
                 ];
-
                 break;
             case "luckychant":
                 this.sideConditions[condition] = [effect.name, 1, 5, 0];
@@ -1261,7 +1251,6 @@ var Battle = (function () {
             abilities = abilities.filter(function (a) {
                 return _this.dex.abilities.get(a).isPermanent;
             });
-
             if (!abilities.length) return false;
         }
         for (
@@ -1713,7 +1702,6 @@ var Battle = (function () {
                         "error",
                         'Invalid spread move target: "' + hitTarget + '"',
                     ]);
-
                     continue;
                 }
                 targets.push(curTarget);
@@ -1877,11 +1865,9 @@ var Battle = (function () {
                             break;
                         case "confusion":
                             this.scene.runStatusAnim("confusedselfhit", [poke]);
-
                             break;
                         case "leechseed":
                             this.scene.runOtherAnim("leech", [ofpoke, poke]);
-
                             break;
                         case "bind":
                         case "wrap":
@@ -1901,7 +1887,6 @@ var Battle = (function () {
                             damage[1] === 100 ? 0 : 1,
                             "\u2013"
                         );
-
                     if (damage[1] !== 100) {
                         var hover =
                             "" +
@@ -1921,7 +1906,6 @@ var Battle = (function () {
                     poke,
                     Pokemon.getFormattedRange(range, 0, " to ")
                 );
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -1956,7 +1940,6 @@ var Battle = (function () {
                         case "healingwish":
                             this.lastMove = "healing-wish";
                             this.scene.runResidualAnim("healingwish", _poke);
-
                             _poke.side.wisher = null;
                             _poke.statusData.sleepTurns = 0;
                             _poke.statusData.toxicTurns = 0;
@@ -1982,7 +1965,6 @@ var Battle = (function () {
                     _poke,
                     Pokemon.getFormattedRange(_range, 0, " to ")
                 );
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -1997,7 +1979,6 @@ var Battle = (function () {
                             0,
                             " to "
                         );
-
                         var diff = _damage2[0];
                         if (diff > 0) {
                             this.scene.healAnim(cpoke, formattedRange);
@@ -2021,7 +2002,6 @@ var Battle = (function () {
                         "already " + _poke2.getBoost(_stat),
                         "neutral"
                     );
-
                     this.log(args, kwArgs);
                     break;
                 }
@@ -2053,7 +2033,6 @@ var Battle = (function () {
                         "already " + _poke3.getBoost(_stat2),
                         "neutral"
                     );
-
                     this.log(args, kwArgs);
                     break;
                 }
@@ -2081,7 +2060,6 @@ var Battle = (function () {
                     _poke4.getBoost(_stat3),
                     _amount2 > 0 ? "good" : "bad"
                 );
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -2129,7 +2107,6 @@ var Battle = (function () {
                                 _ofpoke3,
                                 _poke6,
                             ]);
-
                             break;
                     }
                 }
@@ -2149,6 +2126,10 @@ var Battle = (function () {
             case "-copyboost": {
                 var _poke8 = this.getPokemon(args[1]);
                 var frompoke = this.getPokemon(args[2]);
+                if (!kwArgs.silent && kwArgs.from) {
+                    var _effect5 = Dex.getEffect(kwArgs.from);
+                    this.activateAbility(_poke8, _effect5);
+                }
                 var _stats = args[3]
                     ? args[3].split(", ")
                     : [
@@ -2189,9 +2170,9 @@ var Battle = (function () {
                 var _poke9 = this.getPokemon(args[1]);
                 _poke9.boosts = {};
                 if (!kwArgs.silent && kwArgs.from) {
-                    var _effect5 = Dex.getEffect(kwArgs.from);
+                    var _effect6 = Dex.getEffect(kwArgs.from);
                     var _ofpoke4 = this.getPokemon(kwArgs.of);
-                    this.activateAbility(_ofpoke4 || _poke9, _effect5);
+                    this.activateAbility(_ofpoke4 || _poke9, _effect6);
                 }
                 this.scene.resultAnim(_poke9, "Stats reset", "neutral");
 
@@ -2265,7 +2246,6 @@ var Battle = (function () {
                     this.getPokemon(kwArgs.of) || _poke14,
                     fromeffect
                 );
-
                 this.log(args, kwArgs);
                 this.scene.resultAnim(_poke14, "Immune", "neutral");
                 break;
@@ -2280,18 +2260,17 @@ var Battle = (function () {
             }
             case "-fail": {
                 var _poke15 = this.getPokemon(args[1]);
-                var _effect6 = Dex.getEffect(args[2]);
+                var _effect7 = Dex.getEffect(args[2]);
                 var _fromeffect = Dex.getEffect(kwArgs.from);
                 var _ofpoke5 = this.getPokemon(kwArgs.of);
                 this.activateAbility(_ofpoke5 || _poke15, _fromeffect);
-                switch (_effect6.id) {
+                switch (_effect7.id) {
                     case "brn":
                         this.scene.resultAnim(
                             _poke15,
                             "Already burned",
                             "neutral"
                         );
-
                         break;
                     case "tox":
                     case "psn":
@@ -2300,7 +2279,6 @@ var Battle = (function () {
                             "Already poisoned",
                             "neutral"
                         );
-
                         break;
                     case "slp":
                         if (_fromeffect.id === "uproar") {
@@ -2319,7 +2297,6 @@ var Battle = (function () {
                             "Already paralyzed",
                             "neutral"
                         );
-
                         break;
                     case "frz":
                         this.scene.resultAnim(
@@ -2327,7 +2304,6 @@ var Battle = (function () {
                             "Already frozen",
                             "neutral"
                         );
-
                         break;
                     case "unboost":
                         this.scene.resultAnim(
@@ -2335,7 +2311,6 @@ var Battle = (function () {
                             "Stat drop blocked",
                             "neutral"
                         );
-
                         break;
                     default:
                         if (_poke15) {
@@ -2351,9 +2326,9 @@ var Battle = (function () {
             case "-block": {
                 var _poke16 = this.getPokemon(args[1]);
                 var _ofpoke6 = this.getPokemon(kwArgs.of);
-                var _effect7 = Dex.getEffect(args[2]);
-                this.activateAbility(_ofpoke6 || _poke16, _effect7);
-                switch (_effect7.id) {
+                var _effect8 = Dex.getEffect(args[2]);
+                this.activateAbility(_ofpoke6 || _poke16, _effect8);
+                switch (_effect8.id) {
                     case "quickguard":
                         _poke16.addTurnstatus("quickguard");
                         this.scene.resultAnim(_poke16, "Quick Guard", "good");
@@ -2417,12 +2392,12 @@ var Battle = (function () {
             }
             case "-status": {
                 var _poke20 = this.getPokemon(args[1]);
-                var _effect8 = Dex.getEffect(kwArgs.from);
+                var _effect9 = Dex.getEffect(kwArgs.from);
                 var _ofpoke7 = this.getPokemon(kwArgs.of) || _poke20;
                 _poke20.status = args[2];
-                this.activateAbility(_ofpoke7 || _poke20, _effect8);
-                if (_effect8.effectType === "Item") {
-                    _ofpoke7.item = _effect8.name;
+                this.activateAbility(_ofpoke7 || _poke20, _effect9);
+                if (_effect9.effectType === "Item") {
+                    _ofpoke7.item = _effect9.name;
                 }
 
                 switch (args[2]) {
@@ -2434,7 +2409,7 @@ var Battle = (function () {
                         this.scene.resultAnim(_poke20, "Toxic poison", "psn");
                         this.scene.runStatusAnim("psn", [_poke20]);
                         _poke20.statusData.toxicTurns =
-                            _effect8.name === "Toxic Orb" ? -1 : 0;
+                            _effect9.name === "Toxic Orb" ? -1 : 0;
                         break;
                     case "psn":
                         this.scene.resultAnim(_poke20, "Poisoned", "psn");
@@ -2442,7 +2417,7 @@ var Battle = (function () {
                         break;
                     case "slp":
                         this.scene.resultAnim(_poke20, "Asleep", "slp");
-                        if (_effect8.id === "rest") {
+                        if (_effect9.id === "rest") {
                             _poke20.statusData.sleepTurns = 0;
                         }
                         break;
@@ -2464,10 +2439,10 @@ var Battle = (function () {
             }
             case "-curestatus": {
                 var _poke21 = this.getPokemon(args[1]);
-                var _effect9 = Dex.getEffect(kwArgs.from);
+                var _effect10 = Dex.getEffect(kwArgs.from);
 
-                if (_effect9.id) {
-                    switch (_effect9.id) {
+                if (_effect10.id) {
+                    switch (_effect10.id) {
                         case "flamewheel":
                         case "flareblitz":
                         case "fusionflare":
@@ -2507,7 +2482,6 @@ var Battle = (function () {
                                 "Paralysis cured",
                                 "good"
                             );
-
                             break;
                         case "frz":
                             this.scene.resultAnim(_poke21, "Thawed", "good");
@@ -2539,15 +2513,15 @@ var Battle = (function () {
             case "-item": {
                 var _poke23 = this.getPokemon(args[1]);
                 var item = Dex.items.get(args[2]);
-                var _effect10 = Dex.getEffect(kwArgs.from);
+                var _effect11 = Dex.getEffect(kwArgs.from);
                 var _ofpoke8 = this.getPokemon(kwArgs.of);
                 _poke23.item = item.name;
                 _poke23.itemEffect = "";
                 _poke23.removeVolatile("airballoon");
                 if (item.id === "airballoon") _poke23.addVolatile("airballoon");
 
-                if (_effect10.id) {
-                    switch (_effect10.id) {
+                if (_effect11.id) {
+                    switch (_effect11.id) {
                         case "pickup":
                             this.activateAbility(_poke23, "Pickup");
 
@@ -2572,7 +2546,7 @@ var Battle = (function () {
                             break;
                         case "magician":
                         case "pickpocket":
-                            this.activateAbility(_poke23, _effect10.name);
+                            this.activateAbility(_poke23, _effect11.name);
 
                         case "thief":
                         case "covet":
@@ -2592,7 +2566,6 @@ var Battle = (function () {
                                 "Item Stolen",
                                 "bad"
                             );
-
                             break;
                         case "harvest":
                             _poke23.itemEffect = "harvested";
@@ -2631,8 +2604,8 @@ var Battle = (function () {
             case "-enditem": {
                 var _poke24 = this.getPokemon(args[1]);
                 var _item2 = Dex.items.get(args[2]);
-                var _effect11 = Dex.getEffect(kwArgs.from);
-                if (this.gen > 4 || _effect11.id !== "knockoff") {
+                var _effect12 = Dex.getEffect(kwArgs.from);
+                if (this.gen > 4 || _effect12.id !== "knockoff") {
                     _poke24.item = "";
                     _poke24.itemEffect = "";
                     _poke24.prevItem = _item2.name;
@@ -2647,8 +2620,8 @@ var Battle = (function () {
                 } else if (kwArgs.weaken) {
                     _poke24.prevItemEffect = "eaten";
                     this.lastMove = _item2.id;
-                } else if (_effect11.id) {
-                    switch (_effect11.id) {
+                } else if (_effect12.id) {
+                    switch (_effect12.id) {
                         case "fling":
                             _poke24.prevItemEffect = "flung";
                             break;
@@ -2664,7 +2637,6 @@ var Battle = (function () {
                                 "Item knocked off",
                                 "neutral"
                             );
-
                             break;
                         case "stealeat":
                             _poke24.prevItemEffect = "stolen";
@@ -2686,7 +2658,6 @@ var Battle = (function () {
                                 "Balloon popped",
                                 "neutral"
                             );
-
                             break;
                         case "focussash":
                             _poke24.prevItemEffect = "consumed";
@@ -2698,7 +2669,6 @@ var Battle = (function () {
                                 "Focus Band",
                                 "neutral"
                             );
-
                             break;
                         case "redcard":
                             _poke24.prevItemEffect = "held up";
@@ -2714,16 +2684,16 @@ var Battle = (function () {
             case "-ability": {
                 var _poke25 = this.getPokemon(args[1]);
                 var ability = Dex.abilities.get(args[2]);
-                var _effect12 = Dex.getEffect(kwArgs.from);
+                var _effect13 = Dex.getEffect(kwArgs.from);
                 var _ofpoke9 = this.getPokemon(kwArgs.of);
                 _poke25.rememberAbility(
                     ability.name,
-                    _effect12.id && !kwArgs.fail
+                    _effect13.id && !kwArgs.fail
                 );
 
                 if (kwArgs.silent) {
-                } else if (_effect12.id) {
-                    switch (_effect12.id) {
+                } else if (_effect13.id) {
+                    switch (_effect13.id) {
                         case "trace":
                             this.activateAbility(_poke25, "Trace");
                             this.scene.wait(500);
@@ -2732,7 +2702,7 @@ var Battle = (function () {
                             break;
                         case "powerofalchemy":
                         case "receiver":
-                            this.activateAbility(_poke25, _effect12.name);
+                            this.activateAbility(_poke25, _effect13.name);
                             this.scene.wait(500);
                             this.activateAbility(_poke25, ability.name, true);
                             _ofpoke9.rememberAbility(ability.name);
@@ -2806,7 +2776,6 @@ var Battle = (function () {
                             mod: _poke27.sprite.scene.mod,
                         }
                     );
-
                     _poke27.sprite.oldsp = null;
                 } else {
                     this.scene.animTransform(_poke27, true, true);
@@ -2817,12 +2786,12 @@ var Battle = (function () {
             case "-transform": {
                 var _poke28 = this.getPokemon(args[1]);
                 var tpoke = this.getPokemon(args[2]);
-                var _effect13 = Dex.getEffect(kwArgs.from);
+                var _effect14 = Dex.getEffect(kwArgs.from);
                 if (_poke28 === tpoke)
                     throw new Error("Transforming into self");
 
                 if (!kwArgs.silent) {
-                    this.activateAbility(_poke28, _effect13);
+                    this.activateAbility(_poke28, _effect14);
                 }
 
                 _poke28.boosts = Object.assign({}, tpoke.boosts);
@@ -2845,7 +2814,6 @@ var Battle = (function () {
                     gender,
                     _level
                 );
-
                 _poke28.addVolatile("formechange", speciesForme);
                 for (
                     var _i23 = 0, _tpoke$moveTrack = tpoke.moveTrack;
@@ -2861,7 +2829,6 @@ var Battle = (function () {
                     ["-transform", args[1], args[2], tpoke.speciesForme],
                     kwArgs
                 );
-
                 break;
             }
             case "-formechange": {
@@ -2904,19 +2871,21 @@ var Battle = (function () {
                 var _poke31 = this.getPokemon(args[1]);
                 var type = Dex.types.get(args[2]).name;
                 _poke31.terastallized = type;
+                _poke31.details += ", tera:" + type;
+                _poke31.searchid += ", tera:" + type;
                 this.scene.animTransform(_poke31, true, true);
                 this.log(args, kwArgs);
                 break;
             }
             case "-start": {
                 var _poke32 = this.getPokemon(args[1]);
-                var _effect14 = Dex.getEffect(args[2]);
+                var _effect15 = Dex.getEffect(args[2]);
                 var _ofpoke10 = this.getPokemon(kwArgs.of);
                 var _fromeffect3 = Dex.getEffect(kwArgs.from);
 
-                this.activateAbility(_poke32, _effect14);
+                this.activateAbility(_poke32, _effect15);
                 this.activateAbility(_ofpoke10 || _poke32, _fromeffect3);
-                switch (_effect14.id) {
+                switch (_effect15.id) {
                     case "typechange":
                         if (_poke32.terastallized) break;
                         if (_ofpoke10 && _fromeffect3.id === "reflecttype") {
@@ -3005,7 +2974,6 @@ var Battle = (function () {
                             "Stockpile&times;2",
                             "good"
                         );
-
                         break;
                     case "stockpile3":
                         _poke32.removeVolatile("stockpile2");
@@ -3014,7 +2982,6 @@ var Battle = (function () {
                             "Stockpile&times;3",
                             "good"
                         );
-
                         break;
                     case "perish0":
                         _poke32.removeVolatile("perish1");
@@ -3102,8 +3069,8 @@ var Battle = (function () {
                         break;
                 }
 
-                if (!(_effect14.id === "typechange" && _poke32.terastallized)) {
-                    _poke32.addVolatile(_effect14.id);
+                if (!(_effect15.id === "typechange" && _poke32.terastallized)) {
+                    _poke32.addVolatile(_effect15.id);
                 }
                 this.scene.updateStatbar(_poke32);
                 this.log(args, kwArgs);
@@ -3111,13 +3078,13 @@ var Battle = (function () {
             }
             case "-end": {
                 var _poke33 = this.getPokemon(args[1]);
-                var _effect15 = Dex.getEffect(args[2]);
+                var _effect16 = Dex.getEffect(args[2]);
                 var _fromeffect4 = Dex.getEffect(kwArgs.from);
-                _poke33.removeVolatile(_effect15.id);
+                _poke33.removeVolatile(_effect16.id);
 
                 if (kwArgs.silent) {
                 } else {
-                    switch (_effect15.id) {
+                    switch (_effect16.id) {
                         case "dynamax":
                             this.scene.animTransform(_poke33);
                             break;
@@ -3127,7 +3094,6 @@ var Battle = (function () {
                                 "Power Trick",
                                 "neutral"
                             );
-
                             break;
                         case "telekinesis":
                             this.scene.resultAnim(
@@ -3135,7 +3101,6 @@ var Battle = (function () {
                                 "Telekinesis&nbsp;ended",
                                 "neutral"
                             );
-
                             break;
                         case "skydrop":
                             if (kwArgs.interrupt) {
@@ -3148,7 +3113,6 @@ var Battle = (function () {
                                 "Confusion&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "leechseed":
                             if (_fromeffect4.id === "rapidspin") {
@@ -3165,7 +3129,6 @@ var Battle = (function () {
                                 "Heal Block ended",
                                 "good"
                             );
-
                             break;
                         case "attract":
                             this.scene.resultAnim(
@@ -3173,7 +3136,6 @@ var Battle = (function () {
                                 "Attract&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "taunt":
                             this.scene.resultAnim(
@@ -3181,7 +3143,6 @@ var Battle = (function () {
                                 "Taunt&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "disable":
                             this.scene.resultAnim(
@@ -3189,7 +3150,6 @@ var Battle = (function () {
                                 "Disable&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "embargo":
                             this.scene.resultAnim(
@@ -3197,7 +3157,6 @@ var Battle = (function () {
                                 "Embargo ended",
                                 "good"
                             );
-
                             break;
                         case "torment":
                             this.scene.resultAnim(
@@ -3205,7 +3164,6 @@ var Battle = (function () {
                                 "Torment&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "encore":
                             this.scene.resultAnim(
@@ -3213,11 +3171,9 @@ var Battle = (function () {
                                 "Encore&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "bide":
                             this.scene.runOtherAnim("bideunleash", [_poke33]);
-
                             break;
                         case "illusion":
                             this.scene.resultAnim(
@@ -3225,7 +3181,6 @@ var Battle = (function () {
                                 "Illusion ended",
                                 "bad"
                             );
-
                             _poke33.rememberAbility("Illusion");
                             break;
                         case "slowstart":
@@ -3234,7 +3189,6 @@ var Battle = (function () {
                                 "Slow Start ended",
                                 "good"
                             );
-
                             break;
                         case "perishsong":
                             _poke33.removeVolatile("perish3");
@@ -3262,13 +3216,13 @@ var Battle = (function () {
                             _poke33.removeVolatile("quarkdrivespe");
                             break;
                         default:
-                            if (_effect15.effectType === "Move") {
-                                if (_effect15.name === "Doom Desire") {
+                            if (_effect16.effectType === "Move") {
+                                if (_effect16.name === "Doom Desire") {
                                     this.scene.runOtherAnim("doomdesirehit", [
                                         _poke33,
                                     ]);
                                 }
-                                if (_effect15.name === "Future Sight") {
+                                if (_effect16.name === "Future Sight") {
                                     this.scene.runOtherAnim("futuresighthit", [
                                         _poke33,
                                     ]);
@@ -3282,15 +3236,15 @@ var Battle = (function () {
             }
             case "-singleturn": {
                 var _poke34 = this.getPokemon(args[1]);
-                var _effect16 = Dex.getEffect(args[2]);
+                var _effect17 = Dex.getEffect(args[2]);
                 if (
-                    _effect16.id === "roost" &&
+                    _effect17.id === "roost" &&
                     !_poke34.getTypeList().includes("Flying")
                 ) {
                     break;
                 }
-                _poke34.addTurnstatus(_effect16.id);
-                switch (_effect16.id) {
+                _poke34.addTurnstatus(_effect17.id);
+                switch (_effect17.id) {
                     case "roost":
                         this.scene.resultAnim(_poke34, "Landed", "neutral");
                         break;
@@ -3317,11 +3271,11 @@ var Battle = (function () {
                         break;
                     case "focuspunch":
                         this.scene.resultAnim(_poke34, "Focusing", "neutral");
-                        _poke34.rememberMove(_effect16.name, 0);
+                        _poke34.rememberMove(_effect17.name, 0);
                         break;
                     case "shelltrap":
                         this.scene.resultAnim(_poke34, "Trap set", "neutral");
-                        _poke34.rememberMove(_effect16.name, 0);
+                        _poke34.rememberMove(_effect17.name, 0);
                         break;
                     case "beakblast":
                         this.scene.runOtherAnim("bidecharge", [_poke34]);
@@ -3335,10 +3289,10 @@ var Battle = (function () {
             }
             case "-singlemove": {
                 var _poke35 = this.getPokemon(args[1]);
-                var _effect17 = Dex.getEffect(args[2]);
-                _poke35.addMovestatus(_effect17.id);
+                var _effect18 = Dex.getEffect(args[2]);
+                _poke35.addMovestatus(_effect18.id);
 
-                switch (_effect17.id) {
+                switch (_effect18.id) {
                     case "grudge":
                         this.scene.resultAnim(_poke35, "Grudge", "neutral");
                         break;
@@ -3356,10 +3310,10 @@ var Battle = (function () {
             }
             case "-activate": {
                 var _poke36 = this.getPokemon(args[1]);
-                var _effect18 = Dex.getEffect(args[2]);
+                var _effect19 = Dex.getEffect(args[2]);
                 var _target3 = this.getPokemon(args[3]);
-                this.activateAbility(_poke36, _effect18);
-                switch (_effect18.id) {
+                this.activateAbility(_poke36, _effect19);
+                switch (_effect19.id) {
                     case "poltergeist":
                         _poke36.item = kwArgs.item;
                         _poke36.itemEffect = "disturbed";
@@ -3489,18 +3443,17 @@ var Battle = (function () {
                         if (!kwArgs.ability) break;
                         var _ability2 = Dex.abilities.get(kwArgs.ability);
                         this.activateAbility(_target3, _ability2.name);
-                        this.activateAbility(_poke36, _effect18.name);
+                        this.activateAbility(_poke36, _effect19.name);
                         this.scene.wait(700);
-                        this.activateAbility(_target3, _effect18.name, true);
+                        this.activateAbility(_target3, _effect19.name, true);
                         break;
 
                     case "leppaberry":
                     case "mysteryberry":
                         _poke36.rememberMove(
                             kwArgs.move,
-                            _effect18.id === "leppaberry" ? -10 : -5
+                            _effect19.id === "leppaberry" ? -10 : -5
                         );
-
                         break;
                     case "focusband":
                         _poke36.item = "Focus Band";
@@ -3526,10 +3479,10 @@ var Battle = (function () {
             }
             case "-sidestart": {
                 var _side = this.getSide(args[1]);
-                var _effect19 = Dex.getEffect(args[2]);
-                _side.addSideCondition(_effect19, !!kwArgs.persistent);
+                var _effect20 = Dex.getEffect(args[2]);
+                _side.addSideCondition(_effect20, !!kwArgs.persistent);
 
-                switch (_effect19.id) {
+                switch (_effect20.id) {
                     case "tailwind":
                     case "auroraveil":
                     case "reflect":
@@ -3552,9 +3505,9 @@ var Battle = (function () {
             }
             case "-sideend": {
                 var _side2 = this.getSide(args[1]);
-                var _effect20 = Dex.getEffect(args[2]);
+                var _effect21 = Dex.getEffect(args[2]);
 
-                _side2.removeSideCondition(_effect20.name);
+                _side2.removeSideCondition(_effect21.name);
                 this.log(args, kwArgs);
                 break;
             }
@@ -3565,14 +3518,14 @@ var Battle = (function () {
                 break;
             }
             case "-weather": {
-                var _effect21 = Dex.getEffect(args[1]);
+                var _effect22 = Dex.getEffect(args[1]);
                 var _poke37 = this.getPokemon(kwArgs.of) || undefined;
                 var _ability3 = Dex.getEffect(kwArgs.from);
-                if (!_effect21.id || _effect21.id === "none") {
+                if (!_effect22.id || _effect22.id === "none") {
                     kwArgs.from = this.weather;
                 }
                 this.changeWeather(
-                    _effect21.name,
+                    _effect22.name,
                     _poke37,
                     !!kwArgs.upkeep,
                     _ability3
@@ -3581,13 +3534,13 @@ var Battle = (function () {
                 break;
             }
             case "-fieldstart": {
-                var _effect22 = Dex.getEffect(args[1]);
+                var _effect23 = Dex.getEffect(args[1]);
                 var _poke38 = this.getPokemon(kwArgs.of);
                 var _fromeffect5 = Dex.getEffect(kwArgs.from);
                 this.activateAbility(_poke38, _fromeffect5);
                 var minTimeLeft = 5;
                 var maxTimeLeft = 0;
-                if (_effect22.id.endsWith("terrain")) {
+                if (_effect23.id.endsWith("terrain")) {
                     for (var i = this.pseudoWeather.length - 1; i >= 0; i--) {
                         var pwID = toID(this.pseudoWeather[i][0]);
                         if (pwID.endsWith("terrain")) {
@@ -3598,9 +3551,9 @@ var Battle = (function () {
                     if (this.gen > 6) maxTimeLeft = 8;
                 }
                 if (kwArgs.persistent) minTimeLeft += 2;
-                this.addPseudoWeather(_effect22.name, minTimeLeft, maxTimeLeft);
+                this.addPseudoWeather(_effect23.name, minTimeLeft, maxTimeLeft);
 
-                switch (_effect22.id) {
+                switch (_effect23.id) {
                     case "gravity":
                         if (this.seeking !== null) break;
                         for (
@@ -3619,15 +3572,15 @@ var Battle = (function () {
                 break;
             }
             case "-fieldend": {
-                var _effect23 = Dex.getEffect(args[1]);
+                var _effect24 = Dex.getEffect(args[1]);
 
-                this.removePseudoWeather(_effect23.name);
+                this.removePseudoWeather(_effect24.name);
                 this.log(args, kwArgs);
                 break;
             }
             case "-fieldactivate": {
-                var _effect24 = Dex.getEffect(args[1]);
-                switch (_effect24.id) {
+                var _effect25 = Dex.getEffect(args[1]);
+                switch (_effect25.id) {
                     case "perishsong":
                         this.scene.updateStatbars();
                         break;
@@ -3751,14 +3704,7 @@ var Battle = (function () {
             siden = parseInt(name.charAt(1), 10) - 1;
             name = name.slice(4);
         } else if (/^p[1-9][a-f]: /.test(name)) {
-            var slotChart = {
-                a: 0,
-                b: 1,
-                c: 2,
-                d: 3,
-                e: 4,
-                f: 5,
-            };
+            var slotChart = { a: 0, b: 1, c: 2, d: 3, e: 4, f: 5 };
             siden = parseInt(name.charAt(1), 10) - 1;
             slot = slotChart[name.charAt(2)];
             name = name.slice(5);
@@ -4130,7 +4076,6 @@ var Battle = (function () {
                     args[1],
                     args[2]
                 );
-
                 if (args[3] === "mail") {
                     _pokemon6.item = "(mail)";
                 } else if (args[3] === "item") {
@@ -4309,7 +4254,6 @@ var Battle = (function () {
                     "majorerror",
                     "Error parsing: " + str + " (" + err + ")",
                 ]);
-
                 if (err.stack) {
                     var stack = ("" + err.stack).split("\n");
                     for (var _i30 = 0; _i30 < stack.length; _i30++) {

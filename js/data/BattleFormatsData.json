@@ -531,7 +531,7 @@
     "gengarmega": {
         "isNonstandard": "Past",
         "tier": "Illegal",
-        "natDexTier": "Uber"
+        "natDexTier": "AG"
     },
     "gengargmax": { "isNonstandard": "Past", "tier": "Illegal" },
     "onix": { "isNonstandard": "Past", "tier": "Illegal", "natDexTier": "LC" },
@@ -1459,7 +1459,7 @@
     "shedinja": {
         "isNonstandard": "Past",
         "tier": "Illegal",
-        "natDexTier": "Uber"
+        "natDexTier": "AG"
     },
     "whismur": {
         "isNonstandard": "Past",
@@ -1896,7 +1896,7 @@
     "rayquazamega": {
         "isNonstandard": "Past",
         "tier": "Illegal",
-        "natDexTier": "Uber"
+        "natDexTier": "AG"
     },
     "jirachi": {
         "isNonstandard": "Past",
@@ -2811,7 +2811,7 @@
         "tier": "Illegal",
         "natDexTier": "UU"
     },
-    "rufflet": { "tier": "LC" },
+    "rufflet": { "tier": "NFE" },
     "braviary": { "tier": "UU", "doublesTier": "DUU", "natDexTier": "UU" },
     "braviaryhisui": { "isNonstandard": "Unobtainable", "tier": "Unreleased" },
     "vullaby": {
@@ -4039,7 +4039,7 @@
     "calyrexshadow": {
         "isNonstandard": "Unobtainable",
         "tier": "Unreleased",
-        "natDexTier": "Uber"
+        "natDexTier": "AG"
     },
     "enamorus": { "isNonstandard": "Unobtainable", "tier": "Unreleased" },
     "enamorustherian": {
@@ -4153,11 +4153,7 @@
         "doublesTier": "DUber",
         "natDexTier": "Uber"
     },
-    "miraidon": {
-        "tier": "Uber",
-        "doublesTier": "DUber",
-        "natDexTier": "Uber"
-    },
+    "miraidon": { "tier": "Uber", "doublesTier": "DUber", "natDexTier": "AG" },
     "tinkatink": { "tier": "LC" },
     "tinkatuff": { "tier": "NFE" },
     "tinkaton": { "tier": "UU", "doublesTier": "DOU", "natDexTier": "UU" },
