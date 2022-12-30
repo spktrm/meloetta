@@ -87,12 +87,12 @@ class BattleRoom:
     def recieve(self, data: str = ""):
         return self._ctx.execute("engine.receive({})".format(json.dumps(data)))
 
-    def __getattribute__(self, __name: str) -> Any:
-        tier1, *_ = __name.split(".")
-        if tier1 not in ["_load_js"]:
-            return self._ctx.execute(f"engine.client.{__name}")
-        else:
-            return super().__getattribute__(__name)
+    # def __getattribute__(self, __name: str) -> Any:
+    #     tier1, *_ = __name.split(".")
+    #     if tier1 not in ["_load_js", "_ctx", "_battle_tag"]:
+    #         return self._ctx.execute(f"engine.client.{__name}")
+    #     else:
+    #         return super().__getattribute__(__name)
 
     def add(self, data: str = ""):
         return self._ctx.call("engine.add", data)
