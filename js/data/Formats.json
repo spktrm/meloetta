@@ -201,7 +201,8 @@
         "mod": "gen9",
         "gameType": "doubles",
         "ruleset": ["Standard Doubles"],
-        "banlist": ["DUber", "Shadow Tag"]
+        "banlist": ["DUber", "Shadow Tag"],
+        "unbanlist": ["Flutter Mane"]
     },
     {
         "name": "[Gen 9] Doubles Ubers",
@@ -220,7 +221,7 @@
         "mod": "gen9",
         "gameType": "doubles",
         "ruleset": ["[Gen 9] Doubles OU"],
-        "banlist": ["DOU", "DBL"]
+        "banlist": ["DOU", "DBL", "Flutter Mane"]
     },
     {
         "name": "[Gen 9] Doubles LC",
@@ -795,6 +796,7 @@
         ],
         "banlist": [
             "Annihilape",
+            "Flutter Mane",
             "Koraidon",
             "Miraidon",
             "Slaking",
@@ -1083,6 +1085,7 @@
             "Pure Power",
             "Shadow Tag",
             "Ally Switch",
+            "Baton Pass",
             "Revival Blessing",
             "Swagger"
         ]
@@ -4791,6 +4794,7 @@
             "Gorebyss",
             "Hippopotas",
             "Kadabra",
+            "Kingler",
             "Lapras",
             "Machoke",
             "Magmar",

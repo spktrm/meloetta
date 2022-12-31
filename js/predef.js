@@ -1,4 +1,26 @@
-location = window = exports = this;
+module = location = window = exports = this;
+
+Config = window.Config = {
+    version: "0",
+    bannedHosts: [],
+    whitelist: [],
+    routes: {
+        root: "pokemonshowdown.com",
+        client: "play.pokemonshowdown.com",
+        dex: "dex.pokemonshowdown.com",
+        replays: "replay.pokemonshowdown.com",
+        users: "pokemonshowdown.com/users",
+    },
+    defaultserver: {
+        id: "showdown",
+        host: "sim3.psim.us",
+        port: 443,
+        httpport: 8000,
+        altport: 80,
+        registered: true,
+    },
+    customcolors: {},
+};
 
 Object.prototype.extend = function (obj) {
     for (var i in obj) {

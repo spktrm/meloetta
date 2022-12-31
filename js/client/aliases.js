@@ -1,7 +1,33 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+    for (var name in all)
+        __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+    if ((from && typeof from === "object") || typeof from === "function") {
+        for (let key of __getOwnPropNames(from))
+            if (!__hasOwnProp.call(to, key) && key !== except)
+                __defProp(to, key, {
+                    get: () => from[key],
+                    enumerable:
+                        !(desc = __getOwnPropDesc(from, key)) ||
+                        desc.enumerable,
+                });
+    }
+    return to;
+};
+var __toCommonJS = (mod) =>
+    __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var aliases_exports = {};
+__export(aliases_exports, {
+    Aliases: () => Aliases,
+});
+module.exports = __toCommonJS(aliases_exports);
 const Aliases = {
-    // formats
     randbats: "[Gen 9] Random Battle",
     uber: "[Gen 9] Ubers",
     anythinggoes: "[Gen 8] Anything Goes",
@@ -76,8 +102,6 @@ const Aliases = {
     mayhem: "[Gen 9] Random Battle Mayhem",
     omotm: "[Gen 9] Shared Power",
     lcotm: "[Gen 9] Full Potential",
-
-    // mega evos
     fabio: "Ampharos-Mega",
     maero: "Aerodactyl-Mega",
     megabunny: "Lopunny-Mega",
@@ -104,8 +128,6 @@ const Aliases = {
     mmy: "Mewtwo-Mega-Y",
     zardx: "Charizard-Mega-X",
     zardy: "Charizard-Mega-Y",
-
-    // Pokéstar Studios
     blackdoor: "Pokestar Black-Door",
     brycen: "Brycen-Man",
     brycenman: "Pokestar Brycen-Man",
@@ -123,8 +145,6 @@ const Aliases = {
     ufo: "Pokestar UFO",
     ufo2: "Pokestar UFO-2",
     whitedoor: "Pokestar White-Door",
-
-    // formes
     bugceus: "Arceus-Bug",
     darkceus: "Arceus-Dark",
     dragonceus: "Arceus-Dragon",
@@ -281,8 +301,6 @@ const Aliases = {
     urshifurapid: "Urshifu-Rapid-Strike",
     calyrexir: "Calyrex-Ice",
     calyrexsr: "Calyrex-Shadow",
-
-    // base formes
     nidoranfemale: "Nidoran-F",
     nidoranmale: "Nidoran-M",
     wormadamgrass: "Wormadam",
@@ -334,11 +352,7 @@ const Aliases = {
     ufof: "Pokestar UFO",
     ufoflying: "Pokestar UFO",
     vivillonmeadow: "Vivillon",
-
-    // event formes
     rockruffdusk: "Rockruff",
-
-    // totem formes
     raticatet: "Raticate-Alola-Totem",
     totemalolanraticate: "Raticate-Alola-Totem",
     totemraticate: "Raticate-Alola-Totem",
@@ -365,8 +379,6 @@ const Aliases = {
     totemmimikyu: "Mimikyu-Totem",
     kommoot: "Kommo-o-Totem",
     totemkommoo: "Kommo-o-Totem",
-
-    // cosmetic formes
     alcremierubycream: "Alcremie",
     alcremiematchacream: "Alcremie",
     alcremiemintcream: "Alcremie",
@@ -478,7 +490,6 @@ const Aliases = {
     unownquestion: "Unown",
     tatsugiridroopy: "Tatsugiri",
     tatsugiristretchy: "Tatsugiri",
-
     pokestargiant2: "Pokestar Giant",
     pokestarmonica2: "Pokestar Giant",
     pokestarufopropu1: "Pokestar UFO",
@@ -546,14 +557,10 @@ const Aliases = {
     propr2: "Pokestar F002",
     blackbeltprop: "Pokestar Black Belt",
     propk1: "Pokestar Black Belt",
-
-    // abilities
     ngas: "Neutralizing Gas",
     pheal: "Poison Heal",
     regen: "Regenerator",
     stag: "Shadow Tag",
-
-    // items
     assvest: "Assault Vest",
     av: "Assault Vest",
     balloon: "Air Balloon",
@@ -674,8 +681,6 @@ const Aliases = {
     tr99bodypress: "TR99",
     umbrella: "Utility Umbrella",
     wp: "Weakness Policy",
-
-    // pokemon
     aboma: "Abomasnow",
     aegi: "Aegislash",
     aegiblade: "Aegislash-Blade",
@@ -818,8 +823,6 @@ const Aliases = {
     zong: "Bronzong",
     zor: "Scizor",
     zyg: "Zygarde",
-
-    // ultra beast codenames
     ub01: "Nihilego",
     ub02a: "Buzzwole",
     ub02b: "Pheromosa",
@@ -830,8 +833,6 @@ const Aliases = {
     ubburst: "Blacephalon",
     ubassembly: "Stakataka",
     ubadhesive: "Poipole",
-
-    // moves
     bb: "Brave Bird",
     bd: "Belly Drum",
     bde: "Baby-Doll Eyes",
@@ -890,8 +891,6 @@ const Aliases = {
     vicegrip: "Vise Grip",
     web: "Sticky Web",
     wow: "Will-O-Wisp",
-
-    // z-moves
     "10mv": "10,000,000 Volt Thunderbolt",
     "10mvt": "10,000,000 Volt Thunderbolt",
     clangorous: "Clangorous Soulblaze",
@@ -980,8 +979,6 @@ const Aliases = {
     zultranecrozma: "Light That Burns the Sky",
     zvolttackle: "Catastropika",
     zwater: "Hydro Vortex",
-
-    // Max moves
     maxbug: "Max Flutterby",
     maxdark: "Max Darkness",
     maxdragon: "Max Wyrmwind",
@@ -1002,8 +999,6 @@ const Aliases = {
     maxwater: "Max Geyser",
     maxstatus: "Max Guard",
     maxprotect: "Max Guard",
-
-    // G-Max Moves
     befuddle: "G-Max Befuddle",
     cannonade: "G-Max Cannonade",
     centiferno: "G-Max Centiferno",
@@ -1037,8 +1032,6 @@ const Aliases = {
     voltcrash: "G-Max Volt Crash",
     wildfire: "G-Max Wildfire",
     windrage: "G-Max Wind Rage",
-
-    // Japanese names
     fushigidane: "Bulbasaur",
     fushigisou: "Ivysaur",
     fushigibana: "Venusaur",
@@ -1704,7 +1697,7 @@ const Aliases = {
     bibiyon: "Vivillon",
     shishiko: "Litleo",
     kaenjishi: "Pyroar",
-    furabebe: "Flabébé",
+    furabebe: "Flab\xE9b\xE9",
     furaette: "Floette",
     furaajesu: "Florges",
     meeekuru: "Skiddo",
@@ -1843,6 +1836,4 @@ const Aliases = {
     merutan: "Meltan",
     merumetaru: "Melmetal",
 };
-exports.Aliases = Aliases;
-
-//# sourceMappingURL=sourceMaps/aliases.js.map
+//# sourceMappingURL=aliases.js.map

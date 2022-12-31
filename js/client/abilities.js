@@ -1,62 +1,32 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function _optionalChain(ops) {
-    let lastAccessLHS = undefined;
-    let value = ops[0];
-    let i = 1;
-    while (i < ops.length) {
-        const op = ops[i];
-        const fn = ops[i + 1];
-        i += 2;
-        if (
-            (op === "optionalAccess" || op === "optionalCall") &&
-            value == null
-        ) {
-            return undefined;
-        }
-        if (op === "access" || op === "optionalAccess") {
-            lastAccessLHS = value;
-            value = fn(value);
-        } else if (op === "call" || op === "optionalCall") {
-            value = fn((...args) => value.call(lastAccessLHS, ...args));
-            lastAccessLHS = undefined;
-        }
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+    for (var name in all)
+        __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+    if ((from && typeof from === "object") || typeof from === "function") {
+        for (let key of __getOwnPropNames(from))
+            if (!__hasOwnProp.call(to, key) && key !== except)
+                __defProp(to, key, {
+                    get: () => from[key],
+                    enumerable:
+                        !(desc = __getOwnPropDesc(from, key)) ||
+                        desc.enumerable,
+                });
     }
-    return value;
-} /*
-
-Ratings and how they work:
-
--1: Detrimental
-	  An ability that severely harms the user.
-	ex. Defeatist, Slow Start
-
- 0: Useless
-	  An ability with no overall benefit in a singles battle.
-	ex. Color Change, Plus
-
- 1: Ineffective
-	  An ability that has minimal effect or is only useful in niche situations.
-	ex. Light Metal, Suction Cups
-
- 2: Useful
-	  An ability that can be generally useful.
-	ex. Flame Body, Overcoat
-
- 3: Effective
-	  An ability with a strong effect on the user or foe.
-	ex. Chlorophyll, Sturdy
-
- 4: Very useful
-	  One of the more popular abilities. It requires minimal support to be effective.
-	ex. Adaptability, Magic Bounce
-
- 5: Essential
-	  The sort of ability that defines metagames.
-	ex. Imposter, Shadow Tag
-
-*/
-
+    return to;
+};
+var __toCommonJS = (mod) =>
+    __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var abilities_exports = {};
+__export(abilities_exports, {
+    Abilities: () => Abilities,
+});
+module.exports = __toCommonJS(abilities_exports);
 const Abilities = {
     noability: {
         isNonstandard: "Past",
@@ -122,7 +92,6 @@ const Abilities = {
             this.effectState.switchingIn = true;
         },
         onStart(pokemon) {
-            // Air Lock does not activate when Skill Swapped or when Neutralizing Gas leaves the field
             if (this.effectState.switchingIn) {
                 this.add("-ability", pokemon, "Air Lock");
                 this.effectState.switchingIn = false;
@@ -161,11 +130,7 @@ const Abilities = {
         onHit(target, source, move) {
             if (!target.hp) return;
             if (
-                _optionalChain([
-                    move,
-                    "optionalAccess",
-                    (_) => _.effectType,
-                ]) === "Move" &&
+                move?.effectType === "Move" &&
                 target.getMoveHitData(move).crit
             ) {
                 target.setBoost({ atk: 6 });
@@ -266,7 +231,6 @@ const Abilities = {
             if (!source) source = this.effectState.target;
             if (!source || !pokemon.isAdjacent(source)) return;
             if (pokemon.isGrounded(!pokemon.knownType)) {
-                // Negate immunity if the type is unknown
                 pokemon.maybeTrapped = true;
             }
         },
@@ -288,7 +252,6 @@ const Abilities = {
             ) {
                 return;
             }
-
             const armorTailHolder = this.effectState.target;
             if (
                 (source.isAlly(armorTailHolder) || move.target === "all") &&
@@ -451,14 +414,7 @@ const Abilities = {
     },
     battlebond: {
         onSourceAfterFaint(length, target, source, effect) {
-            if (
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_2) => _2.effectType,
-                ]) !== "Move"
-            )
-                return;
+            if (effect?.effectType !== "Move") return;
             if (source.abilityState.battleBondTriggered) return;
             if (
                 source.species.id === "greninja" &&
@@ -489,17 +445,7 @@ const Abilities = {
         onAnyModifySpD(spd, target, source, move) {
             const abilityHolder = this.effectState.target;
             if (abilityHolder === target) return;
-            if (
-                !_optionalChain([
-                    move,
-                    "access",
-                    (_3) => _3.ruinedSpD,
-                    "optionalAccess",
-                    (_4) => _4.hasAbility,
-                    "call",
-                    (_5) => _5("Beads of Ruin"),
-                ])
-            )
+            if (!move.ruinedSpD?.hasAbility("Beads of Ruin"))
                 move.ruinedSpD = abilityHolder;
             if (move.ruinedSpD !== abilityHolder && move.ruinedSpD !== target)
                 return;
@@ -687,7 +633,6 @@ const Abilities = {
             this.effectState.switchingIn = true;
         },
         onStart(pokemon) {
-            // Cloud Nine does not activate when Skill Swapped or when Neutralizing Gas leaves the field
             if (this.effectState.switchingIn) {
                 this.add("-ability", pokemon, "Cloud Nine");
                 this.effectState.switchingIn = false;
@@ -721,9 +666,7 @@ const Abilities = {
                     type,
                     "[from] ability: Color Change"
                 );
-
                 if (target.side.active.length === 2 && target.position === 1) {
-                    // Curse Glitch
                     const action = this.queue.willMove(target);
                     if (action && action.move.id === "curse") {
                         action.targetLoc = -1;
@@ -740,12 +683,11 @@ const Abilities = {
             this.add("-ability", pokemon, "Comatose");
         },
         onSetStatus(status, target, source, effect) {
-            if (_optionalChain([effect, "optionalAccess", (_6) => _6.status])) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Comatose");
             }
             return false;
         },
-        // Permanent sleep "status" implemented in the relevant sleep-checking effects
         isPermanent: true,
         name: "Comatose",
         rating: 4,
@@ -759,26 +701,21 @@ const Abilities = {
                 pokemon.baseSpecies.baseSpecies !== "Tatsugiri" ||
                 ally.baseSpecies.baseSpecies !== "Dondozo"
             ) {
-                // Handle any edge cases
                 if (pokemon.getVolatile("commanding"))
                     pokemon.removeVolatile("commanding");
                 return;
             }
-
             if (!pokemon.getVolatile("commanding")) {
-                // If Dondozo already was commanded this fails
                 if (ally.getVolatile("commanded")) return;
-                // Cancel all actions this turn for pokemon if applicable
                 this.queue.cancelAction(pokemon);
-                // Add volatiles to both pokemon
                 pokemon.addVolatile("commanding");
                 ally.addVolatile("commanded", pokemon);
-                // Continued in conditions.ts in the volatiles
             } else {
                 if (!ally.fainted) return;
                 pokemon.removeVolatile("commanding");
             }
         },
+        isPermanent: true,
         name: "Commander",
         rating: 0,
         num: 279,
@@ -835,7 +772,6 @@ const Abilities = {
         num: 126,
     },
     corrosion: {
-        // Implemented in sim/pokemon.js:Pokemon#setStatus
         name: "Corrosion",
         rating: 2.5,
         num: 212,
@@ -844,7 +780,6 @@ const Abilities = {
         onStart(pokemon) {
             const ally = pokemon.allies()[0];
             if (!ally) return;
-
             let i;
             for (i in ally.boosts) {
                 pokemon.boosts[i] = ally.boosts[i];
@@ -995,7 +930,6 @@ const Abilities = {
     },
     dancer: {
         name: "Dancer",
-        // implemented in runMove in scripts.js
         rating: 1.5,
         num: 216,
     },
@@ -1012,17 +946,7 @@ const Abilities = {
                 move.type !== "Dark"
             )
                 return;
-            if (
-                !_optionalChain([
-                    move,
-                    "access",
-                    (_7) => _7.auraBooster,
-                    "optionalAccess",
-                    (_8) => _8.hasAbility,
-                    "call",
-                    (_9) => _9("Dark Aura"),
-                ])
-            )
+            if (!move.auraBooster?.hasAbility("Dark Aura"))
                 move.auraBooster = this.effectState.target;
             if (move.auraBooster !== this.effectState.target) return;
             return this.chainModify([move.hasAuraBreak ? 3072 : 5448, 4096]);
@@ -1056,7 +980,6 @@ const Abilities = {
             ) {
                 return;
             }
-
             const dazzlingHolder = this.effectState.target;
             if (
                 (source.isAlly(dazzlingHolder) || move.target === "all") &&
@@ -1211,7 +1134,6 @@ const Abilities = {
                 !move.flags["bypasssub"] &&
                 !(move.infiltrates && this.gen >= 6);
             if (hitSub) return;
-
             if (!target.runImmunity(move.type)) return;
             return false;
         },
@@ -1223,13 +1145,11 @@ const Abilities = {
             ) {
                 return;
             }
-
             const hitSub =
                 target.volatiles["substitute"] &&
                 !move.flags["bypasssub"] &&
                 !(move.infiltrates && this.gen >= 6);
             if (hitSub) return;
-
             if (!target.runImmunity(move.type)) return;
             return 0;
         },
@@ -1383,7 +1303,6 @@ const Abilities = {
     },
     earlybird: {
         name: "Early Bird",
-        // Implemented in statuses.js
         rating: 1.5,
         num: 48,
     },
@@ -1458,17 +1377,7 @@ const Abilities = {
                 move.type !== "Fairy"
             )
                 return;
-            if (
-                !_optionalChain([
-                    move,
-                    "access",
-                    (_10) => _10.auraBooster,
-                    "optionalAccess",
-                    (_11) => _11.hasAbility,
-                    "call",
-                    (_12) => _12("Fairy Aura"),
-                ])
-            )
+            if (!move.auraBooster?.hasAbility("Fairy Aura"))
                 move.auraBooster = this.effectState.target;
             if (move.auraBooster !== this.effectState.target) return;
             return this.chainModify([move.hasAuraBreak ? 3072 : 5448, 4096]);
@@ -1526,7 +1435,7 @@ const Abilities = {
             pokemon.removeVolatile("flashfire");
         },
         condition: {
-            noCopy: true, // doesn't get copied by Baton Pass
+            noCopy: true,
             onStart(target) {
                 this.add("-start", target, "ability: Flash Fire");
             },
@@ -1848,11 +1757,7 @@ const Abilities = {
     },
     galewings: {
         onModifyPriority(priority, pokemon, target, move) {
-            if (
-                _optionalChain([move, "optionalAccess", (_13) => _13.type]) ===
-                    "Flying" &&
-                pokemon.hp === pokemon.maxhp
-            )
+            if (move?.type === "Flying" && pokemon.hp === pokemon.maxhp)
                 return priority + 1;
         },
         name: "Gale Wings",
@@ -1934,7 +1839,6 @@ const Abilities = {
                 pokemon.abilityState.choiceLock &&
                 pokemon.abilityState.choiceLock !== move.id
             ) {
-                // Fails unless ability is being ignored (these events will not run), no PP lost.
                 this.addMove("move", pokemon, move.name);
                 this.attrLastMove("[still]");
                 this.debug("Disabled by Gorilla Tactics");
@@ -1954,7 +1858,6 @@ const Abilities = {
         onModifyAtkPriority: 1,
         onModifyAtk(atk, pokemon) {
             if (pokemon.volatiles["dynamax"]) return;
-            // PLACEHOLDER
             this.debug("Gorilla Tactics Atk Boost");
             return this.chainModify(1.5);
         },
@@ -2046,7 +1949,6 @@ const Abilities = {
                 target.formeChange("cramorant", move);
             }
         },
-        // The Dive part of this mechanic is implemented in Dive's `onTryMove` in moves.ts
         onSourceTryPrimaryHit(target, source, effect) {
             if (
                 effect &&
@@ -2104,7 +2006,7 @@ const Abilities = {
                 attacker.isGrounded()
             ) {
                 this.debug("Hadron Engine boost");
-                return this.chainModify([5325, 4096]);
+                return this.chainModify([5461, 4096]);
             }
         },
         name: "Hadron Engine",
@@ -2214,7 +2116,6 @@ const Abilities = {
         num: 258,
     },
     hustle: {
-        // This should be applied directly to the stat as opposed to chaining with the others
         onModifyAtkPriority: 5,
         onModifyAtk(atk) {
             return this.modify(atk, 1.5);
@@ -2333,13 +2234,11 @@ const Abilities = {
                 target.transformed
             )
                 return;
-
             const hitSub =
                 target.volatiles["substitute"] &&
                 !move.flags["bypasssub"] &&
                 !(move.infiltrates && this.gen >= 6);
             if (hitSub) return;
-
             if (!target.runImmunity(move.type)) return;
             return 0;
         },
@@ -2349,15 +2248,7 @@ const Abilities = {
             }
         },
         onWeatherChange(pokemon, source, sourceEffect) {
-            // snow/hail resuming because Cloud Nine/Air Lock ended does not trigger Ice Face
-            if (
-                _optionalChain([
-                    sourceEffect,
-                    "optionalAccess",
-                    (_14) => _14.suppressWeather,
-                ])
-            )
-                return;
+            if (sourceEffect?.suppressWeather) return;
             if (!pokemon.hp) return;
             if (
                 this.field.isWeather(["hail", "snow"]) &&
@@ -2394,7 +2285,6 @@ const Abilities = {
     illusion: {
         onBeforeSwitchIn(pokemon) {
             pokemon.illusion = null;
-            // yes, you can Illusion an active pokemon but only if it's to your right
             for (
                 let i = pokemon.side.pokemon.length - 1;
                 i > pokemon.position;
@@ -2448,9 +2338,7 @@ const Abilities = {
         },
         onSetStatus(status, target, source, effect) {
             if (status.id !== "psn" && status.id !== "tox") return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_15) => _15.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Immunity");
             }
             return false;
@@ -2465,11 +2353,7 @@ const Abilities = {
             this.effectState.switchingIn = true;
         },
         onStart(pokemon) {
-            // Imposter does not activate when Skill Swapped or when Neutralizing Gas leaves the field
             if (!this.effectState.switchingIn) return;
-            // copies across in doubles/triples
-            // (also copies across in multibattle and diagonally in free-for-all,
-            // but side.foe already takes care of those)
             const target =
                 pokemon.side.foe.active[
                     pokemon.side.foe.active.length - 1 - pokemon.position
@@ -2536,9 +2420,7 @@ const Abilities = {
         },
         onSetStatus(status, target, source, effect) {
             if (status.id !== "slp") return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_16) => _16.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Insomnia");
             }
             return false;
@@ -2637,7 +2519,6 @@ const Abilities = {
         num: 51,
     },
     klutz: {
-        // Item suppression implemented in Pokemon.ignoringItem() within sim/pokemon.js
         onStart(pokemon) {
             this.singleEvent(
                 "End",
@@ -2655,13 +2536,7 @@ const Abilities = {
             if (
                 ["sunnyday", "desolateland"].includes(target.effectiveWeather())
             ) {
-                if (
-                    _optionalChain([
-                        effect,
-                        "optionalAccess",
-                        (_17) => _17.status,
-                    ])
-                ) {
+                if (effect?.status) {
                     this.add("-immune", target, "[from] ability: Leaf Guard");
                 }
                 return false;
@@ -2682,7 +2557,6 @@ const Abilities = {
         num: 102,
     },
     levitate: {
-        // airborneness implemented in sim/pokemon.js:Pokemon#isGrounded
         isBreakable: true,
         name: "Levitate",
         rating: 3.5,
@@ -2815,9 +2689,7 @@ const Abilities = {
         },
         onSetStatus(status, target, source, effect) {
             if (status.id !== "par") return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_18) => _18.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Limber");
             }
             return false;
@@ -2851,7 +2723,6 @@ const Abilities = {
         onModifyTypePriority: -1,
         onModifyType(move, pokemon) {
             if (move.flags["sound"] && !pokemon.volatiles["dynamax"]) {
-                // hardcode
                 move.type = "Water";
             }
         },
@@ -2930,7 +2801,7 @@ const Abilities = {
                 const yourItem = target.takeItem(source);
                 if (!yourItem) return;
                 if (!source.setItem(yourItem)) {
-                    target.item = yourItem.id; // bypass setItem so we don't break choicelock or anything
+                    target.item = yourItem.id;
                     return;
                 }
                 this.add(
@@ -3078,7 +2949,6 @@ const Abilities = {
     },
     mirrorarmor: {
         onBoost(boost, target, source, effect) {
-            // Don't bounce self stat changes, or boosts that have already bounced
             if (target === source || !boost || effect.name === "Mirror Armor")
                 return;
             let b;
@@ -3130,9 +3000,8 @@ const Abilities = {
                     stats.push(statPlus);
                 }
             }
-            let randomStat = stats.length ? this.sample(stats) : undefined;
+            let randomStat = stats.length ? this.sample(stats) : void 0;
             if (randomStat) boost[randomStat] = 2;
-
             stats = [];
             let statMinus;
             for (statMinus in pokemon.boosts) {
@@ -3145,9 +3014,8 @@ const Abilities = {
                     stats.push(statMinus);
                 }
             }
-            randomStat = stats.length ? this.sample(stats) : undefined;
+            randomStat = stats.length ? this.sample(stats) : void 0;
             if (randomStat) boost[randomStat] = -1;
-
             this.boost(boost, pokemon, pokemon);
         },
         name: "Moody",
@@ -3191,7 +3059,6 @@ const Abilities = {
         num: 136,
     },
     multitype: {
-        // Multitype's type-changing itself is implemented in statuses.js
         isPermanent: true,
         name: "Multitype",
         rating: 4,
@@ -3245,69 +3112,40 @@ const Abilities = {
     },
     naturalcure: {
         onCheckShow(pokemon) {
-            // This is complicated
-            // For the most part, in-game, it's obvious whether or not Natural Cure activated,
-            // since you can see how many of your opponent's pokemon are statused.
-            // The only ambiguous situation happens in Doubles/Triples, where multiple pokemon
-            // that could have Natural Cure switch out, but only some of them get cured.
             if (pokemon.side.active.length === 1) return;
             if (pokemon.showCure === true || pokemon.showCure === false) return;
-
             const cureList = [];
             let noCureCount = 0;
             for (const curPoke of pokemon.side.active) {
-                // pokemon not statused
-                if (
-                    !_optionalChain([
-                        curPoke,
-                        "optionalAccess",
-                        (_19) => _19.status,
-                    ])
-                ) {
-                    // this.add('-message', "" + curPoke + " skipped: not statused or doesn't exist");
+                if (!curPoke?.status) {
                     continue;
                 }
                 if (curPoke.showCure) {
-                    // this.add('-message', "" + curPoke + " skipped: Natural Cure already known");
                     continue;
                 }
                 const species = curPoke.species;
-                // pokemon can't get Natural Cure
                 if (
                     !Object.values(species.abilities).includes("Natural Cure")
                 ) {
-                    // this.add('-message', "" + curPoke + " skipped: no Natural Cure");
                     continue;
                 }
-                // pokemon's ability is known to be Natural Cure
                 if (!species.abilities["1"] && !species.abilities["H"]) {
-                    // this.add('-message', "" + curPoke + " skipped: only one ability");
                     continue;
                 }
-                // pokemon isn't switching this turn
                 if (curPoke !== pokemon && !this.queue.willSwitch(curPoke)) {
-                    // this.add('-message', "" + curPoke + " skipped: not switching");
                     continue;
                 }
-
                 if (curPoke.hasAbility("naturalcure")) {
-                    // this.add('-message', "" + curPoke + " confirmed: could be Natural Cure (and is)");
                     cureList.push(curPoke);
                 } else {
-                    // this.add('-message', "" + curPoke + " confirmed: could be Natural Cure (but isn't)");
                     noCureCount++;
                 }
             }
-
             if (!cureList.length || !noCureCount) {
-                // It's possible to know what pokemon were cured
                 for (const pkmn of cureList) {
                     pkmn.showCure = true;
                 }
             } else {
-                // It's not possible to know what pokemon were cured
-
-                // Unlike a -hint, this is real information that battlers need, so we use a -message
                 this.add(
                     "-message",
                     "(" +
@@ -3318,7 +3156,6 @@ const Abilities = {
                         (cureList.length === 1 ? "was" : "were") +
                         " cured by Natural Cure.)"
                 );
-
                 for (const pkmn of cureList) {
                     pkmn.showCure = false;
                 }
@@ -3326,11 +3163,7 @@ const Abilities = {
         },
         onSwitchOut(pokemon) {
             if (!pokemon.status) return;
-
-            // if pokemon.showCure is undefined, it was skipped because its ability
-            // is known
-            if (pokemon.showCure === undefined) pokemon.showCure = true;
-
+            if (pokemon.showCure === void 0) pokemon.showCure = true;
             if (pokemon.showCure)
                 this.add(
                     "-curestatus",
@@ -3339,10 +3172,7 @@ const Abilities = {
                     "[from] ability: Natural Cure"
                 );
             pokemon.clearStatus();
-
-            // only reset .showCure if it's false
-            // (once you know a Pokemon has Natural Cure, its cures are always known)
-            if (!pokemon.showCure) pokemon.showCure = undefined;
+            if (!pokemon.showCure) pokemon.showCure = void 0;
         },
         name: "Natural Cure",
         rating: 2.5,
@@ -3359,7 +3189,6 @@ const Abilities = {
         num: 233,
     },
     neutralizinggas: {
-        // Ability suppression implemented in sim/pokemon.ts:Pokemon#ignoringAbility
         onPreStart(pokemon) {
             if (pokemon.transformed) return;
             this.add("-ability", pokemon, "Neutralizing Gas");
@@ -3411,22 +3240,13 @@ const Abilities = {
                 }
             }
             this.add("-end", source, "ability: Neutralizing Gas");
-
-            // FIXME this happens before the pokemon switches out, should be the opposite order.
-            // Not an easy fix since we cant use a supported event. Would need some kind of special event that
-            // gathers events to run after the switch and then runs them when the ability is no longer accessible.
-            // (If you're tackling this, do note extreme weathers have the same issue)
-
-            // Mark this pokemon's ability as ending so Pokemon#ignoringAbility skips it
             if (source.abilityState.ending) return;
             source.abilityState.ending = true;
             const sortedActive = this.getAllActive();
             this.speedSort(sortedActive);
             for (const pokemon of sortedActive) {
                 if (pokemon !== source) {
-                    if (pokemon.getAbility().isPermanent) continue; // does not interact with e.g Ice Face, Zen Mode
-
-                    // Will be suppressed by Pokemon#ignoringAbility if needed
+                    if (pokemon.getAbility().isPermanent) continue;
                     this.singleEvent(
                         "Start",
                         pokemon.getAbility(),
@@ -3484,7 +3304,6 @@ const Abilities = {
             if (
                 !(move.isZ && move.category !== "Status") &&
                 !noModifyType.includes(move.id) &&
-                // TODO: Figure out actual interaction
                 !(move.name === "Tera Blast" && pokemon.terastallized)
             ) {
                 move.type = "Normal";
@@ -3515,7 +3334,6 @@ const Abilities = {
             if (pokemon.volatiles["taunt"]) {
                 this.add("-activate", pokemon, "ability: Oblivious");
                 pokemon.removeVolatile("taunt");
-                // Taunt's volatile already sends the -end message when removed
             }
         },
         onImmunity(type, pokemon) {
@@ -3552,24 +3370,8 @@ const Abilities = {
     opportunist: {
         onFoeAfterBoost(boost, target, source, effect) {
             if (
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_20) => _20.fullname,
-                    "optionalAccess",
-                    (_21) => _21.endsWith,
-                    "call",
-                    (_22) => _22("Opportunist"),
-                ]) ||
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_23) => _23.fullname,
-                    "optionalAccess",
-                    (_24) => _24.endsWith,
-                    "call",
-                    (_25) => _25("Mirror Herb"),
-                ])
+                effect?.fullname?.endsWith("Opportunist") ||
+                effect?.fullname?.endsWith("Mirror Herb")
             )
                 return;
             const pokemon = this.effectState.target;
@@ -3589,7 +3391,6 @@ const Abilities = {
     },
     orichalcumpulse: {
         onStart(pokemon) {
-            // not affected by Utility Umbrella
             if (
                 !this.field.setWeather("sunnyday") &&
                 this.field.effectiveWeather() === "sunnyday"
@@ -3607,7 +3408,7 @@ const Abilities = {
         onModifyAtk(atk, pokemon) {
             if (pokemon.effectiveWeather() === "sunnyday") {
                 this.debug("Orichalcum boost");
-                return this.chainModify([5325, 4096]);
+                return this.chainModify([5461, 4096]);
             }
         },
         name: "Orichalcum Pulse",
@@ -3665,13 +3466,7 @@ const Abilities = {
             if (status.id === "confusion") return null;
         },
         onHit(target, source, move) {
-            if (
-                _optionalChain([
-                    move,
-                    "optionalAccess",
-                    (_26) => _26.volatileStatus,
-                ]) === "confusion"
-            ) {
+            if (move?.volatileStatus === "confusion") {
                 this.add(
                     "-immune",
                     target,
@@ -3726,14 +3521,12 @@ const Abilities = {
                 move.multihitType = "parentalbond";
             }
         },
-        // Damage modifier implemented in BattleActions#modifyDamage()
         onSourceModifySecondaries(secondaries, target, source, move) {
             if (
                 move.multihitType === "parentalbond" &&
                 move.id === "secretpower" &&
                 move.hit < 2
             ) {
-                // hack to prevent accidentally suppressing King's Rock/Razor Fang
                 return secondaries.filter(
                     (effect) => effect.volatileStatus === "flinch"
                 );
@@ -3770,18 +3563,14 @@ const Abilities = {
         },
         onSetStatus(status, target, source, effect) {
             if (!["psn", "tox"].includes(status.id)) return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_27) => _27.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Pastel Veil");
             }
             return false;
         },
         onAllySetStatus(status, target, source, effect) {
             if (!["psn", "tox"].includes(status.id)) return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_28) => _28.status])
-            ) {
+            if (effect?.status) {
                 const effectHolder = this.effectState.target;
                 this.add(
                     "-block",
@@ -3800,7 +3589,6 @@ const Abilities = {
     perishbody: {
         onDamagingHit(damage, target, source, move) {
             if (!this.checkMoveMakesContact(move, source, target)) return;
-
             let announced = false;
             for (const pokemon of [target, source]) {
                 if (pokemon.volatiles["perishsong"]) continue;
@@ -3817,17 +3605,7 @@ const Abilities = {
     },
     pickpocket: {
         onAfterMoveSecondary(target, source, move) {
-            if (
-                source &&
-                source !== target &&
-                _optionalChain([
-                    move,
-                    "optionalAccess",
-                    (_29) => _29.flags,
-                    "access",
-                    (_30) => _30["contact"],
-                ])
-            ) {
+            if (source && source !== target && move?.flags["contact"]) {
                 if (
                     target.item ||
                     target.switchFlag ||
@@ -3961,19 +3739,8 @@ const Abilities = {
         num: 38,
     },
     poisontouch: {
-        // upokecenter says this is implemented as an added secondary effect
         onModifyMove(move) {
-            if (
-                !_optionalChain([
-                    move,
-                    "optionalAccess",
-                    (_31) => _31.flags,
-                    "access",
-                    (_32) => _32["contact"],
-                ]) ||
-                move.target === "self"
-            )
-                return;
+            if (!move?.flags["contact"] || move.target === "self") return;
             if (!move.secondaries) {
                 move.secondaries = [];
             }
@@ -4076,13 +3843,7 @@ const Abilities = {
     },
     prankster: {
         onModifyPriority(priority, pokemon, target, move) {
-            if (
-                _optionalChain([
-                    move,
-                    "optionalAccess",
-                    (_33) => _33.category,
-                ]) === "Status"
-            ) {
+            if (move?.category === "Status") {
                 move.pranksterBoosted = true;
                 return priority + 1;
             }
@@ -4100,7 +3861,7 @@ const Abilities = {
             return 1;
         },
         name: "Pressure",
-        rating: 2,
+        rating: 2.5,
         num: 46,
     },
     primordialsea: {
@@ -4148,7 +3909,6 @@ const Abilities = {
     propellertail: {
         onModifyMovePriority: 1,
         onModifyMove(move) {
-            // most of the implementation is in Battle#getTarget
             move.tracksTarget = move.target !== "scripted";
         },
         name: "Propeller Tail",
@@ -4195,23 +3955,9 @@ const Abilities = {
         },
         onWeatherChange(pokemon) {
             if (pokemon.transformed) return;
-            // protosynthesis is not affected by Utility Umbrella
-            if (this.field.effectiveWeather() === "sunnyday") {
-                if (!pokemon.volatiles["protosynthesis"]) {
-                    this.add("-activate", pokemon, "ability: Protosynthesis");
-                    pokemon.addVolatile("protosynthesis");
-                }
-            } else if (
-                !_optionalChain([
-                    pokemon,
-                    "access",
-                    (_34) => _34.volatiles,
-                    "access",
-                    (_35) => _35["protosynthesis"],
-                    "optionalAccess",
-                    (_36) => _36.fromBooster,
-                ])
-            ) {
+            if (this.field.isWeather("sunnyday")) {
+                pokemon.addVolatile("protosynthesis");
+            } else if (!pokemon.volatiles["protosynthesis"]?.fromBooster) {
                 pokemon.removeVolatile("protosynthesis");
             }
         },
@@ -4221,7 +3967,18 @@ const Abilities = {
         },
         condition: {
             noCopy: true,
-            onStart(pokemon) {
+            onStart(pokemon, source, effect) {
+                if (effect?.id === "boosterenergy") {
+                    this.effectState.fromBooster = true;
+                    this.add(
+                        "-activate",
+                        pokemon,
+                        "ability: Protosynthesis",
+                        "[fromitem]"
+                    );
+                } else {
+                    this.add("-activate", pokemon, "ability: Protosynthesis");
+                }
                 this.effectState.bestStat = pokemon.getBestStat(false, true);
                 this.add(
                     "-start",
@@ -4305,9 +4062,7 @@ const Abilities = {
     },
     purifyingsalt: {
         onSetStatus(status, target, source, effect) {
-            if (
-                _optionalChain([effect, "optionalAccess", (_37) => _37.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Purifying Salt");
             }
             return false;
@@ -4332,7 +4087,7 @@ const Abilities = {
                 return this.chainModify(0.5);
             }
         },
-        isBreakable: true, // TODO verify the assumption that this can be supprsed by Mold Breaker & friends
+        isBreakable: true,
         name: "Purifying Salt",
         rating: 4,
         num: 272,
@@ -4349,21 +4104,8 @@ const Abilities = {
         onTerrainChange(pokemon) {
             if (pokemon.transformed) return;
             if (this.field.isTerrain("electricterrain")) {
-                if (!pokemon.volatiles["quarkdrive"]) {
-                    this.add("-activate", pokemon, "ability: Quark Drive");
-                    pokemon.addVolatile("quarkdrive");
-                }
-            } else if (
-                !_optionalChain([
-                    pokemon,
-                    "access",
-                    (_38) => _38.volatiles,
-                    "access",
-                    (_39) => _39["quarkdrive"],
-                    "optionalAccess",
-                    (_40) => _40.fromBooster,
-                ])
-            ) {
+                pokemon.addVolatile("quarkdrive");
+            } else if (!pokemon.volatiles["quarkdrive"]?.fromBooster) {
                 pokemon.removeVolatile("quarkdrive");
             }
         },
@@ -4373,7 +4115,18 @@ const Abilities = {
         },
         condition: {
             noCopy: true,
-            onStart(pokemon) {
+            onStart(pokemon, source, effect) {
+                if (effect?.id === "boosterenergy") {
+                    this.effectState.fromBooster = true;
+                    this.add(
+                        "-activate",
+                        pokemon,
+                        "ability: Quark Drive",
+                        "[fromitem]"
+                    );
+                } else {
+                    this.add("-activate", pokemon, "ability: Quark Drive");
+                }
                 this.effectState.bestStat = pokemon.getBestStat(false, true);
                 this.add(
                     "-start",
@@ -4433,7 +4186,6 @@ const Abilities = {
             ) {
                 return;
             }
-
             const dazzlingHolder = this.effectState.target;
             if (
                 (source.isAlly(dazzlingHolder) || move.target === "all") &&
@@ -4638,7 +4390,6 @@ const Abilities = {
                 "Wacan Berry",
                 "Yache Berry",
             ];
-            // Record if the pokemon ate a berry to resist the attack
             pokemon.abilityState.berryWeaken = weakenBerries.includes(
                 item.name
             );
@@ -4665,7 +4416,6 @@ const Abilities = {
         num: 79,
     },
     rkssystem: {
-        // RKS System's type-changing itself is implemented in statuses.js
         isPermanent: true,
         name: "RKS System",
         rating: 4,
@@ -4922,16 +4672,7 @@ const Abilities = {
                     if (secondary.chance) secondary.chance *= 2;
                 }
             }
-            if (
-                _optionalChain([
-                    move,
-                    "access",
-                    (_41) => _41.self,
-                    "optionalAccess",
-                    (_42) => _42.chance,
-                ])
-            )
-                move.self.chance *= 2;
+            if (move.self?.chance) move.self.chance *= 2;
         },
         name: "Serene Grace",
         rating: 3.5,
@@ -4998,10 +4739,8 @@ const Abilities = {
         onModifyMove(move, pokemon) {
             if (move.secondaries) {
                 delete move.secondaries;
-                // Technically not a secondary effect, but it is negated
                 delete move.self;
                 if (move.id === "clangoroussoulblaze") delete move.selfBoost;
-                // Actual negation of `AfterMoveSecondary` effects implemented in scripts.js
                 move.hasSheerForce = true;
             }
         },
@@ -5070,9 +4809,7 @@ const Abilities = {
         onSetStatus(status, target, source, effect) {
             if (target.species.id !== "miniormeteor" || target.transformed)
                 return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_43) => _43.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Shields Down");
             }
             return false;
@@ -5298,7 +5035,6 @@ const Abilities = {
     stalwart: {
         onModifyMovePriority: 1,
         onModifyMove(move) {
-            // most of the implementation is in Battle#getTarget
             move.tracksTarget = move.target !== "scripted";
         },
         name: "Stalwart",
@@ -5676,8 +5412,6 @@ const Abilities = {
             if (effect && effect.id === "toxicspikes") return;
             if (status.id === "slp" || status.id === "frz") return;
             this.add("-activate", target, "ability: Synchronize");
-            // Hack to make status-prevention abilities think Synchronize is a status move
-            // and show messages when activating against it.
             source.trySetStatus(status, target, {
                 status: status.id,
                 id: "synchronize",
@@ -5695,22 +5429,11 @@ const Abilities = {
         onAnyModifyDef(def, target, source, move) {
             const abilityHolder = this.effectState.target;
             if (abilityHolder === target) return;
-            if (
-                !_optionalChain([
-                    move,
-                    "access",
-                    (_44) => _44.ruinedDef,
-                    "optionalAccess",
-                    (_45) => _45.hasAbility,
-                    "call",
-                    (_46) => _46("Sword of Ruin"),
-                ])
-            )
+            if (!move.ruinedDef?.hasAbility("Sword of Ruin"))
                 move.ruinedDef = abilityHolder;
             if (move.ruinedDef !== abilityHolder && move.ruinedDef !== target)
                 return;
             this.debug("Sword of Ruin Def drop");
-            // TODO Placeholder
             return this.chainModify(0.75);
         },
         name: "Sword of Ruin",
@@ -5728,7 +5451,6 @@ const Abilities = {
             if (!move.ruinedAtk) move.ruinedAtk = abilityHolder;
             if (move.ruinedAtk !== abilityHolder) return;
             this.debug("Tablets of Ruin Atk drop");
-            // TODO Placeholder
             return this.chainModify(0.75);
         },
         name: "Tablets of Ruin",
@@ -5739,15 +5461,7 @@ const Abilities = {
         onModifyAccuracyPriority: -1,
         onModifyAccuracy(accuracy, target) {
             if (typeof accuracy !== "number") return;
-            if (
-                _optionalChain([
-                    target,
-                    "optionalAccess",
-                    (_47) => _47.volatiles,
-                    "access",
-                    (_48) => _48["confusion"],
-                ])
-            ) {
+            if (target?.volatiles["confusion"]) {
                 this.debug("Tangled Feet - decreasing accuracy");
                 return this.chainModify(0.5);
             }
@@ -5820,9 +5534,7 @@ const Abilities = {
         },
         onSetStatus(status, target, source, effect) {
             if (status.id !== "brn") return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_49) => _49.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Thermal Exchange");
             }
             return false;
@@ -5924,8 +5636,6 @@ const Abilities = {
     },
     trace: {
         onStart(pokemon) {
-            // n.b. only affects Hackmons
-            // interaction with No Ability is complicated: https://www.smogon.com/forums/threads/pokemon-sun-moon-battle-mechanics-research.3586701/page-76#post-7790209
             if (
                 pokemon
                     .adjacentFoes()
@@ -5933,7 +5643,6 @@ const Abilities = {
             ) {
                 this.effectState.gaveUp = true;
             }
-            // interaction with Ability Shield is similar to No Ability
             if (pokemon.hasItem("Ability Shield")) {
                 this.add("-block", pokemon, "item: Ability Shield");
                 this.effectState.gaveUp = true;
@@ -5941,9 +5650,7 @@ const Abilities = {
         },
         onUpdate(pokemon) {
             if (!pokemon.isStarted || this.effectState.gaveUp) return;
-
             const additionalBannedAbilities = [
-                // Zen Mode included here for compatability with Gen 5-6
                 "noability",
                 "flowergift",
                 "forecast",
@@ -5959,12 +5666,11 @@ const Abilities = {
             const possibleTargets = pokemon
                 .adjacentFoes()
                 .filter(
-                    (target) =>
-                        !target.getAbility().isPermanent &&
-                        !additionalBannedAbilities.includes(target.ability)
+                    (target2) =>
+                        !target2.getAbility().isPermanent &&
+                        !additionalBannedAbilities.includes(target2.ability)
                 );
             if (!possibleTargets.length) return;
-
             const target = this.sample(possibleTargets);
             const ability = target.getAbility();
             if (pokemon.setAbility(ability)) {
@@ -6002,16 +5708,7 @@ const Abilities = {
     },
     triage: {
         onModifyPriority(priority, pokemon, target, move) {
-            if (
-                _optionalChain([
-                    move,
-                    "optionalAccess",
-                    (_50) => _50.flags,
-                    "access",
-                    (_51) => _51["heal"],
-                ])
-            )
-                return priority + 3;
+            if (move?.flags["heal"]) return priority + 3;
         },
         name: "Triage",
         rating: 3.5,
@@ -6022,7 +5719,7 @@ const Abilities = {
             pokemon.removeVolatile("truant");
             if (
                 pokemon.activeTurns &&
-                (pokemon.moveThisTurnResult !== undefined ||
+                (pokemon.moveThisTurnResult !== void 0 ||
                     !this.queue.willMove(pokemon))
             ) {
                 pokemon.addVolatile("truant");
@@ -6140,7 +5837,6 @@ const Abilities = {
             if (!move.ruinedSpA) move.ruinedSpA = abilityHolder;
             if (move.ruinedSpA !== abilityHolder) return;
             this.debug("Vessel of Ruin SpA drop");
-            // TODO Placeholder
             return this.chainModify(0.75);
         },
         name: "Vessel of Ruin",
@@ -6170,9 +5866,7 @@ const Abilities = {
         },
         onSetStatus(status, target, source, effect) {
             if (status.id !== "slp") return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_52) => _52.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Vital Spirit");
             }
             return false;
@@ -6211,7 +5905,6 @@ const Abilities = {
             ) {
                 return;
             }
-
             if (this.checkMoveMakesContact(move, source, target)) {
                 const targetCanBeSet = this.runEvent(
                     "SetAbility",
@@ -6297,9 +5990,7 @@ const Abilities = {
         },
         onSetStatus(status, target, source, effect) {
             if (status.id !== "brn") return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_53) => _53.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Water Bubble");
             }
             return false;
@@ -6328,9 +6019,7 @@ const Abilities = {
         },
         onSetStatus(status, target, source, effect) {
             if (status.id !== "brn") return;
-            if (
-                _optionalChain([effect, "optionalAccess", (_54) => _54.status])
-            ) {
+            if (effect?.status) {
                 this.add("-immune", target, "[from] ability: Water Veil");
             }
             return false;
@@ -6453,7 +6142,6 @@ const Abilities = {
         },
         name: "Wind Rider",
         rating: 3.5,
-        // We do not want Brambleghast to get Infiltrator in Randbats
         num: 274,
     },
     wonderguard: {
@@ -6512,7 +6200,7 @@ const Abilities = {
                 pokemon.hp > pokemon.maxhp / 2 &&
                 ["Zen", "Galar-Zen"].includes(pokemon.species.forme)
             ) {
-                pokemon.addVolatile("zenmode"); // in case of base Darmanitan-Zen
+                pokemon.addVolatile("zenmode");
                 pokemon.removeVolatile("zenmode");
             }
         },
@@ -6580,8 +6268,6 @@ const Abilities = {
         rating: 5,
         num: 278,
     },
-
-    // CAP
     mountaineer: {
         onDamage(damage, target, source, effect) {
             if (effect && effect.id === "stealthrock") {
@@ -6606,7 +6292,6 @@ const Abilities = {
         onTryHitPriority: 1,
         onTryHit(target, source, move) {
             if (this.effectState.target.activeTurns) return;
-
             if (
                 target === source ||
                 move.hasBounced ||
@@ -6621,7 +6306,6 @@ const Abilities = {
         },
         onAllyTryHitSide(target, source, move) {
             if (this.effectState.target.activeTurns) return;
-
             if (
                 target.isAlly(source) ||
                 move.hasBounced ||
@@ -6644,11 +6328,8 @@ const Abilities = {
     persistent: {
         isNonstandard: "CAP",
         name: "Persistent",
-        // implemented in the corresponding move
         rating: 3,
         num: -4,
     },
 };
-exports.Abilities = Abilities;
-
-//# sourceMappingURL=sourceMaps/abilities.js.map
+//# sourceMappingURL=abilities.js.map

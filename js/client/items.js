@@ -1,56 +1,48 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function _optionalChain(ops) {
-    let lastAccessLHS = undefined;
-    let value = ops[0];
-    let i = 1;
-    while (i < ops.length) {
-        const op = ops[i];
-        const fn = ops[i + 1];
-        i += 2;
-        if (
-            (op === "optionalAccess" || op === "optionalCall") &&
-            value == null
-        ) {
-            return undefined;
-        }
-        if (op === "access" || op === "optionalAccess") {
-            lastAccessLHS = value;
-            value = fn(value);
-        } else if (op === "call" || op === "optionalCall") {
-            value = fn((...args) => value.call(lastAccessLHS, ...args));
-            lastAccessLHS = undefined;
-        }
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+    for (var name in all)
+        __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+    if ((from && typeof from === "object") || typeof from === "function") {
+        for (let key of __getOwnPropNames(from))
+            if (!__hasOwnProp.call(to, key) && key !== except)
+                __defProp(to, key, {
+                    get: () => from[key],
+                    enumerable:
+                        !(desc = __getOwnPropDesc(from, key)) ||
+                        desc.enumerable,
+                });
     }
-    return value;
-}
+    return to;
+};
+var __toCommonJS = (mod) =>
+    __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var items_exports = {};
+__export(items_exports, {
+    Items: () => Items,
+});
+module.exports = __toCommonJS(items_exports);
 const Items = {
     abilityshield: {
         name: "Ability Shield",
-        spritenum: 0, // TODO
+        spritenum: 0,
         ignoreKlutz: true,
-        // Neutralizing Gas protection implemented in Pokemon.ignoringAbility() within sim/pokemon.ts
-        // and in Neutralizing Gas itself within data/abilities.ts
         onSetAbility(ability, target, source, effect) {
             if (
                 effect &&
                 effect.effectType === "Ability" &&
-                !_optionalChain([
-                    effect,
-                    "access",
-                    (_) => _.fullname,
-                    "optionalAccess",
-                    (_2) => _2.endsWith,
-                    "call",
-                    (_3) => _3("Trace"),
-                ])
+                !effect.fullname?.endsWith("Trace")
             ) {
                 this.add("-ability", source, effect);
             }
             this.add("-block", target, "item: Ability Shield");
             return null;
         },
-        // Mold Breaker protection implemented in Battle.suppressingAbility() within sim/battle.ts
         num: 1881,
         gen: 9,
     },
@@ -101,6 +93,33 @@ const Items = {
         num: 545,
         gen: 5,
     },
+    adamantcrystal: {
+        name: "Adamant Crystal",
+        spritenum: 4,
+        onBasePowerPriority: 15,
+        onBasePower(basePower, user, target, move) {
+            if (
+                user.baseSpecies.num === 483 &&
+                (move.type === "Steel" || move.type === "Dragon")
+            ) {
+                return this.chainModify([4915, 4096]);
+            }
+        },
+        onTakeItem(item, pokemon, source) {
+            if (
+                source?.baseSpecies.num === 483 ||
+                pokemon.baseSpecies.num === 483
+            ) {
+                return false;
+            }
+            return true;
+        },
+        forcedForme: "Dialga-Origin",
+        itemUser: ["Dialga-Origin"],
+        num: 1777,
+        gen: 8,
+        isNonstandard: "Unobtainable",
+    },
     adamantorb: {
         name: "Adamant Orb",
         spritenum: 4,
@@ -110,8 +129,7 @@ const Items = {
         onBasePowerPriority: 15,
         onBasePower(basePower, user, target, move) {
             if (
-                move &&
-                user.baseSpecies.name === "Dialga" &&
+                user.baseSpecies.num === 483 &&
                 (move.type === "Steel" || move.type === "Dragon")
             ) {
                 return this.chainModify([4915, 4096]);
@@ -232,7 +250,6 @@ const Items = {
                 this.add("-item", target, "Air Balloon");
             }
         },
-        // airborneness implemented in sim/pokemon.js:Pokemon#isGrounded
         onDamagingHit(damage, target, source, move) {
             this.add("-enditem", target, "Air Balloon");
             target.item = "";
@@ -411,7 +428,7 @@ const Items = {
     },
     auspiciousarmor: {
         name: "Auspicious Armor",
-        spritenum: 0, // TODO
+        spritenum: 0,
         num: 2344,
         gen: 9,
     },
@@ -433,7 +450,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -520,6 +536,7 @@ const Items = {
         },
         num: 1111,
         gen: 8,
+        isNonstandard: "Past",
     },
     bigroot: {
         name: "Big Root",
@@ -549,7 +566,6 @@ const Items = {
         fling: {
             basePower: 30,
         },
-        // implemented in statuses
         num: 544,
         gen: 5,
     },
@@ -636,10 +652,7 @@ const Items = {
         spritenum: 41,
         onSwitchIn(pokemon) {
             if (pokemon.isActive && pokemon.baseSpecies.name === "Kyogre") {
-                this.queue.insertChoice({
-                    choice: "runPrimal",
-                    pokemon: pokemon,
-                });
+                this.queue.insertChoice({ choice: "runPrimal", pokemon });
             }
         },
         onPrimal(pokemon) {
@@ -665,6 +678,7 @@ const Items = {
         onEat: false,
         num: 165,
         gen: 3,
+        isNonstandard: "Past",
     },
     blunderpolicy: {
         name: "Blunder Policy",
@@ -672,50 +686,29 @@ const Items = {
         fling: {
             basePower: 80,
         },
-        // Item activation located in scripts.js
         num: 1121,
         gen: 8,
     },
     boosterenergy: {
         name: "Booster Energy",
-        spritenum: 0, // TODO
+        spritenum: 0,
         onUpdate(pokemon) {
             if (pokemon.transformed) return;
+            if (this.queue.peek(true)?.choice === "runSwitch") return;
             if (
-                _optionalChain([
-                    this,
-                    "access",
-                    (_4) => _4.queue,
-                    "access",
-                    (_5) => _5.peek,
-                    "call",
-                    (_6) => _6(true),
-                    "optionalAccess",
-                    (_7) => _7.choice,
-                ]) === "runSwitch"
-            )
-                return;
-
-            function tryEnergyBoost(ability) {
-                if (
-                    pokemon.hasAbility(ability) &&
-                    !pokemon.getVolatile(ability) &&
-                    pokemon.useItem()
-                ) {
-                    this.add(
-                        "-activate",
-                        pokemon,
-                        `ability: ${this.dex.abilities.get(ability).name}`,
-                        "[fromitem]"
-                    );
-                    pokemon.addVolatile(ability);
-                    pokemon.volatiles[ability].fromBooster = true;
-                    return true;
-                }
+                pokemon.hasAbility("protosynthesis") &&
+                !this.field.isWeather("sunnyday") &&
+                pokemon.useItem()
+            ) {
+                pokemon.addVolatile("protosynthesis");
             }
-
-            if (tryEnergyBoost.call(this, "protosynthesis")) return;
-            tryEnergyBoost.call(this, "quarkdrive");
+            if (
+                pokemon.hasAbility("quarkdrive") &&
+                !this.field.isTerrain("electricterrain") &&
+                pokemon.useItem()
+            ) {
+                pokemon.addVolatile("quarkdrive");
+            }
         },
         onTakeItem(item, source) {
             if (source.baseSpecies.tags.includes("Paradox")) return false;
@@ -907,7 +900,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -1118,7 +1110,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -1142,7 +1133,7 @@ const Items = {
     },
     clearamulet: {
         name: "Clear Amulet",
-        spritenum: 0, // TODO
+        spritenum: 0,
         onBoost(boost, target, source, effect) {
             if (source && target === source) return;
             let showMsg = false;
@@ -1174,6 +1165,7 @@ const Items = {
         },
         num: 1112,
         gen: 8,
+        isNonstandard: "Past",
     },
     cobaberry: {
         name: "Coba Berry",
@@ -1193,7 +1185,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -1223,7 +1214,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -1263,7 +1253,7 @@ const Items = {
         fling: {
             basePower: 10,
         },
-        spritenum: 0, // TODO
+        spritenum: 0,
         onModifySecondaries(secondaries) {
             this.debug("Covert Cloak prevent secondary");
             return secondaries.filter(
@@ -1738,16 +1728,7 @@ const Items = {
             basePower: 50,
         },
         onAfterBoost(boost, target, source, effect) {
-            if (
-                _optionalChain([
-                    this,
-                    "access",
-                    (_8) => _8.activeMove,
-                    "optionalAccess",
-                    (_9) => _9.id,
-                ]) === "partingshot"
-            )
-                return;
+            if (this.activeMove?.id === "partingshot") return;
             let eject = false;
             let i;
             for (i in boost) {
@@ -1858,15 +1839,6 @@ const Items = {
         num: 779,
         gen: 7,
         isNonstandard: "Past",
-    },
-    energypowder: {
-        name: "Energy Powder",
-        spritenum: 123,
-        fling: {
-            basePower: 30,
-        },
-        num: 34,
-        gen: 2,
     },
     enigmaberry: {
         name: "Enigma Berry",
@@ -2196,6 +2168,7 @@ const Items = {
         },
         num: 1113,
         gen: 8,
+        isNonstandard: "Past",
     },
     flyinggem: {
         name: "Flying Gem",
@@ -2341,7 +2314,7 @@ const Items = {
         onFractionalPriority: -0.1,
         num: 316,
         gen: 4,
-        isNonstandard: "Unobtainable",
+        isNonstandard: "Past",
     },
     galaricacuff: {
         name: "Galarica Cuff",
@@ -2351,7 +2324,7 @@ const Items = {
         },
         num: 1582,
         gen: 8,
-        isNonstandard: "Past",
+        isNonstandard: "Unobtainable",
     },
     galaricawreath: {
         name: "Galarica Wreath",
@@ -2361,7 +2334,7 @@ const Items = {
         },
         num: 1592,
         gen: 8,
-        isNonstandard: "Past",
+        isNonstandard: "Unobtainable",
     },
     galladite: {
         name: "Galladite",
@@ -2617,9 +2590,35 @@ const Items = {
         fling: {
             basePower: 90,
         },
-        // implemented in statuses
         num: 286,
         gen: 4,
+    },
+    griseouscore: {
+        name: "Griseous Core",
+        spritenum: 180,
+        onBasePowerPriority: 15,
+        onBasePower(basePower, user, target, move) {
+            if (
+                user.baseSpecies.num === 487 &&
+                (move.type === "Ghost" || move.type === "Dragon")
+            ) {
+                return this.chainModify([4915, 4096]);
+            }
+        },
+        onTakeItem(item, pokemon, source) {
+            if (
+                source?.baseSpecies.num === 487 ||
+                pokemon.baseSpecies.num === 487
+            ) {
+                return false;
+            }
+            return true;
+        },
+        forcedForme: "Giratina-Origin",
+        itemUser: ["Giratina-Origin"],
+        num: 1779,
+        gen: 8,
+        isNonstandard: "Unobtainable",
     },
     griseousorb: {
         name: "Griseous Orb",
@@ -2636,17 +2635,7 @@ const Items = {
                 return this.chainModify([4915, 4096]);
             }
         },
-        onTakeItem(item, pokemon, source) {
-            if (
-                (source && source.baseSpecies.num === 487) ||
-                pokemon.baseSpecies.num === 487
-            ) {
-                return false;
-            }
-            return true;
-        },
-        forcedForme: "Giratina-Origin",
-        itemUser: ["Giratina-Origin"],
+        itemUser: ["Giratina"],
         num: 112,
         gen: 4,
         isNonstandard: "Unobtainable",
@@ -2729,7 +2718,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -2787,7 +2775,6 @@ const Items = {
         },
         num: 1120,
         gen: 8,
-        // Hazard Immunity implemented in moves.ts
     },
     helixfossil: {
         name: "Helix Fossil",
@@ -3009,7 +2996,6 @@ const Items = {
                 return;
             if (move.type === "Ground" && target.hasType("Flying")) return 0;
         },
-        // airborneness negation implemented in sim/pokemon.js:Pokemon#isGrounded
         onModifySpe(spe) {
             return this.chainModify(0.5);
         },
@@ -3097,7 +3083,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -3127,7 +3112,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -3299,7 +3283,7 @@ const Items = {
         },
         num: 255,
         gen: 3,
-        isNonstandard: "Unobtainable",
+        isNonstandard: "Past",
     },
     leafstone: {
         name: "Leaf Stone",
@@ -3485,14 +3469,12 @@ const Items = {
         fling: {
             basePower: 30,
         },
-        // implemented in the corresponding thing
         num: 269,
         gen: 4,
     },
     loadeddice: {
         name: "Loaded Dice",
-        spritenum: 0, // TODO
-        // partially implemented in sim/battle-actions.ts:BattleActions#hitStepMoveHitLoop
+        spritenum: 0,
         onModifyMove(move) {
             if (move.multiaccuracy) {
                 delete move.multiaccuracy;
@@ -3531,6 +3513,7 @@ const Items = {
         },
         num: 1110,
         gen: 8,
+        isNonstandard: "Past",
     },
     lucarionite: {
         name: "Lucarionite",
@@ -3622,6 +3605,33 @@ const Items = {
         gen: 2,
         isPokeball: true,
     },
+    lustrousglobe: {
+        name: "Lustrous Globe",
+        spritenum: 265,
+        onBasePowerPriority: 15,
+        onBasePower(basePower, user, target, move) {
+            if (
+                user.baseSpecies.num === 484 &&
+                (move.type === "Water" || move.type === "Dragon")
+            ) {
+                return this.chainModify([4915, 4096]);
+            }
+        },
+        onTakeItem(item, pokemon, source) {
+            if (
+                source?.baseSpecies.num === 484 ||
+                pokemon.baseSpecies.num === 484
+            ) {
+                return false;
+            }
+            return true;
+        },
+        forcedForme: "Palkia-Origin",
+        itemUser: ["Palkia-Origin"],
+        num: 1778,
+        gen: 8,
+        isNonstandard: "Unobtainable",
+    },
     lustrousorb: {
         name: "Lustrous Orb",
         spritenum: 265,
@@ -3631,8 +3641,7 @@ const Items = {
         onBasePowerPriority: 15,
         onBasePower(basePower, user, target, move) {
             if (
-                move &&
-                user.baseSpecies.name === "Palkia" &&
+                user.baseSpecies.num === 484 &&
                 (move.type === "Water" || move.type === "Dragon")
             ) {
                 return this.chainModify([4915, 4096]);
@@ -3673,6 +3682,7 @@ const Items = {
         },
         num: 215,
         gen: 3,
+        isNonstandard: "Past",
     },
     magmarizer: {
         name: "Magmarizer",
@@ -3682,6 +3692,7 @@ const Items = {
         },
         num: 323,
         gen: 4,
+        isNonstandard: "Past",
     },
     magnet: {
         name: "Magnet",
@@ -3759,7 +3770,7 @@ const Items = {
     },
     maliciousarmor: {
         name: "Malicious Armor",
-        spritenum: 0, // TODO
+        spritenum: 0,
         num: 1861,
         gen: 9,
     },
@@ -3983,6 +3994,7 @@ const Items = {
         itemUser: ["Ditto"],
         num: 257,
         gen: 2,
+        isNonstandard: "Past",
     },
     metronome: {
         name: "Metronome",
@@ -4173,27 +4185,11 @@ const Items = {
         fling: {
             basePower: 10,
         },
-        spritenum: 0, // TODO
+        spritenum: 0,
         onFoeAfterBoost(boost, target, source, effect) {
             if (
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_10) => _10.fullname,
-                    "optionalAccess",
-                    (_11) => _11.endsWith,
-                    "call",
-                    (_12) => _12("Opportunist"),
-                ]) ||
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_13) => _13.fullname,
-                    "optionalAccess",
-                    (_14) => _14.endsWith,
-                    "call",
-                    (_15) => _15("Mirror Herb"),
-                ])
+                effect?.fullname?.endsWith("Opportunist") ||
+                effect?.fullname?.endsWith("Mirror Herb")
             )
                 return;
             const boostPlus = {};
@@ -4386,7 +4382,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -4412,7 +4407,7 @@ const Items = {
         },
         num: 314,
         gen: 4,
-        isNonstandard: "Unobtainable",
+        isNonstandard: "Past",
     },
     oldamber: {
         name: "Old Amber",
@@ -4494,7 +4489,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -4524,7 +4518,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -4656,6 +4649,7 @@ const Items = {
         onEat: false,
         num: 168,
         gen: 3,
+        isNonstandard: "Past",
     },
     pinsirite: {
         name: "Pinsirite",
@@ -4844,7 +4838,7 @@ const Items = {
                 this.debug("power herb - remove charge turn for " + move.id);
                 this.attrLastMove("[still]");
                 this.addMove("-anim", pokemon, move.name, target);
-                return false; // skip charge turn
+                return false;
             }
         },
         name: "Power Herb",
@@ -4915,7 +4909,6 @@ const Items = {
         fling: {
             basePower: 30,
         },
-        // protective effect handled in Battle#checkMoveMakesContact
         num: 880,
         gen: 7,
     },
@@ -5001,14 +4994,15 @@ const Items = {
     },
     punchingglove: {
         name: "Punching Glove",
-        spritenum: 0, // TODO
+        spritenum: 0,
         onBasePowerPriority: 23,
         onBasePower(basePower, attacker, defender, move) {
             if (move.flags["punch"]) {
                 this.debug("Punching Glove boost");
-                return this.chainModify([4915, 4096]);
+                return this.chainModify([4506, 4096]);
             }
         },
+        onModifyMovePriority: 1,
         onModifyMove(move) {
             if (move.flags["punch"]) delete move.flags["contact"];
         },
@@ -5064,6 +5058,7 @@ const Items = {
         itemUser: ["Ditto"],
         num: 274,
         gen: 4,
+        isNonstandard: "Past",
     },
     rabutaberry: {
         name: "Rabuta Berry",
@@ -5190,7 +5185,6 @@ const Items = {
                 ) {
                     return;
                 }
-                // The item is used up even against a pokemon with Ingrain or that otherwise can't be forced out
                 if (target.useItem(source)) {
                     if (this.runEvent("DragOut", source, target, move)) {
                         source.forceSwitchFlag = true;
@@ -5206,10 +5200,7 @@ const Items = {
         spritenum: 390,
         onSwitchIn(pokemon) {
             if (pokemon.isActive && pokemon.baseSpecies.name === "Groudon") {
-                this.queue.insertChoice({
-                    choice: "runPrimal",
-                    pokemon: pokemon,
-                });
+                this.queue.insertChoice({ choice: "runPrimal", pokemon });
             }
         },
         onPrimal(pokemon) {
@@ -5239,6 +5230,7 @@ const Items = {
         },
         num: 1115,
         gen: 8,
+        isNonstandard: "Past",
     },
     rindoberry: {
         name: "Rindo Berry",
@@ -5258,7 +5250,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -5308,7 +5299,7 @@ const Items = {
         },
         num: 315,
         gen: 4,
-        isNonstandard: "Unobtainable",
+        isNonstandard: "Past",
     },
     rockmemory: {
         name: "Rock Memory",
@@ -5373,7 +5364,7 @@ const Items = {
         onAnyPseudoWeatherChange() {
             const pokemon = this.effectState.target;
             if (this.field.getPseudoWeather("trickroom")) {
-                pokemon.useItem();
+                pokemon.useItem(pokemon);
             }
         },
         boosts: {
@@ -5406,7 +5397,7 @@ const Items = {
         },
         num: 318,
         gen: 4,
-        isNonstandard: "Unobtainable",
+        isNonstandard: "Past",
     },
     roseliberry: {
         name: "Roseli Berry",
@@ -5426,7 +5417,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -5532,6 +5522,7 @@ const Items = {
         num: 5,
         gen: 1,
         isPokeball: true,
+        isNonstandard: "Unobtainable",
     },
     safetygoggles: {
         name: "Safety Goggles",
@@ -5666,7 +5657,7 @@ const Items = {
         },
         num: 254,
         gen: 3,
-        isNonstandard: "Unobtainable",
+        isNonstandard: "Past",
     },
     sharpbeak: {
         name: "Sharp Beak",
@@ -5772,7 +5763,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -6052,6 +6042,7 @@ const Items = {
         num: 499,
         gen: 2,
         isPokeball: true,
+        isNonstandard: "Unobtainable",
     },
     starfberry: {
         name: "Starf Berry",
@@ -6101,6 +6092,7 @@ const Items = {
         },
         num: 1114,
         gen: 8,
+        isNonstandard: "Past",
     },
     steelixite: {
         name: "Steelixite",
@@ -6198,9 +6190,8 @@ const Items = {
                 this.checkMoveMakesContact(move, source, target)
             ) {
                 const barb = target.takeItem();
-                if (!barb) return; // Gen 4 Multitype
+                if (!barb) return;
                 source.setItem(barb);
-                // no message for Sticky Barb changing hands
             }
         },
         num: 288,
@@ -6230,6 +6221,14 @@ const Items = {
         gen: 4,
         isNonstandard: "Unobtainable",
     },
+    strangeball: {
+        name: "Strange Ball",
+        spritenum: 303,
+        num: 1785,
+        gen: 8,
+        isPokeball: true,
+        isNonstandard: "Unobtainable",
+    },
     strawberrysweet: {
         name: "Strawberry Sweet",
         spritenum: 704,
@@ -6238,6 +6237,7 @@ const Items = {
         },
         num: 1109,
         gen: 8,
+        isNonstandard: "Past",
     },
     sunstone: {
         name: "Sun Stone",
@@ -6302,7 +6302,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -7499,7 +7498,6 @@ const Items = {
         fling: {
             basePower: 60,
         },
-        // Partially implemented in Pokemon.effectiveWeather() in sim/pokemon.ts
         onStart(pokemon) {
             if (!pokemon.ignoringItem()) return;
             if (
@@ -7674,7 +7672,7 @@ const Items = {
         },
         num: 317,
         gen: 4,
-        isNonstandard: "Unobtainable",
+        isNonstandard: "Past",
     },
     weaknesspolicy: {
         name: "Weakness Policy",
@@ -7838,7 +7836,6 @@ const Items = {
                     !move.flags["bypasssub"] &&
                     !(move.infiltrates && this.gen >= 6);
                 if (hitSub) return;
-
                 if (target.eatItem()) {
                     this.debug("-50% reduction");
                     this.add("-enditem", target, this.effect, "[weaken]");
@@ -7890,9 +7887,6 @@ const Items = {
         num: 276,
         gen: 4,
     },
-
-    // Gen 2 items
-
     berserkgene: {
         name: "Berserk Gene",
         spritenum: 388,
@@ -8176,9 +8170,6 @@ const Items = {
         gen: 2,
         isNonstandard: "Past",
     },
-
-    // CAP items
-
     crucibellite: {
         name: "Crucibellite",
         spritenum: 577,
@@ -8211,13 +8202,7 @@ const Items = {
         },
         onTakeItem(item, pokemon, source) {
             if (
-                _optionalChain([
-                    source,
-                    "optionalAccess",
-                    (_16) => _16.baseSpecies,
-                    "access",
-                    (_17) => _17.num,
-                ]) === -66 ||
+                source?.baseSpecies.num === -66 ||
                 pokemon.baseSpecies.num === -66
             ) {
                 return false;
@@ -8231,6 +8216,4 @@ const Items = {
         isNonstandard: "CAP",
     },
 };
-exports.Items = Items;
-
-//# sourceMappingURL=sourceMaps/items.js.map
+//# sourceMappingURL=items.js.map

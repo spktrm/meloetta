@@ -3742,21 +3742,9 @@
         "natDexTier": "UU"
     },
     "rillaboomgmax": { "isNonstandard": "Past", "tier": "Illegal" },
-    "scorbunny": {
-        "isNonstandard": "Unobtainable",
-        "tier": "Unreleased",
-        "natDexTier": "LC"
-    },
-    "raboot": {
-        "isNonstandard": "Unobtainable",
-        "tier": "Unreleased",
-        "natDexTier": "NFE"
-    },
-    "cinderace": {
-        "isNonstandard": "Unobtainable",
-        "tier": "Unreleased",
-        "natDexTier": "UU"
-    },
+    "scorbunny": { "tier": "LC" },
+    "raboot": { "tier": "NFE" },
+    "cinderace": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "UU" },
     "cinderacegmax": { "isNonstandard": "Past", "tier": "Illegal" },
     "sobble": {
         "isNonstandard": "Unobtainable",
