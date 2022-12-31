@@ -24902,8 +24902,7 @@
         "color": "White",
         "evos": ["Raboot"],
         "eggGroups": ["Field", "Human-Like"],
-        "tier": "Unreleased",
-        "isNonstandard": "Unobtainable"
+        "tier": "LC"
     },
     "raboot": {
         "num": 814,
@@ -24926,8 +24925,7 @@
         "evoLevel": 16,
         "evos": ["Cinderace"],
         "eggGroups": ["Field", "Human-Like"],
-        "tier": "Unreleased",
-        "isNonstandard": "Unobtainable"
+        "tier": "NFE"
     },
     "cinderace": {
         "num": 815,
@@ -24950,8 +24948,7 @@
         "evoLevel": 35,
         "eggGroups": ["Field", "Human-Like"],
         "canGigantamax": "G-Max Fireball",
-        "tier": "Unreleased",
-        "isNonstandard": "Unobtainable"
+        "tier": "OU"
     },
     "cinderacegmax": {
         "num": 815,

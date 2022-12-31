@@ -13,31 +13,52 @@ State = Dict[str, Union[str, Dict[str, Any], List[str]]]
 
 
 class ChoiceBuilder:
-    def __init__(self, room: BattleRoom, state: State):
+    def __init__(self, room: BattleRoom):
         self.room = room
-        self.state = state
-        controls = state["controls"]["controls"]
-        self.controls_html = BeautifulSoup(controls, "html.parser")
+        tier = room.get_js_attr("battle.tier")
+        self.gen = int(re.search(r"([0-9])", tier).group())
+        self.gametype = room.get_js_attr("battle.gameType")
 
-        self.isMega = any("mega" in choice for choice in state["choice"]["choices"])
-        self.isZMove = any("zmove" in choice for choice in state["choice"]["choices"])
-        self.isUltraBurst = any(
-            "ultra" in choice for choice in state["choice"]["choices"]
-        )
-        self.isDynamax = any(
-            "dynamax" in choice for choice in state["choice"]["choices"]
-        )
-        self.isTerastal = any(
-            "terastal" in choice for choice in state["choice"]["choices"]
-        )
+        controls = room.get_js_attr("controls.controls")
+        choices = room.get_js_attr("choice.choices")
+        choices = [c for c in choices if c is not None]
+        self.pos = len(choices)
 
-    def update(self, room: BattleRoom, state: State):
-        self.room = room
-        self.state = state
+        self.html = controls
+        self.soup = BeautifulSoup(controls, "html.parser")
+
+        self.isMega = any("mega" in choice for choice in choices)
+        self.isZMove = any("zmove" in choice for choice in choices)
+        self.isUltraBurst = any("ultra" in choice for choice in choices)
+        self.isDynamax = any("dynamax" in choice for choice in choices)
+        self.isTerastal = any("terastal" in choice for choice in choices)
+
+        choices = []
+        self.checkboxes = {
+            checkbox.find("input").attrs["name"]
+            for checkbox in self.soup.find_all("label")
+        }
 
     def get_choices(self):
-        teampreview = self.controls_html.find_all(attrs={"name": "chooseTeamPreview"})
-        teampreview = [
+        choices = []
+        choices += self.get_teampreview()
+        choices += self.get_moves()
+        choices += self.get_switches()
+        if self.gen == 8:
+            choices += self.get_max_moves()
+        if self.gen == 9:
+            choices += self.get_tera_moves()
+        if self.gen == 7:
+            choices += self.get_zmoves()
+        if self.gen == 7 or self.gen == 6:
+            choices += self.get_mega()
+        if self.gametype == "triples" and self.pos != 1:
+            choices += self.get_shifts()
+        return choices
+
+    def get_teampreview(self):
+        teampreview = self.soup.find_all(attrs={"name": "chooseTeamPreview"})
+        return [
             (
                 choice.attrs.get("data-tooltip"),
                 self.room.choose_team_preview,
@@ -47,10 +68,11 @@ class ChoiceBuilder:
             for choice in teampreview
         ]
 
-        reg_moves = self.controls_html.find_all(
+    def get_moves(self):
+        self.reg_moves = self.soup.find_all(
             attrs={"name": "chooseMove", "data-tooltip": re.compile(r"^move\|")}
         )
-        moves = [
+        return [
             (
                 choice.attrs.get("data-tooltip"),
                 self.room.choose_move,
@@ -64,13 +86,16 @@ class ChoiceBuilder:
                     "isTerastal": False,
                 },
             )
-            for choice in reg_moves
+            for choice in self.reg_moves
         ]
+
+    def get_max_moves(self):
+        max_moves = []
         if not self.isDynamax:
-            max_moves = self.controls_html.find_all(
+            max_moves = self.soup.find_all(
                 attrs={"name": "chooseMove", "data-tooltip": re.compile(r"^maxmove\|")}
             )
-            moves += [
+            max_moves = [
                 (
                     choice.attrs.get("data-tooltip"),
                     self.room.choose_move,
@@ -86,47 +111,76 @@ class ChoiceBuilder:
                 )
                 for choice in max_moves
             ]
-        z_moves = self.controls_html.find_all(
-            attrs={"name": "chooseMove", "data-tooltip": re.compile(r"^zmove\|")}
-        )
-        moves += [
-            (
-                choice.attrs.get("data-tooltip"),
-                self.room.choose_move,
-                [choice.attrs.get("value")],
-                {
-                    "target": choice.attrs.get("data-target"),
-                    "isMega": False,
-                    "isZMove": True,
-                    "isUltraBurst": False,
-                    "isDynamax": False,
-                    "isTerastal": False,
-                },
-            )
-            for choice in z_moves
-        ]
-        t_moves = self.controls_html.find_all(
-            attrs={"name": "chooseMove", "data-tooltip": re.compile(r"^terastal\|")}
-        )
-        moves += [
-            (
-                choice.attrs.get("data-tooltip"),
-                self.room.choose_move,
-                [choice.attrs.get("value")],
-                {
-                    "target": choice.attrs.get("data-target"),
-                    "isMega": False,
-                    "isZMove": False,
-                    "isUltraBurst": False,
-                    "isDynamax": False,
-                    "isTerastal": True,
-                },
-            )
-            for choice in t_moves
-        ]
+        return max_moves
 
-        move_targets = self.controls_html.find_all(attrs={"name": "chooseMoveTarget"})
-        move_targets = [
+    def get_mega(self):
+        if not self.isMega and "megaevo" in self.checkboxes:
+            mega_moves = self.soup.find_all(attrs={"name": "chooseMove"})
+            return [
+                (
+                    choice.attrs.get("data-tooltip"),
+                    self.room.choose_move,
+                    [choice.attrs.get("value")],
+                    {
+                        "target": choice.attrs.get("data-target"),
+                        "isMega": True,
+                        "isZMove": False,
+                        "isUltraBurst": False,
+                        "isDynamax": False,
+                        "isTerastal": False,
+                    },
+                )
+                for choice in mega_moves
+            ]
+
+    def get_zmoves(self):
+        z_moves = []
+        if not self.isZMove and "zmove" in self.checkboxes:
+            z_moves = self.soup.find_all(
+                attrs={"name": "chooseMove", "data-tooltip": re.compile(r"^zmove\|")}
+            )
+            z_moves = [
+                (
+                    choice.attrs.get("data-tooltip"),
+                    self.room.choose_move,
+                    [choice.attrs.get("value")],
+                    {
+                        "target": choice.attrs.get("data-target"),
+                        "isMega": False,
+                        "isZMove": True,
+                        "isUltraBurst": False,
+                        "isDynamax": False,
+                        "isTerastal": False,
+                    },
+                )
+                for choice in z_moves
+            ]
+            return z_moves
+
+    def get_tera_moves(self):
+        tera_moves = []
+        if not self.isTerastal and "terastallize" in self.checkboxes:
+            tera_moves = [
+                (
+                    choice.attrs.get("data-tooltip") + " tera",
+                    self.room.choose_move,
+                    [choice.attrs.get("value")],
+                    {
+                        "target": choice.attrs.get("data-target"),
+                        "isMega": False,
+                        "isZMove": False,
+                        "isUltraBurst": False,
+                        "isDynamax": False,
+                        "isTerastal": True,
+                    },
+                )
+                for choice in self.reg_moves
+            ]
+        return tera_moves
+
+    def get_move_targets(self):
+        move_targets = self.soup.find_all(attrs={"name": "chooseMoveTarget"})
+        return [
             (
                 choice.attrs.get("data-tooltip"),
                 self.room.choose_move_target,
@@ -136,8 +190,9 @@ class ChoiceBuilder:
             for choice in move_targets
         ]
 
-        switches = self.controls_html.find_all(attrs={"name": "chooseSwitch"})
-        switches = [
+    def get_switches(self):
+        switches = self.soup.find_all(attrs={"name": "chooseSwitch"})
+        return [
             (
                 choice.attrs.get("data-tooltip"),
                 self.room.choose_switch,
@@ -147,10 +202,9 @@ class ChoiceBuilder:
             for choice in switches
         ]
 
-        switch_targets = self.controls_html.find_all(
-            attrs={"name": "chooseSwitchTarget"}
-        )
-        switch_targets = [
+    def get_switch_targets(self):
+        switch_targets = self.soup.find_all(attrs={"name": "chooseSwitchTarget"})
+        return [
             (
                 choice.attrs.get("data-tooltip"),
                 self.room.choose_switch_target,
@@ -160,8 +214,9 @@ class ChoiceBuilder:
             for choice in switch_targets
         ]
 
-        shift = self.controls_html.find_all(attrs={"name": "chooseShift"})
-        shift = [
+    def get_shifts(self):
+        shift = self.soup.find_all(attrs={"name": "chooseShift"})
+        return [
             (
                 choice.attrs.get("data-tooltip"),
                 self.room.choose_shift,
@@ -170,8 +225,6 @@ class ChoiceBuilder:
             )
             for choice in shift
         ]
-
-        return teampreview + moves + move_targets + switches + switch_targets + shift
 
 
 class Player:
@@ -211,7 +264,7 @@ class Player:
         state = self.get_state()
         # action_required = state.get("controlsShown", False)
 
-        if "|turn" in data:
+        if any(prefix in data for prefix in {"|turn", "|teampreview"}):
             return True
 
         if "|request" not in data:
@@ -227,15 +280,11 @@ class Player:
         return self.state
 
     def get_vectorized_state(self):
-        state = self.room.get_state()
-        return VectorizedState.from_battle(self.room, state)
+        return VectorizedState.from_battle(self.room)
 
     def get_vectorized_choice(self):
         state = self.room.get_state()
-        return VectorizedState.from_battle(self.room, state)
+        return VectorizedState.from_battle(self.room)
 
     def get_choices(self):
-        return ChoiceBuilder(self.room, self.state).get_choices()
-
-    async def submit_choices(self, msg_list):
-        await self.client.send_message(self.room.battle_tag, msg_list)
+        return ChoiceBuilder(self.room).get_choices()

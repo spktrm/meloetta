@@ -1,3 +1,5 @@
+from meloetta.room import BattleRoom
+
 from typing import Union, NamedTuple, List, Dict, Any
 
 from meloetta.data import (
@@ -100,32 +102,32 @@ class State(NamedTuple):
 
 
 class VectorizedState:
-    def __init__(self, battle, state):
-        self.battle = battle
-        self.state = state
-        self.gen = self.state["dex"]["gen"]
+    def __init__(self, room: BattleRoom):
+        self.room = room
+        self.battle = room.get_battle()
+        self.gen = self.battle["dex"]["gen"]
 
     @classmethod
-    def from_battle(self, battle, state):
-        vstate = VectorizedState(battle, state)
+    def from_battle(self, room: BattleRoom):
+        vstate = VectorizedState(room)
         return vstate.vectorize()
 
     def vectorize(self):
         p1, p2 = self._vectorize_sides()
         pseudoweathers = [
             (get_pseudoweather_token(to_id(pseudoweather)), t1, t2)
-            for pseudoweather, t1, t2 in self.state["pseudoWeather"]
+            for pseudoweather, t1, t2 in self.battle["pseudoWeather"]
         ]
         return State(
             p1=p1,
             p2=p2,
-            last_move=self.state["lastMove"],
-            weather=get_weather_token(self.state["weather"]),
-            weather_time_left=self.state["weatherTimeLeft"],
-            weather_min_time_left=self.state["weatherMinTimeLeft"],
+            last_move=self.battle["lastMove"],
+            weather=get_weather_token(self.battle["weather"]),
+            weather_time_left=self.battle["weatherTimeLeft"],
+            weather_min_time_left=self.battle["weatherMinTimeLeft"],
             pseudo_weather=pseudoweathers,
-            turn=self.state["turn"],
-            log=self.state["stepQueue"],
+            turn=self.battle["turn"],
+            log=self.battle["stepQueue"],
         )
 
     def _vectorize_sides(self):
@@ -134,7 +136,7 @@ class VectorizedState:
         return p1, p2
 
     def _vectorize_side(self, side_id: str):
-        side = self.state[side_id]
+        side = self.battle[side_id]
         active = [self._vectorize_public_active_pokemon(p) for p in side["active"]]
         reserve = [self._vectorize_public_reserve_pokemon(p) for p in side["pokemon"]]
         return Side(

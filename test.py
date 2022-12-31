@@ -3,14 +3,15 @@ import asyncio
 
 import multiprocessing as mp
 
-from meloetta.player import Player
 from typing import Any
 from tqdm import tqdm
 
+from meloetta.player import Player
+from meloetta.room import BattleRoom
 
-def waiting_for_opp(battle):
-    state = battle.get_state()
-    controls = state["controls"]["controls"]
+
+def waiting_for_opp(room: BattleRoom):
+    controls = room.get_js_attr("controls.controls")
     return (
         "Waiting for opponent" in controls or " will switch in, replacing" in controls
     )
@@ -53,12 +54,11 @@ class SelfPlayWorker:
 
         battle_format = "gen3randombattle"
         team = "null"
-        # battle_format = "gen8ou"
+        # battle_format = "gen9doublesou"
         # team = "Charizard||HeavyDutyBoots|Blaze|hurricane,fireblast,toxic,roost||85,,85,85,85,85||,0,,,,||88|]Venusaur||BlackSludge|Chlorophyll|leechseed,substitute,sleeppowder,sludgebomb||85,,85,85,85,85||,0,,,,||82|]Blastoise||WhiteHerb|Torrent|shellsmash,earthquake,icebeam,hydropump||85,85,85,85,85,85||||86|"
+        # team = "Ceruledge||LifeOrb|WeakArmor|bitterblade,closecombat,shadowsneak,swordsdance||85,85,85,85,85,85||||82|,,,,,Fighting]Grafaiai||Leftovers|Prankster|encore,gunkshot,knockoff,partingshot||85,85,85,85,85,85||||86|,,,,,Dark]Greedent||SitrusBerry|CheekPouch|bodyslam,psychicfangs,swordsdance,firefang||85,85,85,85,85,85||||88|,,,,,Psychic]Quaquaval||LifeOrb|Moxie|aquastep,closecombat,swordsdance,icespinner||85,85,85,85,85,85||||80|,,,,,Fighting]Flapple||LifeOrb|Hustle|gravapple,outrage,dragondance,suckerpunch||85,85,85,85,85,85||||84|,,,,,Grass]Pachirisu||AssaultVest|VoltAbsorb|nuzzle,superfang,thunderbolt,uturn||85,85,85,85,85,85||||94|,,,,,Flying"
 
-        num_games = range(100)
-        progress = tqdm(num_games) if player_index == 0 else num_games
-        for _ in progress:  # 10 battles each player-player pair
+        for _ in range(100):  # 10 battles each player-player pair
             if player_index % 2 == 0:
                 await player.client.challenge_user(
                     f"p{player_index + 1}", battle_format, team
@@ -70,39 +70,46 @@ class SelfPlayWorker:
                 message = await player.client.receive_message()
                 action_required = await player.recieve(message)
                 if "|error" in message:
+                    # print(message)
+                    # edge case for handling when the pokemon is trapped
                     if "Can't switch: The active Pokémon is trapped" in message:
                         message = await player.client.receive_message()
                         action_required = await player.recieve(message)
                         action_required = True
-                    else:
-                        print(message)
+
+                    # for some reason, disabled max moves are being selected
+                    elif "Can't move" in message:
+                        print()
 
                 while (
                     action_required
-                    and not waiting_for_opp(player)
-                    and not player.state["battle"]["ended"]
+                    and not waiting_for_opp(player.room)
+                    and not player.room.get_js_attr("battle.ended")
                 ):
+                    vstate = player.get_vectorized_state()
                     choices = player.get_choices()
                     _, func, args, kwargs = random.choice(choices)
                     func(*args, **kwargs)
 
-                outgoing_message = player.state.get("outgoing_message", "")
+                outgoing_message = player.room.get_js_attr("outgoing_message")
                 if outgoing_message:
                     player.room.pop_outgoing()
                     await player.client.websocket.send(
                         player.room.battle_tag + "|" + outgoing_message
                     )
 
-                if player.state["battle"].get("ended", False):
+                if player.room.get_js_attr("battle.ended"):
                     await player.client.leave_battle(player.room.battle_tag)
                     player.reset()
                     break
+
+        print(f"{username} done")
 
 
 def main():
     procs = []
     for i in range(20):  # num workes (check with os.cpu_count())
-        worker = SelfPlayWorker(i, 1)  # 2 is players per worker
+        worker = SelfPlayWorker(i, 2)  # 2 is players per worker
         # This config will spawn 20 workers with 2 players each
         # for a total of 40 players, playing 20 games.
         # it is recommended to have an even number of players per worker

@@ -1,3 +1,4 @@
+import re
 import json
 
 from typing import Union, Dict, Any, List
@@ -81,63 +82,77 @@ class BattleRoom:
         for file in SRC:
             with open(file, "r", encoding="utf-8") as f:
                 file_src = f.read()
-            self._ctx.eval(file_src)
+            try:
+                modules = re.findall(r"(module\.exports \= .*)", file_src)
+                for module in modules:
+                    file_src = file_src.replace(module, "")
+                self._ctx.eval(file_src)
+            except Exception as e:
+                print(e)
+                print(file)
+                exit()
         self._ctx.eval("engine.start()")
 
     def recieve(self, data: str = ""):
         return self._ctx.execute("engine.receive({})".format(json.dumps(data)))
 
-    # def __getattribute__(self, __name: str) -> Any:
-    #     tier1, *_ = __name.split(".")
-    #     if tier1 not in ["_load_js", "_ctx", "_battle_tag"]:
-    #         return self._ctx.execute(f"engine.client.{__name}")
-    #     else:
-    #         return super().__getattribute__(__name)
+    def get_js_attr(self, attr: str):
+        return self._ctx.execute(f"engine.client.{attr}")
+
+    def get_battle(self, raw: bool = False):
+        battle = self._ctx.execute("serialize(engine.client.battle)")
+        if not raw:
+            battle = deserialize(battle)
+        return battle
 
     def add(self, data: str = ""):
-        return self._ctx.call("engine.add", data)
+        return self._call("engine.add", data)
+
+    def _call(self, cmd, *args):
+        js = cmd + "({})".format(json.dumps(args)[1:-1])
+        return self._ctx.execute(js)
 
     def instantAdd(self, data: str):
-        return self._ctx.call("engine.instandAdd", data)
+        return self._call("engine.instandAdd", data)
 
     def push_to_step_queue(self, data: str):
-        return self._ctx.call("engine.addToStepQueue", data)
+        return self._call("engine.addToStepQueue", data)
 
     def seek_turn(self, turn: int, force_reset: bool):
-        return self._ctx.call("engine.seekTurn", turn, force_reset)
+        return self._call("engine.seekTurn", turn, force_reset)
 
     def setPerspective(self, sideid: str):
-        return self._ctx.call("engine.setPerspective", sideid)
+        return self._call("engine.setPerspective", sideid)
 
     def parsePokemonId(self, pokemonid: str):
-        return self._ctx.call("engine.parsePokemonId", pokemonid)
+        return self._call("engine.parsePokemonId", pokemonid)
 
     def getPokemon(self, pokemonid: str):
-        return self._ctx.call("engine.getPokemon", pokemonid)
+        return self._call("engine.getPokemon", pokemonid)
 
     def fixRequest(self, request):
-        return self._ctx.call("engine.fixRequest", request)
+        return self._call("engine.fixRequest", request)
 
     def get_choices(self, request):
-        return self._ctx.call("engine.getChoices", request)
+        return self._call("engine.getChoices", request)
 
     def get_species(self, species):
-        return self._ctx.call("engine.getSpecies", species)
+        return self._call("engine.getSpecies", species)
 
     def get_move(self, move):
-        return self._ctx.call("engine.getMove", move)
+        return self._call("engine.getMove", move)
 
     def get_item(self, item):
-        return self._ctx.call("engine.getItem", item)
+        return self._call("engine.getItem", item)
 
     def get_ability(self, ability):
-        return self._ctx.call("engine.getAbility", ability)
+        return self._call("engine.getAbility", ability)
 
     def get_type(self, type):
-        return self._ctx.call("engine.getType", type)
+        return self._call("engine.getType", type)
 
     def set_gen(self, gen):
-        return self._ctx.call("engine.setGen", gen)
+        return self._call("engine.setGen", gen)
 
     def reset(self):
         self._ctx.eval("engine.reset()")
@@ -193,3 +208,11 @@ class BattleRoom:
     @property
     def battle_tag(self):
         return self._battle_tag
+
+
+def main():
+    room = BattleRoom()
+
+
+if __name__ == "__main__":
+    main()

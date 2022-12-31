@@ -1,5 +1,32 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+    for (var name in all)
+        __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+    if ((from && typeof from === "object") || typeof from === "function") {
+        for (let key of __getOwnPropNames(from))
+            if (!__hasOwnProp.call(to, key) && key !== except)
+                __defProp(to, key, {
+                    get: () => from[key],
+                    enumerable:
+                        !(desc = __getOwnPropDesc(from, key)) ||
+                        desc.enumerable,
+                });
+    }
+    return to;
+};
+var __toCommonJS = (mod) =>
+    __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var pokedex_exports = {};
+__export(pokedex_exports, {
+    Pokedex: () => Pokedex,
+});
+module.exports = __toCommonJS(pokedex_exports);
 const Pokedex = {
     bulbasaur: {
         num: 1,
@@ -565,15 +592,15 @@ const Pokedex = {
             "Pikachu-Unova",
             "Pikachu-Kalos",
             "Pikachu-Alola",
-            "Pikachu-Partner", // Gen 7 formes
-            "Pikachu-Starter", // forme 8 in LGPE
-            "Pikachu-World", // Gen 8 forme (indexed as Pikachu 9 in datamine)
+            "Pikachu-Partner",
+            "Pikachu-Starter",
+            "Pikachu-World",
             "Pikachu-Rock-Star",
             "Pikachu-Belle",
             "Pikachu-Pop-Star",
             "Pikachu-PhD",
             "Pikachu-Libre",
-            "Pikachu-Cosplay", // formes 1-6 from Gen 6
+            "Pikachu-Cosplay",
         ],
         canGigantamax: "G-Max Volt Crash",
     },
@@ -8752,6 +8779,8 @@ const Pokedex = {
         weightkg: 850,
         color: "White",
         eggGroups: ["Undiscovered"],
+        requiredItem: "Adamant Crystal",
+        changesFrom: "Dialga",
         gen: 8,
     },
     palkia: {
@@ -8782,6 +8811,8 @@ const Pokedex = {
         weightkg: 660,
         color: "Purple",
         eggGroups: ["Undiscovered"],
+        requiredItem: "Lustrous Globe",
+        changesFrom: "Palkia",
         gen: 8,
     },
     heatran: {
@@ -8838,7 +8869,7 @@ const Pokedex = {
         weightkg: 650,
         color: "Black",
         eggGroups: ["Undiscovered"],
-        requiredItem: "Griseous Orb",
+        requiredItem: "Griseous Core",
         changesFrom: "Giratina",
     },
     cresselia: {
@@ -12028,7 +12059,6 @@ const Pokedex = {
         evoLevel: 36,
         eggGroups: ["Water 1"],
         otherFormes: ["Greninja-Ash"],
-        // non-activated Greninja-Ash is forme 1, but PS does not currently distinguish it
         formeOrder: ["Greninja", "Greninja", "Greninja-Ash"],
     },
     greninjaash: {
@@ -12123,7 +12153,6 @@ const Pokedex = {
         color: "Black",
         evos: ["Spewpa"],
         eggGroups: ["Bug"],
-        // TODO: Scatterbug technically has the same number of formes as Vivillon
     },
     spewpa: {
         num: 665,
@@ -12138,12 +12167,11 @@ const Pokedex = {
         evoLevel: 9,
         evos: ["Vivillon", "Vivillon-Fancy"],
         eggGroups: ["Bug"],
-        // TODO: Spewpa technically has the same number of formes as Vivillon
     },
     vivillon: {
         num: 666,
         name: "Vivillon",
-        baseForme: "Meadow", // TODO: actual base forme is Icy Snow, not Meadow
+        baseForme: "Meadow",
         types: ["Bug", "Flying"],
         baseStats: { hp: 80, atk: 52, def: 50, spa: 90, spd: 50, spe: 89 },
         abilities: { 0: "Shield Dust", 1: "Compound Eyes", H: "Friend Guard" },
@@ -12180,7 +12208,7 @@ const Pokedex = {
             "Vivillon-Continental",
             "Vivillon-Garden",
             "Vivillon-Elegant",
-            "Vivillon", // Meadow
+            "Vivillon",
             "Vivillon-Modern",
             "Vivillon-Marine",
             "Vivillon-Archipelago",
@@ -13133,7 +13161,7 @@ const Pokedex = {
     xerneas: {
         num: 716,
         name: "Xerneas",
-        baseForme: "Active", // Neutral is technically the base, but it can't be used in battle
+        baseForme: "Active",
         types: ["Fairy"],
         gender: "N",
         baseStats: { hp: 126, atk: 131, def: 95, spa: 131, spd: 98, spe: 99 },
@@ -13187,7 +13215,6 @@ const Pokedex = {
         tags: ["Restricted Legendary"],
         eggGroups: ["Undiscovered"],
         otherFormes: ["Zygarde-10%", "Zygarde-Complete"],
-        // forme 2 = 10% with Power Constructor ,forme 3 = 50% with Power Construct
         formeOrder: [
             "Zygarde",
             "Zygarde-10%",
@@ -13604,8 +13631,8 @@ const Pokedex = {
         weightkg: 180,
         color: "White",
         prevo: "Crabrawler",
-        evoType: "levelExtra",
-        evoCondition: "at Mount Lanakila",
+        evoType: "useItem",
+        evoItem: "Ice Stone",
         eggGroups: ["Water 3"],
     },
     oricorio: {
@@ -13730,7 +13757,7 @@ const Pokedex = {
         color: "Brown",
         evos: ["Lycanroc", "Lycanroc-Midnight", "Lycanroc-Dusk"],
         eggGroups: ["Field"],
-        formeOrder: ["Rockruff", "Rockruff"], // TODO: Rockruff-Dusk
+        formeOrder: ["Rockruff", "Rockruff"],
     },
     lycanroc: {
         num: 745,
@@ -14534,7 +14561,6 @@ const Pokedex = {
             "Minior-Violet",
         ],
         formeOrder: [
-            // All of the colored Minior Meteor formes (unsupported by PS) are numbers 0-6
             "Minior-Meteor",
             "Minior-Meteor",
             "Minior-Meteor",
@@ -17046,7 +17072,7 @@ const Pokedex = {
         weightkg: 43,
         color: "Purple",
         prevo: "Sneasel-Hisui",
-        evoType: "useItem",
+        evoType: "levelHold",
         evoItem: "Razor Claw",
         evoCondition: "during the day",
         eggGroups: ["Field"],
@@ -17795,7 +17821,6 @@ const Pokedex = {
         prevo: "Capsakid",
         evoType: "useItem",
         evoItem: "Fire Stone",
-        evoLevel: 30,
         eggGroups: ["Grass"],
     },
     rellor: {
@@ -18456,7 +18481,7 @@ const Pokedex = {
         eggGroups: ["Undiscovered"],
     },
     gholdengo: {
-        num: 1000,
+        num: 1e3,
         name: "Gholdengo",
         types: ["Steel", "Ghost"],
         gender: "N",
@@ -18467,7 +18492,7 @@ const Pokedex = {
         color: "Yellow",
         prevo: "Gimmighoul",
         evoType: "other",
-        evoCondition: "Give 999 Coins",
+        evoCondition: "Level up with 999 Coins in the bag",
         eggGroups: ["Undiscovered"],
     },
     wochien: {
@@ -19575,9 +19600,8 @@ const Pokedex = {
         eggGroups: ["Field"],
         gen: 8,
     },
-    // NOTE: PokeStar "formes" are not actually formes and thus do not have a formeOrder
     pokestarsmeargle: {
-        num: -5000,
+        num: -5e3,
         name: "Pokestar Smeargle",
         types: ["Normal"],
         baseStats: { hp: 55, atk: 20, def: 35, spa: 20, spd: 45, spe: 75 },
@@ -19927,6 +19951,4 @@ const Pokedex = {
         gen: 5,
     },
 };
-exports.Pokedex = Pokedex;
-
-//# sourceMappingURL=sourceMaps/pokedex.js.map
+//# sourceMappingURL=pokedex.js.map

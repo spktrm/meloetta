@@ -57,8 +57,8 @@ var engine = {
     },
 
     serialize: function () {
-        serialized_state = serialize(this.client)
-        delete serialized_state.battle.stepQueue;
+        serialized_state = serialize(this.client);
+        // delete serialized_state.battle.stepQueue;
         return serialized_state;
     },
 
@@ -88,27 +88,43 @@ var engine = {
     // Choices
 
     chooseMoveTarget: function (posString) {
-        return this.client.chooseMoveTarget(posString)
+        return this.client.chooseMoveTarget(posString);
     },
 
-    chooseMove: function (pos, target, isMega, isZMove, isUltraBurst, isDynamax, isTerastal) {
-        return this.client.chooseMove(pos, target, isMega, isZMove, isUltraBurst, isDynamax, isTerastal)
+    chooseMove: function (
+        pos,
+        target,
+        isMega,
+        isZMove,
+        isUltraBurst,
+        isDynamax,
+        isTerastal
+    ) {
+        return this.client.chooseMove(
+            pos,
+            target,
+            isMega,
+            isZMove,
+            isUltraBurst,
+            isDynamax,
+            isTerastal
+        );
     },
 
     chooseShift: function () {
-        return this.client.chooseShift()
+        return this.client.chooseShift();
     },
 
     chooseSwitch: function (pos) {
-        return this.client.chooseSwitch(pos)
+        return this.client.chooseSwitch(pos);
     },
 
     chooseSwitchTarget: function (pos) {
-        return this.client.chooseSwitchTarget(pos)
+        return this.client.chooseSwitchTarget(pos);
     },
 
     chooseTeamPreview: function (pos) {
-        return this.client.chooseTeamPreview(pos)
+        return this.client.chooseTeamPreview(pos);
     },
 
     popOutgoing: function () {

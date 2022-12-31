@@ -2967,6 +2967,7 @@
         "name": "Punching Glove",
         "spritenum": 0,
         "onBasePowerPriority": 23,
+        "onModifyMovePriority": 1,
         "num": 1884,
         "gen": 9,
         "desc": "Holder's punch-based attacks have 1.1x power and do not make contact."

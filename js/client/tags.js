@@ -1,9 +1,33 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+    for (var name in all)
+        __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+    if ((from && typeof from === "object") || typeof from === "function") {
+        for (let key of __getOwnPropNames(from))
+            if (!__hasOwnProp.call(to, key) && key !== except)
+                __defProp(to, key, {
+                    get: () => from[key],
+                    enumerable:
+                        !(desc = __getOwnPropDesc(from, key)) ||
+                        desc.enumerable,
+                });
+    }
+    return to;
+};
+var __toCommonJS = (mod) =>
+    __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var tags_exports = {};
+__export(tags_exports, {
+    Tags: () => Tags,
+});
+module.exports = __toCommonJS(tags_exports);
 const Tags = {
-    // Categories
-    // ----------
     physical: {
         name: "Physical",
         desc: "Move deals damage with the Attack and Defense stats.",
@@ -19,9 +43,6 @@ const Tags = {
         desc: "Move does not deal damage.",
         moveFilter: (move) => move.category === "Status",
     },
-
-    // Pokemon tags
-    // ------------
     mega: {
         name: "Mega",
         speciesFilter: (species) => !!species.isMega,
@@ -43,9 +64,6 @@ const Tags = {
         name: "Paradox",
         speciesFilter: (species) => species.tags.includes("Paradox"),
     },
-
-    // Move tags
-    // ---------
     zmove: {
         name: "Z-Move",
         moveFilter: (move) => !!move.isZ,
@@ -61,12 +79,12 @@ const Tags = {
     },
     sound: {
         name: "Sound",
-        desc: "Doesn't affect Soundproof Pokémon. (All sound moves also bypass Substitute.)",
+        desc: "Doesn't affect Soundproof Pok\xE9mon. (All sound moves also bypass Substitute.)",
         moveFilter: (move) => "sound" in move.flags,
     },
     powder: {
         name: "Powder",
-        desc: "Doesn't affect Grass-type Pokémon, Overcoat Pokémon, or Safety Goggles holders.",
+        desc: "Doesn't affect Grass-type Pok\xE9mon, Overcoat Pok\xE9mon, or Safety Goggles holders.",
         moveFilter: (move) => "powder" in move.flags,
     },
     fist: {
@@ -86,7 +104,7 @@ const Tags = {
     },
     ballistic: {
         name: "Ballistic",
-        desc: "Doesn't affect Bulletproof Pokémon.",
+        desc: "Doesn't affect Bulletproof Pok\xE9mon.",
         moveFilter: (move) => "bullet" in move.flags,
     },
     bypassprotect: {
@@ -125,9 +143,6 @@ const Tags = {
         name: "G-Max Move",
         moveFilter: (move) => typeof move.isMax === "string",
     },
-
-    // Tiers
-    // -----
     uber: {
         name: "Uber",
         speciesFilter: (species) =>
@@ -201,9 +216,6 @@ const Tags = {
         name: "AG",
         speciesFilter: (species) => species.tier === "AG",
     },
-
-    // Doubles tiers
-    // -------------
     duber: {
         name: "DUber",
         speciesFilter: (species) =>
@@ -227,9 +239,10 @@ const Tags = {
         name: "DNU",
         speciesFilter: (species) => species.doublesTier === "(DUU)",
     },
-
-    // Nat Dex tiers
-    // -------------
+    ndag: {
+        name: "ND AG",
+        speciesFilter: (species) => species.natDexTier === "AG",
+    },
     nduber: {
         name: "ND Uber",
         speciesFilter: (species) =>
@@ -256,8 +269,6 @@ const Tags = {
         name: "ND RU",
         speciesFilter: (species) => species.natDexTier === "RU",
     },
-
-    // Legality tags
     past: {
         name: "Past",
         genericFilter: (thing) => thing.isNonstandard === "Past",
@@ -287,14 +298,10 @@ const Tags = {
         genericFilter: (thing) =>
             !!thing.isNonstandard && thing.isNonstandard !== "Unobtainable",
     },
-
-    // filter columns
-    // --------------
     introducedgen: {
         name: "Introduced Gen",
         genericNumCol: (thing) => thing.gen,
     },
-
     height: {
         name: "Height",
         speciesNumCol: (species) => species.heightm,
@@ -338,7 +345,6 @@ const Tags = {
         desc: "Base Stat Total",
         speciesNumCol: (species) => species.bst,
     },
-
     basepower: {
         name: "Base Power",
         moveNumCol: (move) => move.basePower,
@@ -356,6 +362,4 @@ const Tags = {
         moveNumCol: (move) => move.pp,
     },
 };
-exports.Tags = Tags;
-
-//# sourceMappingURL=sourceMaps/tags.js.map
+//# sourceMappingURL=tags.js.map

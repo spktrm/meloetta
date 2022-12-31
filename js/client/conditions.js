@@ -1,29 +1,32 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function _optionalChain(ops) {
-    let lastAccessLHS = undefined;
-    let value = ops[0];
-    let i = 1;
-    while (i < ops.length) {
-        const op = ops[i];
-        const fn = ops[i + 1];
-        i += 2;
-        if (
-            (op === "optionalAccess" || op === "optionalCall") &&
-            value == null
-        ) {
-            return undefined;
-        }
-        if (op === "access" || op === "optionalAccess") {
-            lastAccessLHS = value;
-            value = fn(value);
-        } else if (op === "call" || op === "optionalCall") {
-            value = fn((...args) => value.call(lastAccessLHS, ...args));
-            lastAccessLHS = undefined;
-        }
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+    for (var name in all)
+        __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+    if ((from && typeof from === "object") || typeof from === "function") {
+        for (let key of __getOwnPropNames(from))
+            if (!__hasOwnProp.call(to, key) && key !== except)
+                __defProp(to, key, {
+                    get: () => from[key],
+                    enumerable:
+                        !(desc = __getOwnPropDesc(from, key)) ||
+                        desc.enumerable,
+                });
     }
-    return value;
-}
+    return to;
+};
+var __toCommonJS = (mod) =>
+    __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var conditions_exports = {};
+__export(conditions_exports, {
+    Conditions: () => Conditions,
+});
+module.exports = __toCommonJS(conditions_exports);
 const Conditions = {
     brn: {
         name: "brn",
@@ -43,7 +46,6 @@ const Conditions = {
                 this.add("-status", target, "brn");
             }
         },
-        // Damage reduction is handled directly in the sim/battle.js damage function
         onResidualOrder: 10,
         onResidual(pokemon) {
             this.damage(pokemon.baseMaxhp / 16);
@@ -66,7 +68,6 @@ const Conditions = {
             }
         },
         onModifySpe(spe, pokemon) {
-            // Paralysis occurs after all other Speed modifiers, so evaluate all modifiers up to this point first
             spe = this.finalModify(spe);
             if (!pokemon.hasAbility("quickfeet")) {
                 spe = Math.floor((spe * 50) / 100);
@@ -103,10 +104,8 @@ const Conditions = {
             } else {
                 this.add("-status", target, "slp");
             }
-            // 1-3 turns
             this.effectState.startTime = this.random(2, 5);
             this.effectState.time = this.effectState.startTime;
-
             if (target.removeVolatile("nightmare")) {
                 this.add("-end", target, "Nightmare", "[silent]");
             }
@@ -233,27 +232,13 @@ const Conditions = {
     },
     confusion: {
         name: "confusion",
-        // this is a volatile status
         onStart(target, source, sourceEffect) {
-            if (
-                _optionalChain([
-                    sourceEffect,
-                    "optionalAccess",
-                    (_) => _.id,
-                ]) === "lockedmove"
-            ) {
+            if (sourceEffect?.id === "lockedmove") {
                 this.add("-start", target, "confusion", "[fatigue]");
             } else {
                 this.add("-start", target, "confusion");
             }
-            const min =
-                _optionalChain([
-                    sourceEffect,
-                    "optionalAccess",
-                    (_2) => _2.id,
-                ]) === "axekick"
-                    ? 3
-                    : 2;
+            const min = sourceEffect?.id === "axekick" ? 3 : 2;
             this.effectState.time = this.random(min, 6);
         },
         onEnd(target) {
@@ -311,16 +296,7 @@ const Conditions = {
         name: "partiallytrapped",
         duration: 5,
         durationCallback(target, source) {
-            if (
-                _optionalChain([
-                    source,
-                    "optionalAccess",
-                    (_3) => _3.hasItem,
-                    "call",
-                    (_4) => _4("gripclaw"),
-                ])
-            )
-                return 8;
+            if (source?.hasItem("gripclaw")) return 8;
             return this.random(5, 7);
         },
         onStart(pokemon, source) {
@@ -337,7 +313,6 @@ const Conditions = {
         onResidualOrder: 13,
         onResidual(pokemon) {
             const source = this.effectState.source;
-            // G-Max Centiferno and G-Max Sandblast continue even after the user leaves the field
             const gmaxEffect = ["gmaxcentiferno", "gmaxsandblast"].includes(
                 this.effectState.sourceEffect.id
             );
@@ -370,28 +345,15 @@ const Conditions = {
             const gmaxEffect = ["gmaxcentiferno", "gmaxsandblast"].includes(
                 this.effectState.sourceEffect.id
             );
-            if (
-                _optionalChain([
-                    this,
-                    "access",
-                    (_5) => _5.effectState,
-                    "access",
-                    (_6) => _6.source,
-                    "optionalAccess",
-                    (_7) => _7.isActive,
-                ]) ||
-                gmaxEffect
-            )
+            if (this.effectState.source?.isActive || gmaxEffect)
                 pokemon.tryTrap();
         },
     },
     lockedmove: {
-        // Outrage, Thrash, Petal Dance...
         name: "lockedmove",
         duration: 2,
         onResidual(target) {
             if (target.status === "slp") {
-                // don't lock, and bypass confusion for calming
                 delete target.volatiles["lockedmove"];
             }
             this.effectState.trueDuration--;
@@ -415,25 +377,16 @@ const Conditions = {
         },
     },
     twoturnmove: {
-        // Skull Bash, SolarBeam, Sky Drop...
         name: "twoturnmove",
         duration: 2,
         onStart(attacker, defender, effect) {
-            // ("attacker" is the Pokemon using the two turn move and the Pokemon this condition is being applied to)
             this.effectState.move = effect.id;
             attacker.addVolatile(effect.id);
-            // lastMoveTargetLoc is the location of the originally targeted slot before any redirection
-            // note that this is not updated for moves called by other moves
-            // i.e. if Dig is called by Metronome, lastMoveTargetLoc will still be the user's location
             let moveTargetLoc = attacker.lastMoveTargetLoc;
             if (
                 effect.sourceEffect &&
                 this.dex.moves.get(effect.id).target !== "self"
             ) {
-                // this move was called by another move such as Metronome
-                // and needs a random target to be determined this turn
-                // it will already have one by now if there is any valid target
-                // but if there isn't one we need to choose a random slot now
                 if (defender.fainted) {
                     defender = this.sample(attacker.foes(true));
                 }
@@ -441,7 +394,6 @@ const Conditions = {
             }
             attacker.volatiles[effect.id].targetLoc = moveTargetLoc;
             this.attrLastMove("[still]");
-            // Run side-effects normally associated with hitting (e.g., Protean, Libero)
             this.runEvent("PrepareHit", attacker, defender, effect);
         },
         onEnd(target) {
@@ -478,7 +430,6 @@ const Conditions = {
                 move.id !== this.effectState.move &&
                 move.id !== "struggle"
             ) {
-                // Fails unless the Choice item is being ignored, and no PP is lost
                 this.addMove("move", pokemon, move.name);
                 this.attrLastMove("[still]");
                 this.debug("Disabled by Choice item lock");
@@ -524,13 +475,11 @@ const Conditions = {
         onLockMove: "recharge",
     },
     futuremove: {
-        // this is a slot condition
         name: "futuremove",
         duration: 3,
         onResidualOrder: 3,
         onEnd(target) {
             const data = this.effectState;
-            // time's up; time to hit! :D
             const move = this.dex.moves.get(data.move);
             if (target.fainted || target === data.source) {
                 this.hint(
@@ -540,11 +489,9 @@ const Conditions = {
                 );
                 return;
             }
-
             this.add("-end", target, "move: " + move.name);
             target.removeVolatile("Protect");
             target.removeVolatile("Endure");
-
             if (data.source.hasAbility("infiltrator") && this.gen >= 6) {
                 data.moveData.infiltrates = true;
             }
@@ -555,7 +502,6 @@ const Conditions = {
                 data.moveData.stab = 2;
             }
             const hitMove = new this.dex.Move(data.moveData);
-
             this.actions.trySpreadMoveHit([target], data.source, hitMove, true);
             if (
                 data.source.isActive &&
@@ -572,12 +518,10 @@ const Conditions = {
                 );
             }
             this.activeMove = null;
-
             this.checkWin();
         },
     },
     healreplacement: {
-        // this is a slot condition
         name: "healreplacement",
         onStart(target, source, sourceEffect) {
             this.effectState.sourceEffect = sourceEffect;
@@ -599,7 +543,6 @@ const Conditions = {
         },
     },
     stall: {
-        // Protect, Detect, Endure counter
         name: "stall",
         duration: 2,
         counterMax: 729,
@@ -607,8 +550,6 @@ const Conditions = {
             this.effectState.counter = 3;
         },
         onStallMove(pokemon) {
-            // this.effectState.counter should never be undefined here.
-            // However, just in case, use 1 if it is undefined.
             const counter = this.effectState.counter || 1;
             this.debug("Success chance: " + Math.round(100 / counter) + "%");
             const success = this.randomChance(1, counter);
@@ -632,23 +573,12 @@ const Conditions = {
             return this.chainModify([5325, 4096]);
         },
     },
-
-    // weather is implemented here since it's so important to the game
-
     raindance: {
         name: "RainDance",
         effectType: "Weather",
         duration: 5,
         durationCallback(source, effect) {
-            if (
-                _optionalChain([
-                    source,
-                    "optionalAccess",
-                    (_8) => _8.hasItem,
-                    "call",
-                    (_9) => _9("damprock"),
-                ])
-            ) {
+            if (source?.hasItem("damprock")) {
                 return 8;
             }
             return 5;
@@ -665,13 +595,7 @@ const Conditions = {
             }
         },
         onFieldStart(field, source, effect) {
-            if (
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_10) => _10.effectType,
-                ]) === "Ability"
-            ) {
+            if (effect?.effectType === "Ability") {
                 if (this.gen <= 5) this.effectState.duration = 0;
                 this.add(
                     "-weather",
@@ -734,15 +658,7 @@ const Conditions = {
         effectType: "Weather",
         duration: 5,
         durationCallback(source, effect) {
-            if (
-                _optionalChain([
-                    source,
-                    "optionalAccess",
-                    (_11) => _11.hasItem,
-                    "call",
-                    (_12) => _12("heatrock"),
-                ])
-            ) {
+            if (source?.hasItem("heatrock")) {
                 return 8;
             }
             return 5;
@@ -759,13 +675,7 @@ const Conditions = {
             }
         },
         onFieldStart(battle, source, effect) {
-            if (
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_13) => _13.effectType,
-                ]) === "Ability"
-            ) {
+            if (effect?.effectType === "Ability") {
                 if (this.gen <= 5) this.effectState.duration = 0;
                 this.add(
                     "-weather",
@@ -836,21 +746,11 @@ const Conditions = {
         effectType: "Weather",
         duration: 5,
         durationCallback(source, effect) {
-            if (
-                _optionalChain([
-                    source,
-                    "optionalAccess",
-                    (_14) => _14.hasItem,
-                    "call",
-                    (_15) => _15("smoothrock"),
-                ])
-            ) {
+            if (source?.hasItem("smoothrock")) {
                 return 8;
             }
             return 5;
         },
-        // This should be applied directly to the stat before any of the other modifiers are chained
-        // So we give it increased priority.
         onModifySpDPriority: 10,
         onModifySpD(spd, pokemon) {
             if (pokemon.hasType("Rock") && this.field.isWeather("sandstorm")) {
@@ -858,13 +758,7 @@ const Conditions = {
             }
         },
         onFieldStart(field, source, effect) {
-            if (
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_16) => _16.effectType,
-                ]) === "Ability"
-            ) {
+            if (effect?.effectType === "Ability") {
                 if (this.gen <= 5) this.effectState.duration = 0;
                 this.add(
                     "-weather",
@@ -893,27 +787,13 @@ const Conditions = {
         effectType: "Weather",
         duration: 5,
         durationCallback(source, effect) {
-            if (
-                _optionalChain([
-                    source,
-                    "optionalAccess",
-                    (_17) => _17.hasItem,
-                    "call",
-                    (_18) => _18("icyrock"),
-                ])
-            ) {
+            if (source?.hasItem("icyrock")) {
                 return 8;
             }
             return 5;
         },
         onFieldStart(field, source, effect) {
-            if (
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_19) => _19.effectType,
-                ]) === "Ability"
-            ) {
+            if (effect?.effectType === "Ability") {
                 if (this.gen <= 5) this.effectState.duration = 0;
                 this.add(
                     "-weather",
@@ -942,15 +822,7 @@ const Conditions = {
         effectType: "Weather",
         duration: 5,
         durationCallback(source, effect) {
-            if (
-                _optionalChain([
-                    source,
-                    "optionalAccess",
-                    (_20) => _20.hasItem,
-                    "call",
-                    (_21) => _21("icyrock"),
-                ])
-            ) {
+            if (source?.hasItem("icyrock")) {
                 return 8;
             }
             return 5;
@@ -962,13 +834,7 @@ const Conditions = {
             }
         },
         onFieldStart(field, source, effect) {
-            if (
-                _optionalChain([
-                    effect,
-                    "optionalAccess",
-                    (_22) => _22.effectType,
-                ]) === "Ability"
-            ) {
+            if (effect?.effectType === "Ability") {
                 if (this.gen <= 5) this.effectState.duration = 0;
                 this.add(
                     "-weather",
@@ -1023,7 +889,6 @@ const Conditions = {
             this.add("-weather", "none");
         },
     },
-
     dynamax: {
         name: "Dynamax",
         noCopy: true,
@@ -1050,10 +915,7 @@ const Conditions = {
                 pokemon.gigantamax ? "Gmax" : ""
             );
             if (pokemon.baseSpecies.name === "Shedinja") return;
-
-            // Changes based on dynamax level, 2 is max (at LVL 10)
             const ratio = 1.5 + pokemon.dynamaxLevel * 0.05;
-
             pokemon.maxhp = Math.floor(pokemon.maxhp * ratio);
             pokemon.hp = Math.floor(pokemon.hp * ratio);
             this.add("-heal", pokemon, pokemon.getHealth, "[silent]");
@@ -1091,9 +953,6 @@ const Conditions = {
             this.add("-heal", pokemon, pokemon.getHealth, "[silent]");
         },
     },
-
-    // Commander needs two conditions so they are implemented here
-    // Dondozo
     commanded: {
         name: "Commanded",
         noCopy: true,
@@ -1104,13 +963,11 @@ const Conditions = {
         onDragOut() {
             return false;
         },
-        // Prevents Shed Shell allowing a swap
         onTrapPokemonPriority: -11,
         onTrapPokemon(pokemon) {
             pokemon.trapped = true;
         },
     },
-    // Tatsugiri
     commanding: {
         name: "Commanding",
         noCopy: true,
@@ -1121,12 +978,10 @@ const Conditions = {
         onDragOut() {
             return false;
         },
-        // Prevents Shed Shell allowing a swap
         onTrapPokemonPriority: -11,
         onTrapPokemon(pokemon) {
             pokemon.trapped = true;
         },
-        // Override No Guard
         onInvulnerabilityPriority: 2,
         onInvulnerability(target, source, move) {
             return false;
@@ -1135,13 +990,6 @@ const Conditions = {
             this.queue.cancelAction(pokemon);
         },
     },
-
-    // Arceus and Silvally's actual typing is implemented here.
-    // Their true typing for all their formes is Normal, and it's only
-    // Multitype and RKS System, respectively, that changes their type,
-    // but their formes are specified to be their corresponding type
-    // in the Pokedex, so that needs to be overridden.
-    // This is mainly relevant for Hackmons Cup and Balanced Hackmons.
     arceus: {
         name: "Arceus",
         onTypePriority: 1,
@@ -1197,6 +1045,4 @@ const Conditions = {
         },
     },
 };
-exports.Conditions = Conditions;
-
-//# sourceMappingURL=sourceMaps/conditions.js.map
+//# sourceMappingURL=conditions.js.map

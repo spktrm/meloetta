@@ -1367,7 +1367,7 @@
     },
     "pressure": {
         "name": "Pressure",
-        "rating": 2,
+        "rating": 2.5,
         "num": 46,
         "desc": "If this Pokemon is the target of an opposing Pokemon's move, that move loses one additional PP. Imprison and Snatch also lose one additional PP when used by an opposing Pokemon, but Sticky Web does not.",
         "shortDesc": "If this Pokemon is the target of a foe's move, that move loses one additional PP."

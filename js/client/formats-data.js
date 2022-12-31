@@ -1,5 +1,32 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+    for (var name in all)
+        __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+    if ((from && typeof from === "object") || typeof from === "function") {
+        for (let key of __getOwnPropNames(from))
+            if (!__hasOwnProp.call(to, key) && key !== except)
+                __defProp(to, key, {
+                    get: () => from[key],
+                    enumerable:
+                        !(desc = __getOwnPropDesc(from, key)) ||
+                        desc.enumerable,
+                });
+    }
+    return to;
+};
+var __toCommonJS = (mod) =>
+    __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var formats_data_exports = {};
+__export(formats_data_exports, {
+    FormatsData: () => FormatsData,
+});
+module.exports = __toCommonJS(formats_data_exports);
 const FormatsData = {
     bulbasaur: {
         isNonstandard: "Past",
@@ -742,7 +769,7 @@ const FormatsData = {
     gengarmega: {
         isNonstandard: "Past",
         tier: "Illegal",
-        natDexTier: "Uber",
+        natDexTier: "AG",
     },
     gengargmax: {
         isNonstandard: "Past",
@@ -1999,7 +2026,7 @@ const FormatsData = {
     shedinja: {
         isNonstandard: "Past",
         tier: "Illegal",
-        natDexTier: "Uber",
+        natDexTier: "AG",
     },
     whismur: {
         isNonstandard: "Past",
@@ -2554,7 +2581,7 @@ const FormatsData = {
     rayquazamega: {
         isNonstandard: "Past",
         tier: "Illegal",
-        natDexTier: "Uber",
+        natDexTier: "AG",
     },
     jirachi: {
         isNonstandard: "Past",
@@ -3771,7 +3798,7 @@ const FormatsData = {
         natDexTier: "UU",
     },
     rufflet: {
-        tier: "LC",
+        tier: "NFE",
     },
     braviary: {
         tier: "UU",
@@ -4291,7 +4318,7 @@ const FormatsData = {
         natDexTier: "Uber",
     },
     xerneasneutral: {
-        isNonstandard: "Custom", // can't be used in battle
+        isNonstandard: "Custom",
         tier: "Illegal",
     },
     yveltal: {
@@ -4964,18 +4991,14 @@ const FormatsData = {
         tier: "Illegal",
     },
     scorbunny: {
-        isNonstandard: "Unobtainable",
-        tier: "Unreleased",
-        natDexTier: "LC",
+        tier: "LC",
     },
     raboot: {
-        isNonstandard: "Unobtainable",
-        tier: "Unreleased",
-        natDexTier: "NFE",
+        tier: "NFE",
     },
     cinderace: {
-        isNonstandard: "Unobtainable",
-        tier: "Unreleased",
+        tier: "OU",
+        doublesTier: "DOU",
         natDexTier: "UU",
     },
     cinderacegmax: {
@@ -5450,7 +5473,7 @@ const FormatsData = {
     calyrexshadow: {
         isNonstandard: "Unobtainable",
         tier: "Unreleased",
-        natDexTier: "Uber",
+        natDexTier: "AG",
     },
     enamorus: {
         isNonstandard: "Unobtainable",
@@ -5761,13 +5784,6 @@ const FormatsData = {
         doublesTier: "DOU",
         natDexTier: "UU",
     },
-    /*
-	placeholder1: {
-		tier: "UU",
-		doublesTier: "DUU",
-		natDexTier: "UU",
-	},
-	*/
     sandyshocks: {
         tier: "UU",
         doublesTier: "DUU",
@@ -5798,13 +5814,6 @@ const FormatsData = {
         doublesTier: "DUU",
         natDexTier: "OU",
     },
-    /*
-	placeholder2: {
-		tier: "UU",
-		doublesTier: "DUU",
-		natDexTier: "UU",
-	},
-	*/
     ironmoth: {
         tier: "OU",
         doublesTier: "DOU",
@@ -5863,7 +5872,7 @@ const FormatsData = {
     miraidon: {
         tier: "Uber",
         doublesTier: "DUber",
-        natDexTier: "Uber",
+        natDexTier: "AG",
     },
     tinkatink: {
         tier: "LC",
@@ -6273,6 +6282,4 @@ const FormatsData = {
         tier: "Illegal",
     },
 };
-exports.FormatsData = FormatsData;
-
-//# sourceMappingURL=sourceMaps/formats-data.js.map
+//# sourceMappingURL=formats-data.js.map
