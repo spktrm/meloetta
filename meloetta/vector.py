@@ -11,6 +11,7 @@ except ModuleNotFoundError:
     warnings.warn("numpy not found")
 
 from meloetta.room import BattleRoom
+from meloetta.utils import expand_bt
 
 from typing import Union, NamedTuple, Tuple, List, Dict, Any
 
@@ -28,8 +29,6 @@ from meloetta.data import (
     get_move_token,
     get_type_token,
     get_weather_token,
-    get_pseudoweather_token,
-    get_side_condition_token,
 )
 
 
@@ -43,11 +42,7 @@ class NamedVector(NamedTuple):
     schema: Dict[str, Tuple[int, int]]
 
 
-def to_id(string: str):
-    return "".join(c for c in string if c.isalnum()).lower()
-
-
-class Side(NamedTuple):
+class PublicSide(NamedTuple):
     n: torch.Tensor
     total_pokemon: torch.Tensor
     faint_counter: torch.Tensor
@@ -61,26 +56,26 @@ class Side(NamedTuple):
     stickyweb: torch.Tensor
 
 
-class ReservePokemon(NamedTuple):
-    species: int
-    forme: int
-    slot: int
-    hp: int
-    fainted: int
-    level: int
-    gender: int
-    moves: List[str]
-    ability: int
-    base_ability: int
-    item: int
-    item_effect: int
-    prev_item: int
-    prev_item_effect: int
-    terastallized: int
-    status: int
-    status_stage: int
-    last_move: int
-    times_attacked: int
+class ReservePublicPokemon(NamedTuple):
+    species: torch.Tensor
+    forme: torch.Tensor
+    slot: torch.Tensor
+    hp: torch.Tensor
+    fainted: torch.Tensor
+    level: torch.Tensor
+    gender: torch.Tensor
+    moves: torch.Tensor
+    ability: torch.Tensor
+    base_ability: torch.Tensor
+    item: torch.Tensor
+    item_effect: torch.Tensor
+    prev_item: torch.Tensor
+    prev_item_effect: torch.Tensor
+    terastallized: torch.Tensor
+    status: torch.Tensor
+    status_stage: torch.Tensor
+    last_move: torch.Tensor
+    times_attacked: torch.Tensor
 
     def vector(
         self,
@@ -116,30 +111,30 @@ class ReservePokemon(NamedTuple):
             return arr
 
 
-class ActivePokemon(NamedTuple):
-    species: int
-    forme: int
-    slot: int
-    hp: int
-    fainted: int
-    level: int
-    gender: int
-    moves: List[str]
-    ability: int
-    base_ability: int
-    item: int
-    item_effect: int
-    prev_item: int
-    prev_item_effect: int
-    terastallized: int
-    status: int
-    status_stage: int
-    last_move: int
-    times_attacked: int
-    boosts: Dict[str, Any]
-    volatiles: Dict[str, Any]
-    sleep_turns: int
-    toxic_turns: int
+class ActivePublicPokemon(NamedTuple):
+    species: torch.Tensor
+    forme: torch.Tensor
+    slot: torch.Tensor
+    hp: torch.Tensor
+    fainted: torch.Tensor
+    level: torch.Tensor
+    gender: torch.Tensor
+    moves: torch.Tensor
+    ability: torch.Tensor
+    base_ability: torch.Tensor
+    item: torch.Tensor
+    item_effect: torch.Tensor
+    prev_item: torch.Tensor
+    prev_item_effect: torch.Tensor
+    terastallized: torch.Tensor
+    status: torch.Tensor
+    status_stage: torch.Tensor
+    last_move: torch.Tensor
+    times_attacked: torch.Tensor
+    boosts: torch.Tensor
+    volatiles: torch.Tensor
+    sleep_turns: torch.Tensor
+    toxic_turns: torch.Tensor
 
     def vector(
         self,
@@ -176,8 +171,7 @@ class ActivePokemon(NamedTuple):
 
 
 class State(NamedTuple):
-    p1: Side
-    p2: Side
+    public_sides: PublicSide
     weather: torch.Tensor
     weather_time_left: torch.Tensor
     weather_min_time_left: torch.Tensor
@@ -186,7 +180,7 @@ class State(NamedTuple):
     log: List[str]
 
 
-Battle = Dict[str, Any]
+Battle = Dict[str, Dict[str, Dict[str, Any]]]
 
 
 LAST_MOVES = set()
@@ -204,7 +198,7 @@ class VectorizedState:
         return vstate.vectorize()
 
     def vectorize(self):
-        p1, p2 = self._vectorize_sides()
+        public_sides = self._vectorize_sides()
         pseudoweathers = {
             (pseudoweather[0]).replace(" ", "").lower(): pseudoweather[1:]
             for pseudoweather in self.battle["pseudoWeather"]
@@ -215,24 +209,43 @@ class VectorizedState:
                 for pseudoweather in PSEUDOWEATHERS
             ]
         )
-        LAST_MOVES.add(self.battle["lastMove"])
+        pseudoweathers = expand_bt(pseudoweathers)
+
+        weather = torch.tensor(get_weather_token(self.battle["weather"]))
+        weather = expand_bt(weather)
+
+        weather_time_left = torch.tensor(self.battle["weatherTimeLeft"])
+        weather_time_left = weather_time_left.view(
+            1, 1, *(weather_time_left.shape or (1,))
+        )
+
+        weather_min_time_left = torch.tensor(self.battle["weatherMinTimeLeft"])
+        weather_min_time_left = weather_min_time_left.view(
+            1, 1, *(weather_min_time_left.shape or (1,))
+        )
+
+        turn = torch.tensor(self.battle["turn"])
+        turn = expand_bt(turn)
+
         return State(
-            p1=p1,
-            p2=p2,
-            weather=torch.tensor(get_weather_token(self.battle["weather"])),
-            weather_time_left=torch.tensor(self.battle["weatherTimeLeft"]),
-            weather_min_time_left=torch.tensor(self.battle["weatherMinTimeLeft"]),
+            public_sides=public_sides,
+            weather=weather,
+            weather_time_left=weather_time_left,
+            weather_min_time_left=weather_min_time_left,
+            turn=turn,
             pseudo_weather=pseudoweathers,
-            turn=torch.tensor(self.battle["turn"]),
             log=self.battle["stepQueue"],
         )
 
     def _vectorize_sides(self):
-        p1 = self._vectorize_side("mySide")
-        p2 = self._vectorize_side("farSide")
-        return p1, p2
+        p1 = self._vectorize_public_side("mySide")
+        p2 = self._vectorize_public_side("farSide")
+        combined_fields = {}
+        for field, value1, value2 in zip(PublicSide._fields, p1, p2):
+            combined_fields[field] = torch.stack((value1, value2), dim=2)
+        return PublicSide(**combined_fields)
 
-    def _vectorize_side(self, side_id: str):
+    def _vectorize_public_side(self, side_id: str):
         side = self.battle[side_id]
         controlling = self.battle["pokemonControlled"]
 
@@ -247,7 +260,7 @@ class VectorizedState:
             ]
             + active_padding
         )
-        active = active.view(1, 1, *active.shape)
+        active = expand_bt(active)
 
         reserve_size = 6 - len(side["pokemon"][controlling:]) - p_control
         reserve_padding = [torch.zeros(_RESERVE_SIZE) for _ in range(reserve_size)]
@@ -259,7 +272,7 @@ class VectorizedState:
             ]
             + reserve_padding
         )
-        reserve = reserve.view(1, 1, *reserve.shape)
+        reserve = expand_bt(reserve)
 
         side_conditions = torch.stack(
             [
@@ -271,25 +284,38 @@ class VectorizedState:
                 not in {"stealthrock", "spikes", "toxicspikes", "stickyweb"}
             ]
         )
-        side_conditions = side_conditions.view(1, 1, *side_conditions.shape)
+        side_conditions = expand_bt(side_conditions)
 
         stealthrock = torch.tensor(
             side["sideConditions"].get("stealthrock", [None, 0])[1]
         )
-        stealthrock = stealthrock.view(1, 1, *stealthrock.shape)
+        stealthrock = expand_bt(stealthrock)
         spikes = torch.tensor(side["sideConditions"].get("spikes", [None, 0])[1])
-        spikes = spikes.view(1, 1, *spikes.shape)
+        spikes = expand_bt(spikes)
         toxicspikes = torch.tensor(
             side["sideConditions"].get("toxicspikes", [None, 0])[1]
         )
-        toxicspikes = toxicspikes.view(1, 1, *toxicspikes.shape)
+        toxicspikes = expand_bt(toxicspikes)
         stickyweb = torch.tensor(side["sideConditions"].get("stickyweb", [None, 0])[1])
-        stickyweb = stickyweb.view(1, 1, *stickyweb.shape)
+        stickyweb = expand_bt(stickyweb)
 
-        return Side(
-            n=torch.tensor(side["n"]),
-            total_pokemon=torch.tensor(side["totalPokemon"]),
-            faint_counter=torch.tensor(side["faintCounter"]),
+        n = torch.tensor(side["n"])
+        n = expand_bt(n)
+
+        total_pokemon = torch.tensor(side["totalPokemon"])
+        total_pokemon = expand_bt(total_pokemon)
+
+        faint_counter = torch.tensor(side["faintCounter"])
+        faint_counter = expand_bt(faint_counter)
+
+        wisher_slot = (side["wisher"] or {"slot": -1})["slot"]
+        wisher_slot = torch.tensor(wisher_slot)
+        wisher_slot = expand_bt(wisher_slot)
+
+        return PublicSide(
+            n=n,
+            total_pokemon=total_pokemon,
+            faint_counter=faint_counter,
             active=active,
             reserve=reserve,
             side_conditions=side_conditions,
@@ -297,7 +323,7 @@ class VectorizedState:
             spikes=spikes,
             toxicspikes=toxicspikes,
             stickyweb=stickyweb,
-            wisher=side["wisher"],
+            wisher=wisher_slot,
         )
 
     def _vectorize_public_active_pokemon(self, pokemon):
@@ -314,7 +340,7 @@ class VectorizedState:
             1 if volatile in pokemon["volatiles"] else 0 for volatile in VOLATILES
         ]
         forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
-        return ActivePokemon(
+        return ActivePublicPokemon(
             species=get_species_token(self.gen, "name", pokemon["name"]),
             forme=get_species_token(self.gen, "forme", forme),
             slot=pokemon["slot"],
@@ -347,7 +373,7 @@ class VectorizedState:
         for _ in range(8 - int(len(moves) / 2)):
             moves += [-1, -1]
         forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
-        return ReservePokemon(
+        return ReservePublicPokemon(
             species=get_species_token(self.gen, "name", pokemon["name"]),
             forme=get_species_token(self.gen, "forme", forme),
             slot=pokemon["slot"],

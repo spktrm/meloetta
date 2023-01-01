@@ -338,6 +338,8 @@ def main():
             itemdex,
             abilitydex,
         ]:
+            dex: Dex
+
             dex_name = type(dex).__name__.lower()
             samples = sorted(dex.data.values(), key=lambda x: x["num"])
             progress = tqdm(samples, desc=f"gen{gen}: " + dex_name)

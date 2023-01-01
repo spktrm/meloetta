@@ -1,9 +1,16 @@
 import re
+import torch
 
 from typing import Dict, Union, Any, List
 
 from meloetta.client import Client
 from meloetta.room import BattleRoom
+from meloetta.data import (
+    get_choice_flag_token,
+    get_choice_target_token,
+    get_choice_token,
+)
+from meloetta.utils import expand_bt
 
 from bs4 import BeautifulSoup
 
@@ -21,6 +28,7 @@ class ChoiceBuilder:
         controls = room.get_js_attr("controls.controls")
         choices = room.get_js_attr("choice.choices")
         choices = [c for c in choices if c is not None]
+        self.choices: List[str] = choices
         self.pos = len(choices)
 
         self.html = controls
@@ -42,9 +50,17 @@ class ChoiceBuilder:
         choices = []
         choices += self.get_teampreview()
         choices += self.get_moves()
-        choices += self.get_move_targets()
         choices += self.get_switches()
-        choices += self.get_switch_targets()
+
+        targets = self.get_move_targets() + self.get_switch_targets()
+        if targets:
+            targeting = torch.tensor(1)
+        else:
+            targeting = torch.tensor(0)
+        targeting = expand_bt(targeting)
+
+        choices += targets
+
         if self.gen == 8:
             choices += self.get_max_moves()
         if self.gen == 9:
@@ -55,7 +71,53 @@ class ChoiceBuilder:
             choices += self.get_mega()
         if self.gametype == "triples" and self.pos != 1:
             choices += self.get_shifts()
-        return choices
+
+        if self.gametype != "singles":  # only relevant for gamemodes not singles
+            prev_choices = self.get_prev_choices()
+        else:
+            prev_choices = None
+
+        return targeting, prev_choices, choices
+
+    def get_prev_choices(self):
+        choices = []
+        total = 2 if self.gametype == "doubles" else 3
+        remaining = total - len(self.choices) - 1
+        for prev_choice in self.choices:
+            prev_choice_token = -1
+            index = -1
+            flag_token = -1
+            target_token = -1
+
+            if prev_choice != "pass":
+                token, index, *flags = prev_choice.split(" ")
+                prev_choice_token = get_choice_token(token)
+                index = int(index)
+
+                if flags:
+                    flag = ""
+                    target = ""
+                    for potential_flag in flags:
+                        try:
+                            int(potential_flag)
+                        except ValueError:
+                            flag = potential_flag
+                        else:
+                            target = potential_flag
+
+                    if flag:
+                        flag_token = get_choice_flag_token(flag)
+
+                    if target:
+                        target_token = get_choice_target_token(target)
+
+            prev_choice_tensor = torch.tensor(
+                [prev_choice_token, index, flag_token, target_token]
+            )
+            choices.append(prev_choice_tensor)
+
+        choices += [torch.tensor([-1, -1, -1, -1]) for _ in range(remaining)]
+        return expand_bt(torch.stack(choices))
 
     def get_teampreview(self):
         teampreview = self.soup.find_all(attrs={"name": "chooseTeamPreview"})
