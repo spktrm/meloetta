@@ -249,6 +249,11 @@ class VectorizedState:
         side = self.battle[side_id]
 
         controlling = self.battle["pokemonControlled"]
+
+        # This is a measure for removing duplicates from zoroak
+        # To be clear, this doest not remove zoroark, but onyl mons 
+        # that are affected by -replace
+        # TODO: account for zororak duplicates somehow...
         pokemon = [p for p in side["pokemon"] if not p.get("status", "") != "???"]
 
         active = [
