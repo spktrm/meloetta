@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from meloetta.player import Player
 from meloetta.room import BattleRoom
-from meloetta.vector import VectorizedState, VectorizedChoice
+from meloetta.vector import VectorizedState
 
 
 def waiting_for_opp(room: BattleRoom):
@@ -53,8 +53,9 @@ class SelfPlayWorker:
         await player.client.login()
         await asyncio.sleep(1)
 
-        battle_format = "gen8randomdoublesbattle"
-        battle_format = "gen3randombattle"
+        # battle_format = "gen8randomdoublesbattle"
+        battle_format = "gen9randombattle"
+        # battle_format = "gen3randombattle"
         team = "null"
         # battle_format = "gen9doublesou"
         # # team = "Charizard||HeavyDutyBoots|Blaze|hurricane,fireblast,toxic,roost||85,,85,85,85,85||,0,,,,||88|]Venusaur||BlackSludge|Chlorophyll|leechseed,substitute,sleeppowder,sludgebomb||85,,85,85,85,85||,0,,,,||82|]Blastoise||WhiteHerb|Torrent|shellsmash,earthquake,icebeam,hydropump||85,85,85,85,85,85||||86|"
@@ -87,7 +88,6 @@ class SelfPlayWorker:
                     # inputs to neural net
                     battle = player.room.get_battle()
                     vstate = VectorizedState.from_battle(player.room, battle)
-                    vchoice = VectorizedChoice.from_battle(player.room, battle)
 
                 while (
                     action_required
@@ -105,7 +105,7 @@ class SelfPlayWorker:
                         player.room.battle_tag + "|" + outgoing_message
                     )
 
-                if player.room.get_js_attr("battle.ended"):
+                if player.room.get_js_attr("battle?.ended"):
                     await player.client.leave_battle(player.room.battle_tag)
                     player.reset()
                     break
@@ -133,5 +133,5 @@ def main():
 
 
 if __name__ == "__main__":
-    mp.set_start_method("spawn")
+    mp.set_start_method("fork")
     main()
