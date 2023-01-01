@@ -150,3 +150,36 @@ def get_pseudoweather_token(name: str):
 
 def get_side_condition_token(name: str):
     return SIDE_CONDITIONS.get(name, -1)
+
+
+# Choice related
+
+CHOICE_TOKENS = {
+    "move": 0,
+    "switch": 1,
+}
+
+CHOICE_FLAGS = {
+    "mega": 0,
+    "zmove": 1,
+    "dynamax": 2,
+    "max": 2,
+    "terastallize": 3,
+}
+
+CHOICE_TARGETS = list(range(-3, 3))
+CHOICE_TARGETS.remove(0)
+CHOICE_TARGETS = {str(target): i for i, target in enumerate(CHOICE_TARGETS)}
+CHOICE_TARGETS
+
+
+def get_choice_flag_token(name: str):
+    return CHOICE_FLAGS[name]
+
+
+def get_choice_target_token(name: str):
+    return CHOICE_TARGETS[name]
+
+
+def get_choice_token(name: str):
+    return CHOICE_TOKENS[name]
