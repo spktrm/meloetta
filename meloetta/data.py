@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 from copy import deepcopy
-from typing import Any
+from typing import Dict, Any
 
 
 DATA_DIR = "js/data"
@@ -64,8 +64,9 @@ def load_feature_embedding(type: str, gen: int):
     return np.load(os.path.join("pretrained", f"gen{gen}", type + ".npy"))
 
 
+Schema = Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]
 with open("pretrained/schema.json", "r") as f:
-    schema = json.loads(f.read())
+    schema: Schema = json.loads(f.read())
 
 tokenized_schema = deepcopy(schema)
 
@@ -131,13 +132,21 @@ ITEM_EFFECTS = WSNC["item_effects"]
 ITEM_EFFECTS = {v: i for i, v in enumerate(ITEM_EFFECTS)}
 
 
-def get_item_effect_token(name):
+SIDE_CONDITIONS = WSNC["side_conditions"]
+SIDE_CONDITIONS = {v: i for i, v in enumerate(SIDE_CONDITIONS)}
+
+
+def get_item_effect_token(name: str):
     return ITEM_EFFECTS.get(name, -1)
 
 
-def get_weather_token(name):
+def get_weather_token(name: str):
     return WEATHERS.get(name, -1)
 
 
-def get_pseudoweather_token(name):
+def get_pseudoweather_token(name: str):
     return PSEUDOWEATHERS.get(name, -1)
+
+
+def get_side_condition_token(name: str):
+    return SIDE_CONDITIONS.get(name, -1)

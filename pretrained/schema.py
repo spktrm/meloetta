@@ -266,6 +266,7 @@ class Movedex(Dex):
             for key in self.schema:
                 if "maxMove" in key:
                     keys_to_pop.append(key)
+
         for key in keys_to_pop:
             self.schema.pop(key)
 

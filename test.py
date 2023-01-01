@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from meloetta.player import Player
 from meloetta.room import BattleRoom
+from meloetta.vector import VectorizedState, VectorizedChoice
 
 
 def waiting_for_opp(room: BattleRoom):
@@ -52,7 +53,7 @@ class SelfPlayWorker:
         await player.client.login()
         await asyncio.sleep(1)
 
-        battle_format = "gen3randombattle"
+        battle_format = "gen8randomdoublesbattle"
         team = "null"
         # battle_format = "gen9doublesou"
         # team = "Charizard||HeavyDutyBoots|Blaze|hurricane,fireblast,toxic,roost||85,,85,85,85,85||,0,,,,||88|]Venusaur||BlackSludge|Chlorophyll|leechseed,substitute,sleeppowder,sludgebomb||85,,85,85,85,85||,0,,,,||82|]Blastoise||WhiteHerb|Torrent|shellsmash,earthquake,icebeam,hydropump||85,85,85,85,85,85||||86|"
@@ -81,12 +82,17 @@ class SelfPlayWorker:
                     elif "Can't move" in message:
                         print()
 
+                if action_required:
+                    # inputs to neural net
+                    battle = player.room.get_battle()
+                    vstate = VectorizedState.from_battle(player.room, battle)
+                    vchoice = VectorizedChoice.from_battle(player.room, battle)
+
                 while (
                     action_required
                     and not waiting_for_opp(player.room)
                     and not player.room.get_js_attr("battle.ended")
                 ):
-                    vstate = player.get_vectorized_state()
                     choices = player.get_choices()
                     _, func, args, kwargs = random.choice(choices)
                     func(*args, **kwargs)
@@ -108,7 +114,7 @@ class SelfPlayWorker:
 
 def main():
     procs = []
-    for i in range(20):  # num workes (check with os.cpu_count())
+    for i in range(1):  # num workes (check with os.cpu_count())
         worker = SelfPlayWorker(i, 2)  # 2 is players per worker
         # This config will spawn 20 workers with 2 players each
         # for a total of 40 players, playing 20 games.
