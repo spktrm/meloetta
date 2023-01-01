@@ -128,7 +128,6 @@
                 divClass = _this$parseChatMessag[0];
                 divHTML = _this$parseChatMessag[1];
                 noNotify = _this$parseChatMessag[2];
-
                 if (!noNotify && isHighlighted) {
                     var notifyTitle =
                         "Mentioned by " + name + " in " + battle.roomid;
@@ -183,11 +182,9 @@
                 }
                 this.joinLeave.element.innerHTML =
                     "<small>" + BattleLog.escapeHTML(buf) + "</small>";
-
                 (preempt ? this.preemptElem : this.innerElem).appendChild(
                     this.joinLeave.element
                 );
-
                 return;
             }
 
@@ -213,11 +210,9 @@
                     " renamed from " +
                     BattleLog.escapeHTML(this.lastRename.from) +
                     ".</small>";
-
                 (preempt ? this.preemptElem : this.innerElem).appendChild(
                     this.lastRename.element
                 );
-
                 return;
             }
 
@@ -250,7 +245,6 @@
                         BattleLog.escapeHTML(args[1]).replace(/\|/g, "<br />") +
                         "</div>"
                 );
-
                 return;
 
             case "pm":
@@ -273,7 +267,6 @@
                         BattleLog.escapeHTML(args[1]) +
                         '"><b>Register</b></button></div>'
                 );
-
                 return;
 
             case "unlink": {
@@ -341,11 +334,9 @@
                 this.message(
                     "<strong>Warning:</strong> " + BattleLog.escapeHTML(args[1])
                 );
-
                 this.message(
                     'Bug? Report it to <a href="http://www.smogon.com/forums/showthread.php?t=3453192">the replay viewer\'s Smogon thread</a>'
                 );
-
                 if (this.scene) this.scene.wait(1000);
                 return;
 
@@ -356,7 +347,6 @@
                         BattleLog.escapeHTML(args[1]) +
                         "</em></small>"
                 );
-
                 break;
 
             case "rule":
@@ -370,7 +360,6 @@
                         BattleLog.escapeHTML(ruleArgs[1] || "") +
                         "</small>"
                 );
-
                 break;
 
             case "rated":
@@ -380,7 +369,6 @@
                         (BattleLog.escapeHTML(args[1]) || "Rated battle") +
                         "</strong>"
                 );
-
                 break;
 
             case "tier":
@@ -390,7 +378,6 @@
                         BattleLog.escapeHTML(args[1]) +
                         "</strong>"
                 );
-
                 break;
 
             case "turn":
@@ -429,7 +416,6 @@
                         "chat message-error",
                         "Unrecognized: |" + BattleLog.escapeHTML(args.join("|"))
                     );
-
                     return;
                 }
                 if (!line) return;
@@ -440,8 +426,8 @@
     _proto.textList = function textList(list) {
         var message = "";
         var listNoDuplicates = [];
-        for (var _i = 0, _list = list; _i < _list.length; _i++) {
-            var user = _list[_i];
+        for (var _i2 = 0, _list2 = list; _i2 < _list2.length; _i2++) {
+            var user = _list2[_i2];
             if (!listNoDuplicates.includes(user)) listNoDuplicates.push(user);
         }
         list = listNoDuplicates;
@@ -465,7 +451,6 @@
                 /\|\|([^\|]*)\|\|([^\|]*)\|\|/,
                 '<abbr title="$1">$2</abbr>'
             );
-
             if (line.startsWith("  "))
                 line = "<small>" + line.trim() + "</small>";
             return line;
@@ -523,11 +508,11 @@
         var classContains = " uhtml-" + id + " ";
         var elements = [];
         for (
-            var _i2 = 0, _ref = this.innerElem.childNodes;
-            _i2 < _ref.length;
-            _i2++
+            var _i4 = 0, _ref2 = this.innerElem.childNodes;
+            _i4 < _ref2.length;
+            _i4++
         ) {
-            var node = _ref[_i2];
+            var node = _ref2[_i4];
             if (
                 node.className &&
                 (" " + node.className + " ").includes(classContains)
@@ -537,11 +522,11 @@
         }
         if (this.preemptElem) {
             for (
-                var _i3 = 0, _ref2 = this.preemptElem.childNodes;
-                _i3 < _ref2.length;
-                _i3++
+                var _i6 = 0, _ref4 = this.preemptElem.childNodes;
+                _i6 < _ref4.length;
+                _i6++
             ) {
-                var _node = _ref2[_i3];
+                var _node = _ref4[_i6];
                 if (
                     _node.className &&
                     (" " + _node.className + " ").includes(classContains)
@@ -551,15 +536,15 @@
             }
         }
         if (htmlSrc && elements.length && !forceAdd) {
-            for (var _i4 = 0; _i4 < elements.length; _i4++) {
-                var element = elements[_i4];
+            for (var _i8 = 0; _i8 < elements.length; _i8++) {
+                var element = elements[_i8];
                 element.innerHTML = BattleLog.sanitizeHTML(htmlSrc);
             }
             this.updateScroll();
             return;
         }
-        for (var _i5 = 0; _i5 < elements.length; _i5++) {
-            var _element = elements[_i5];
+        for (var _i10 = 0; _i10 < elements.length; _i10++) {
+            var _element = elements[_i10];
             _element.parentElement.removeChild(_element);
         }
         if (!htmlSrc) return;
@@ -584,11 +569,11 @@
         var classStart = "chat chatmessage-" + userid + " ";
         var nodes = [];
         for (
-            var _i6 = 0, _ref3 = this.innerElem.childNodes;
-            _i6 < _ref3.length;
-            _i6++
+            var _i12 = 0, _ref6 = this.innerElem.childNodes;
+            _i12 < _ref6.length;
+            _i12++
         ) {
-            var node = _ref3[_i6];
+            var node = _ref6[_i12];
             if (
                 node.className &&
                 (node.className + " ").startsWith(classStart)
@@ -598,11 +583,11 @@
         }
         if (this.preemptElem) {
             for (
-                var _i7 = 0, _ref4 = this.preemptElem.childNodes;
-                _i7 < _ref4.length;
-                _i7++
+                var _i14 = 0, _ref8 = this.preemptElem.childNodes;
+                _i14 < _ref8.length;
+                _i14++
             ) {
-                var _node2 = _ref4[_i7];
+                var _node2 = _ref8[_i14];
                 if (
                     _node2.className &&
                     (_node2.className + " ").startsWith(classStart)
@@ -612,8 +597,8 @@
             }
         }
         if (lineCount) nodes = nodes.slice(-lineCount);
-        for (var _i8 = 0, _nodes = nodes; _i8 < _nodes.length; _i8++) {
-            var _node3 = _nodes[_i8];
+        for (var _i16 = 0, _nodes2 = nodes; _i16 < _nodes2.length; _i16++) {
+            var _node3 = _nodes2[_i16];
             _node3.style.display = "none";
             _node3.className = "revealed " + _node3.className;
         }
@@ -635,8 +620,8 @@
         lastNode.appendChild(button);
     };
     BattleLog.unlinkNodeList = function unlinkNodeList(nodeList, classStart) {
-        for (var _i9 = 0, _ref5 = nodeList; _i9 < _ref5.length; _i9++) {
-            var node = _ref5[_i9];
+        for (var _i18 = 0, _ref10 = nodeList; _i18 < _ref10.length; _i18++) {
+            var node = _ref10[_i18];
             if (
                 node.className &&
                 (node.className + " ").startsWith(classStart)
@@ -648,11 +633,11 @@
                     var parent = linkNode.parentElement;
                     if (!parent) continue;
                     for (
-                        var _i10 = 0, _ref6 = linkNode.childNodes;
-                        _i10 < _ref6.length;
-                        _i10++
+                        var _i20 = 0, _ref12 = linkNode.childNodes;
+                        _i20 < _ref12.length;
+                        _i20++
                     ) {
-                        var childNode = _ref6[_i10];
+                        var childNode = _ref12[_i20];
                         parent.insertBefore(childNode, linkNode);
                     }
                     parent.removeChild(linkNode);
@@ -827,7 +812,6 @@
         }
         var colorStyle =
             ' style="color:' + BattleLog.usernameColor(toID(name)) + '"';
-
         var clickableName =
             "<small>" +
             BattleLog.escapeHTML(group) +
@@ -939,7 +923,6 @@
                     "chat message-error",
                     "[outdated code no longer supported]",
                 ];
-
             case "text":
                 return ["chat", BattleLog.parseMessage(target)];
             case "error":
@@ -1214,7 +1197,6 @@
                         "https://www.youtube.com/embed/" +
                             videoId +
                             (time ? "?start=" + time : ""),
-
                         "frameborder",
                         "0",
                         "allow",
@@ -1250,7 +1232,6 @@
                             "class",
                             "picon" + (className ? " " + className : "")
                         );
-
                         setAttrib(
                             "style",
                             Dex.getPokemonIcon(iconValue) +
@@ -1261,7 +1242,6 @@
                             "class",
                             "itemicon" + (className ? " " + className : "")
                         );
-
                         setAttrib(
                             "style",
                             Dex.getItemIcon(iconValue) +
@@ -1417,7 +1397,6 @@
             '" class="subtle" target="_blank">' +
             BattleLog.escapeHTML(battle.p2.name) +
             "</a></h1>\n";
-
         buf +=
             '<script type="text/plain" class="battle-log-data">' +
             battle.stepQueue.join("\n").replace(/\//g, "\\/") +
@@ -1466,8 +1445,8 @@ BattleLog.interstice = (function () {
             if (uri[0] === "/" && uri[1] !== "/") {
                 return true;
             }
-            for (var _i11 = 0; _i11 < patterns.length; _i11++) {
-                var pattern = patterns[_i11];
+            for (var _i22 = 0; _i22 < patterns.length; _i22++) {
+                var pattern = patterns[_i22];
                 if (pattern.test(uri)) return true;
             }
             return false;

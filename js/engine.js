@@ -12,105 +12,144 @@ function serialize(obj) {
     return JSON.decycle(obj);
 }
 
-var engine = (function () {
-    battle = null;
-    choices = null;
+var engine = {
+    start: function () {
+        this.client = BattleRoom;
+        this.client.initialize();
+        return 0;
+    },
 
-    return {
-        start: function () {
-            battle = new Battle();
-            return 0;
-        },
+    receive: function (data) {
+        this.client.receive(data);
+        return 0;
+    },
 
-        setGen: function (gen) {
-            battle.dex = Dex.forGen(gen);
-            return 0;
-        },
+    setGen: function (gen) {
+        this.client.battle.dex = Dex.forGen(gen);
+        return 0;
+    },
 
-        add: function (command) {
-            battle.add(command);
-            return 0;
-        },
+    add: function (command) {
+        this.client.battle.add(command);
+        return 0;
+    },
 
-        instantAdd: function (command) {
-            battle.run(command, true);
-            battle.preemptStepQueue.push(command);
-            battle.add(command);
-            return 0;
-        },
+    instantAdd: function (command) {
+        this.client.battle.run(command, true);
+        this.client.battle.preemptStepQueue.push(command);
+        this.client.battle.add(command);
+        return 0;
+    },
 
-        addToStepQueue: function (command) {
-            battle.stepQueue.push(command);
-            return 0;
-        },
+    addToStepQueue: function (command) {
+        this.client.battle.stepQueue.push(command);
+        return 0;
+    },
 
-        seekTurn: function (turn, forceReset) {
-            battle.seekTurn(turn, forceReset);
-            return 0;
-        },
+    seekTurn: function (turn, forceReset) {
+        this.client.battle.seekTurn(turn, forceReset);
+        return 0;
+    },
 
-        setPerspective: function (sideid) {
-            battle.setPerspective(sideid);
-            return 0;
-        },
+    setPerspective: function (sideid) {
+        this.client.battle.setPerspective(sideid);
+        return 0;
+    },
 
-        serialize: function () {
-            return serialize(battle);
-        },
+    serialize: function () {
+        serialized_state = serialize(this.client);
+        // delete serialized_state.battle.stepQueue;
+        return serialized_state;
+    },
 
-        reset: function () {
-            battle = new Battle();
-            return 0;
-        },
+    reset: function () {
+        this.client.initialize();
+        this.client.request = null;
+        this.client.side = "";
+        this.client.battleEnded = false;
+        this.client.title = "";
+        return 0;
+    },
 
-        // Battle Funcs
+    // Battle Funcs
 
-        parsePokemonId: function (pokemonId) {
-            return battle.parsePokemonId(pokemonId);
-        },
+    parsePokemonId: function (pokemonId) {
+        return this.client.battle.parsePokemonId(pokemonId);
+    },
 
-        getPokemon: function (pokemonId) {
-            return battle.getPokemon(pokemonId);
-        },
+    getPokemon: function (pokemonId) {
+        return this.client.battle.getPokemon(pokemonId);
+    },
 
-        getNearSide: function () {
-            return battle.nearSide;
-        },
+    getNearSide: function () {
+        return this.client.battle.nearSide;
+    },
 
-        // Choices
+    // Choices
 
-        getChoices: function (request) {
-            choices = new BattleChoiceBuilder(request);
-            return JSON.parse(JSON.stringify(choices));
-        },
+    chooseMoveTarget: function (posString) {
+        return this.client.chooseMoveTarget(posString);
+    },
 
-        fixRequest: function (request) {
-            BattleChoiceBuilder.fixRequest(request, battle);
-            return request;
-        },
+    chooseMove: function (
+        pos,
+        target,
+        isMega,
+        isZMove,
+        isUltraBurst,
+        isDynamax,
+        isTerastal
+    ) {
+        return this.client.chooseMove(
+            pos,
+            target,
+            isMega,
+            isZMove,
+            isUltraBurst,
+            isDynamax,
+            isTerastal
+        );
+    },
 
-        // Dex
+    chooseShift: function () {
+        return this.client.chooseShift();
+    },
 
-        getSpecies: function (species) {
-            return battle.dex.species.get(species);
-        },
+    chooseSwitch: function (pos) {
+        return this.client.chooseSwitch(pos);
+    },
 
-        getMove: function (move) {
-            return battle.dex.moves.get(move);
-        },
+    chooseSwitchTarget: function (pos) {
+        return this.client.chooseSwitchTarget(pos);
+    },
 
-        getItem: function (item) {
-            return battle.dex.items.get(item);
-        },
+    chooseTeamPreview: function (pos) {
+        return this.client.chooseTeamPreview(pos);
+    },
 
-        getAbility: function (ability) {
-            return battle.dex.abilities.get(ability);
-        },
+    popOutgoing: function () {
+        delete this.client.outgoing_message;
+    },
 
-        getType: function (type) {
-            return battle.dex.types.get(type);
-        },
-    };
-})();
+    // Dex
 
-this.engine = engine;
+    getSpecies: function (species) {
+        return this.client.battle.dex.species.get(species);
+    },
+
+    getMove: function (move) {
+        return this.client.battle.dex.moves.get(move);
+    },
+
+    getItem: function (item) {
+        return this.client.battle.dex.items.get(item);
+    },
+
+    getAbility: function (ability) {
+        return this.client.battle.dex.abilities.get(ability);
+    },
+
+    getType: function (type) {
+        return this.client.battle.dex.types.get(type);
+    },
+};

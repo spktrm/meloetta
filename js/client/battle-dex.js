@@ -80,7 +80,6 @@ var PSUtils = new ((function () {
         if (Array.isArray(a)) {
             for (var i = 0; i < a.length; i++) {
                 var comparison = PSUtils.compare(a[i], b[i]);
-
                 if (comparison) return comparison;
             }
             return 0;
@@ -291,12 +290,12 @@ var Dex = new ((function () {
                     window.BattleBaseSpeciesChart
                 ) {
                     for (
-                        var _i = 0,
-                            _BattleBaseSpeciesCha = BattleBaseSpeciesChart;
-                        _i < _BattleBaseSpeciesCha.length;
-                        _i++
+                        var _i2 = 0,
+                            _BattleBaseSpeciesCha2 = BattleBaseSpeciesChart;
+                        _i2 < _BattleBaseSpeciesCha2.length;
+                        _i2++
                     ) {
-                        var baseSpeciesId = _BattleBaseSpeciesCha[_i];
+                        var baseSpeciesId = _BattleBaseSpeciesCha2[_i2];
                         if (formid.startsWith(baseSpeciesId)) {
                             id = baseSpeciesId;
                             break;
@@ -327,12 +326,12 @@ var Dex = new ((function () {
 
                 if (species.cosmeticFormes) {
                     for (
-                        var _i2 = 0,
-                            _species$cosmeticForm = species.cosmeticFormes;
-                        _i2 < _species$cosmeticForm.length;
-                        _i2++
+                        var _i4 = 0,
+                            _species$cosmeticForm2 = species.cosmeticFormes;
+                        _i4 < _species$cosmeticForm2.length;
+                        _i4++
                     ) {
-                        var forme = _species$cosmeticForm[_i2];
+                        var forme = _species$cosmeticForm2[_i4];
                         if (toID(forme) === formid) {
                             species = new Species(
                                 formid,
@@ -661,7 +660,6 @@ var Dex = new ((function () {
                 options.mod +
                 "/audio/" +
                 toID(species.baseSpecies);
-
             spriteData.cryurl += ".mp3";
         }
 
@@ -832,7 +830,6 @@ var Dex = new ((function () {
             (_pokemon5 = pokemon) != null && _pokemon5.fainted
                 ? ";opacity:.3;filter:grayscale(100%) brightness(.5)"
                 : "";
-
         return (
             "background:transparent url(" +
             Dex.resourcePrefix +
@@ -1006,11 +1003,11 @@ var Dex = new ((function () {
         this.pokeballs = [];
         if (!window.BattleItems) window.BattleItems = {};
         for (
-            var _i3 = 0, _ref2 = Object.values(window.BattleItems);
-            _i3 < _ref2.length;
-            _i3++
+            var _i6 = 0, _ref3 = Object.values(window.BattleItems);
+            _i6 < _ref3.length;
+            _i6++
         ) {
-            var data = _ref2[_i3];
+            var data = _ref3[_i6];
             if (!data.isPokeball) continue;
             this.pokeballs.push(data.name);
         }
@@ -1209,11 +1206,11 @@ var ModdedDex = (function () {
         this.pokeballs = [];
         if (!window.BattleItems) window.BattleItems = {};
         for (
-            var _i4 = 0, _ref3 = Object.values(window.BattleItems);
-            _i4 < _ref3.length;
-            _i4++
+            var _i8 = 0, _ref5 = Object.values(window.BattleItems);
+            _i8 < _ref5.length;
+            _i8++
         ) {
-            var data = _ref3[_i4];
+            var data = _ref5[_i8];
             if (data.gen && data.gen > this.gen) continue;
             if (!data.isPokeball) continue;
             this.pokeballs.push(data.name);

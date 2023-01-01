@@ -87,7 +87,7 @@ class ReservePublicPokemon(NamedTuple):
         arr = []
         schema = {}
 
-        for field in sorted(self._fields):
+        for field in self._fields:
             value = getattr(self, field)
 
             start = len(arr)
@@ -146,7 +146,7 @@ class ActivePublicPokemon(NamedTuple):
         arr = []
         schema = {}
 
-        for field in sorted(self._fields):
+        for field in self._fields:
             value = getattr(self, field)
 
             start = len(arr)
@@ -247,31 +247,24 @@ class VectorizedState:
 
     def _vectorize_public_side(self, side_id: str):
         side = self.battle[side_id]
+
         controlling = self.battle["pokemonControlled"]
+        pokemon = [p for p in side["pokemon"] if not p.get("status", "") != "???"]
 
-        p_control = side["battle"]["pokemonControlled"]
-        active_size = p_control - len(side["pokemon"][:controlling])
-        active_padding = [torch.zeros(_ACTIVE_SIZE) for _ in range(active_size)]
-
-        active = torch.stack(
-            [
-                self._vectorize_public_active_pokemon(p)
-                for p in side["pokemon"][:controlling]
-            ]
-            + active_padding
-        )
+        active = [
+            self._vectorize_public_active_pokemon(p) for p in pokemon[:controlling]
+        ]
+        active += [torch.zeros(_ACTIVE_SIZE) for _ in range(controlling - len(active))]
+        active = torch.stack(active)
         active = expand_bt(active)
 
-        reserve_size = 6 - len(side["pokemon"][controlling:]) - p_control
-        reserve_padding = [torch.zeros(_RESERVE_SIZE) for _ in range(reserve_size)]
+        reserve = [
+            self._vectorize_public_reserve_pokemon(p) for p in pokemon[controlling:]
+        ]
+        num_reserve_padding = 6 - controlling - len(reserve)
+        reserve += [torch.zeros(_RESERVE_SIZE) for _ in range(num_reserve_padding)]
 
-        reserve = torch.stack(
-            [
-                self._vectorize_public_reserve_pokemon(p)
-                for p in side["pokemon"][controlling:]
-            ]
-            + reserve_padding
-        )
+        reserve = torch.stack(reserve)
         reserve = expand_bt(reserve)
 
         side_conditions = torch.stack(
@@ -394,18 +387,3 @@ class VectorizedState:
             last_move=get_move_token(self.gen, "name", pokemon["lastMove"]),
             times_attacked=pokemon["timesAttacked"],
         ).vector()
-
-
-class VectorizedChoice:
-    def __init__(self, room: BattleRoom, battle: Battle):
-        self.room = room
-        self.battle = battle
-        self.gen = self.battle["dex"]["gen"]
-
-    @classmethod
-    def from_battle(self, room: BattleRoom, battle: Battle):
-        vstate = VectorizedChoice(room, battle)
-        return vstate.vectorize()
-
-    def vectorize(self):
-        return

@@ -3,6 +3,7 @@ import json
 
 from typing import Union, Dict, Any, List
 from py_mini_racer import MiniRacer
+from py_mini_racer.py_mini_racer import is_unicode
 
 SRC = [
     "js/predef.js",
@@ -26,7 +27,7 @@ SRC = [
     "js/client/battle-log.js",
     "js/client/battle.js",
     "js/client.js",
-    "js/enginev2.js",
+    "js/engine.js",
 ]
 
 
@@ -94,13 +95,13 @@ class BattleRoom:
         self._ctx.eval("engine.start()")
 
     def recieve(self, data: str = ""):
-        return self._ctx.execute("engine.receive({})".format(json.dumps(data)))
+        return self._execute("engine.receive({})".format(json.dumps(data)))
 
     def get_js_attr(self, attr: str):
-        return self._ctx.execute(f"engine.client.{attr}")
+        return self._execute(f"engine.client.{attr}")
 
     def get_battle(self, raw: bool = False):
-        battle = self._ctx.execute("serialize(engine.client.battle)")
+        battle = self._execute("serialize(engine.client.battle)")
         if not raw:
             battle = deserialize(battle)
         return battle
@@ -110,7 +111,14 @@ class BattleRoom:
 
     def _call(self, cmd, *args):
         js = cmd + "({})".format(json.dumps(args)[1:-1])
-        return self._ctx.execute(js)
+        return self._execute(js)
+
+    def _execute(self, expr, timeout=None, max_memory=None):
+        wrapped_expr = "JSON.stringify((function(){return (%s)})())" % expr
+        ret = self._ctx.eval(wrapped_expr, timeout=timeout, max_memory=max_memory)
+        if not is_unicode(ret):
+            return None
+        return self._ctx.json_impl.loads(ret)
 
     def instantAdd(self, data: str):
         return self._call("engine.instandAdd", data)
@@ -161,7 +169,7 @@ class BattleRoom:
     # choice start
 
     def choose_move_target(self, posString):
-        return self._ctx.execute(
+        return self._execute(
             "engine.chooseMoveTarget({})".format(json.dumps(posString))
         )
 
@@ -178,29 +186,27 @@ class BattleRoom:
         args = [pos, target, isMega, isZMove, isUltraBurst, isDynamax, isTerastal]
         args = json.dumps(args)[1:-1]
         cmd = "engine.chooseMove({})".format(args)
-        return self._ctx.execute(cmd)
+        return self._execute(cmd)
 
     def choose_shift(self):
-        return self._ctx.execute("engine.chooseShift()")
+        return self._execute("engine.chooseShift()")
 
     def choose_switch(self, pos: str):
-        return self._ctx.execute("engine.chooseSwitch({})".format(json.dumps(pos)))
+        return self._execute("engine.chooseSwitch({})".format(json.dumps(pos)))
 
     def choose_switch_target(self, pos: str):
-        return self._ctx.execute(
-            "engine.chooseSwitchTarget({})".format(json.dumps(pos))
-        )
+        return self._execute("engine.chooseSwitchTarget({})".format(json.dumps(pos)))
 
     def choose_team_preview(self, pos: str):
-        return self._ctx.execute("engine.chooseTeamPreview({})".format(json.dumps(pos)))
+        return self._execute("engine.chooseTeamPreview({})".format(json.dumps(pos)))
 
     def pop_outgoing(self):
-        return self._ctx.execute("engine.popOutgoing()")
+        return self._execute("engine.popOutgoing()")
 
     # choice end
 
     def get_state(self, raw: bool = True) -> Dict[str, Union[str, Dict[str, Any]]]:
-        state = self._ctx.execute("engine.serialize()")
+        state = self._execute("engine.serialize()")
         if not raw:
             state = deserialize(state)
         return state

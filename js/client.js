@@ -26,11 +26,11 @@ BattleRoom = {
         this.battle.roomid = this.id;
         this.battle.joinButtons = true;
         this.tooltips = new BattleTooltips(this.battle);
-        var self = this;
 
         this.controls = Controls;
 
         this.users = {};
+        this.request = {};
         this.userCount = { users: 0 };
 
         this.isMega = false;
