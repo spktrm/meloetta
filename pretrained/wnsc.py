@@ -6,12 +6,15 @@ from extract import PS_CLIENT_DIR
 
 CONDITIONS_PATH = f"pokemon-showdown-client/data/pokemon-showdown/data/conditions.ts"
 MOVES_PATH = f"pokemon-showdown-client/data/pokemon-showdown/data/moves.ts"
+BATTLE_PATH = f"pokemon-showdown-client/src/battle.ts"
 
 
 def main():
-    os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
+    # os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
 
     src = ""
+    with open(BATTLE_PATH, "r") as f:
+        src += f.read()
     with open(CONDITIONS_PATH, "r") as f:
         src += f.read()
     with open(MOVES_PATH, "r") as f:
@@ -46,6 +49,10 @@ def main():
     weathers = list(map(lambda s: s.lower(), sorted(set(weathers))))
 
     side_conditions = re.findall(r"sideCondition:\s*[\"|\'](.*)[\"|\'],", src)
+    addSideCondition = re.search(
+        r"addSideCondition\(.*\) \{([\S\s]*?)\n\t\}", src
+    ).group()
+    side_conditions += re.findall(r"case \"(.*?)\"", addSideCondition)
     side_conditions = list(sorted(set(side_conditions)))
 
     terrain = re.findall(r"terrain:\s*[\"|\'](.*)[\"|\'],", src)
@@ -67,6 +74,7 @@ def main():
         "pseudoweather": pseudoweather,
         "terrain": terrain,
         "item_effects": item_effects,
+        "side_conditions": side_conditions,
     }
     with open("pretrained/wsnc.json", "w") as f:
         json.dump(wsnc, f)

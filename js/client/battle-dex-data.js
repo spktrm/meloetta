@@ -1379,6 +1379,7 @@ var Species = function Species(id, name, data) {
     this.isMega = !!(
         this.forme && ["-mega", "-megax", "-megay"].includes(this.formeid)
     );
+
     this.cannotDynamax = !!data.cannotDynamax;
     this.canGigantamax = !!data.canGigantamax;
     this.isPrimal = !!(this.forme && this.formeid === "-primal");

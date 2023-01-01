@@ -4,7 +4,6 @@ from typing import Dict, Union, Any, List
 
 from meloetta.client import Client
 from meloetta.room import BattleRoom
-from meloetta.state import VectorizedState
 
 from bs4 import BeautifulSoup
 
@@ -43,7 +42,9 @@ class ChoiceBuilder:
         choices = []
         choices += self.get_teampreview()
         choices += self.get_moves()
+        choices += self.get_move_targets()
         choices += self.get_switches()
+        choices += self.get_switch_targets()
         if self.gen == 8:
             choices += self.get_max_moves()
         if self.gen == 9:
@@ -261,14 +262,12 @@ class Player:
                 self.started = True
                 self.room.recieve(data)
 
-        state = self.get_state()
-        # action_required = state.get("controlsShown", False)
-
         if any(prefix in data for prefix in {"|turn", "|teampreview"}):
             return True
 
+        forceSwitch = self.room.get_js_attr("request?.forceSwitch")
         if "|request" not in data:
-            return (state.get("request") or {}).get("forceSwitch")
+            return forceSwitch
 
     def reset(self):
         self.room.reset()
@@ -278,13 +277,6 @@ class Player:
     def get_state(self, raw: bool = False):
         self.state = self.room.get_state(raw=raw)
         return self.state
-
-    def get_vectorized_state(self):
-        return VectorizedState.from_battle(self.room)
-
-    def get_vectorized_choice(self):
-        state = self.room.get_state()
-        return VectorizedState.from_battle(self.room)
 
     def get_choices(self):
         return ChoiceBuilder(self.room).get_choices()

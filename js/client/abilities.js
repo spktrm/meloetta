@@ -3406,7 +3406,11 @@ const Abilities = {
         },
         onModifyAtkPriority: 5,
         onModifyAtk(atk, pokemon) {
-            if (pokemon.effectiveWeather() === "sunnyday") {
+            if (
+                ["sunnyday", "desolateland"].includes(
+                    pokemon.effectiveWeather()
+                )
+            ) {
                 this.debug("Orichalcum boost");
                 return this.chainModify([5461, 4096]);
             }
