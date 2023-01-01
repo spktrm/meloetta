@@ -1,5 +1,6 @@
 import os
 import json
+import torch
 import traceback
 import numpy as np
 
@@ -352,10 +353,11 @@ def main():
                         value = get_nested(sample, feature)
                         sample["encs"][feature] = dex.vectorize(feature, value)
 
-                    sample["feature_vector"] = np.concatenate(
+                    feature_vector = np.concatenate(
                         [sample["encs"][feature] for feature in dex.schema]
                     )
-                data = np.stack([sample["feature_vector"] for sample in samples])
+                    sample["feature_vector"] = torch.from_numpy(feature_vector)
+                data = torch.stack([sample["feature_vector"] for sample in samples])
             except ValueError:
                 pass
             except:
@@ -365,7 +367,7 @@ def main():
                 for key, values in schema[f"gen{gen}"][dex_name].items():
                     for index, value in enumerate(values):
                         schema[f"gen{gen}"][dex_name][key][index] = json.loads(value)
-                np.save(os.path.join(save_dir, dex_name), data)
+                torch.save(data, os.path.join(save_dir, dex_name + ".pt"))
 
     with open("pretrained/schema.json", "w") as f:
         json.dump(schema, f)
