@@ -1622,6 +1622,8 @@ BattleRoom = {
         //     this.autoTimerActivated = true;
         // }
 
+        // BattleChoiceBuilder.fixRequest(request, this.battle);
+
         request.requestType = "move";
         if (request.forceSwitch) {
             request.requestType = "switch";

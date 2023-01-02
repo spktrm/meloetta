@@ -56,6 +56,69 @@ class PublicSide(NamedTuple):
     stickyweb: torch.Tensor
 
 
+class PrivateSide(NamedTuple):
+    reserve: torch.Tensor
+
+
+class PrivatePokemon(NamedTuple):
+    ability: Union[torch.Tensor, None]
+    active: Union[torch.Tensor, None]
+    canGmax: Union[torch.Tensor, None]
+    commanding: Union[torch.Tensor, None]
+    fainted: Union[torch.Tensor, None]
+    gender: Union[torch.Tensor, None]
+    hp: Union[torch.Tensor, None]
+    item: Union[torch.Tensor, None]
+    level: Union[torch.Tensor, None]
+    maxhp: Union[torch.Tensor, None]
+    moves: Union[torch.Tensor, None]
+    name: Union[torch.Tensor, None]
+    reviving: Union[torch.Tensor, None]
+    forme: Union[torch.Tensor, None]
+    stat_atk: Union[torch.Tensor, None]
+    stat_def: Union[torch.Tensor, None]
+    stat_spa: Union[torch.Tensor, None]
+    stat_spd: Union[torch.Tensor, None]
+    stat_spe: Union[torch.Tensor, None]
+    status: Union[torch.Tensor, None]
+    teraType: Union[torch.Tensor, None]
+    terastallized: Union[torch.Tensor, None]
+
+    def vector(
+        self,
+        backend: str = _DEFAULT_BACKEND,
+        with_schema: bool = False,
+        *args,
+        **kwargs
+    ):
+        arr = []
+        schema = {}
+
+        for field in self._fields:
+            value = getattr(self, field)
+
+            start = len(arr)
+            if isinstance(value, int):
+                arr.append(value)
+            elif isinstance(value, list):
+                arr += value
+
+            finish = len(arr)
+            schema[field] = (start, finish)
+
+        if backend == "numpy":
+            arr = np.array(arr, *args, **kwargs)
+        elif backend == "torch":
+            arr = torch.tensor(arr, *args, **kwargs)
+        else:
+            raise ValueError("Invalid Backend, must be one of `numpy` or `torch`")
+
+        if with_schema:
+            return NamedVector(arr, schema)
+        else:
+            return arr
+
+
 class ReservePublicPokemon(NamedTuple):
     species: torch.Tensor
     forme: torch.Tensor
@@ -171,6 +234,7 @@ class ActivePublicPokemon(NamedTuple):
 
 
 class State(NamedTuple):
+    private_side: PrivateSide
     public_sides: PublicSide
     weather: torch.Tensor
     weather_time_left: torch.Tensor
@@ -191,6 +255,7 @@ class VectorizedState:
         self.room = room
         self.battle = battle
         self.gen = self.battle["dex"]["gen"]
+        self.moves = {}
 
     @classmethod
     def from_battle(self, room: BattleRoom, battle: Battle):
@@ -198,7 +263,9 @@ class VectorizedState:
         return vstate.vectorize()
 
     def vectorize(self):
-        public_sides = self._vectorize_sides()
+        public_sides = self._vectorize_public_sides()
+        private_side = self._vectorize_private_side()
+
         pseudoweathers = {
             (pseudoweather[0]).replace(" ", "").lower(): pseudoweather[1:]
             for pseudoweather in self.battle["pseudoWeather"]
@@ -228,6 +295,7 @@ class VectorizedState:
         turn = expand_bt(turn)
 
         return State(
+            private_side=private_side,
             public_sides=public_sides,
             weather=weather,
             weather_time_left=weather_time_left,
@@ -237,7 +305,7 @@ class VectorizedState:
             log=self.battle["stepQueue"],
         )
 
-    def _vectorize_sides(self):
+    def _vectorize_public_sides(self) -> PublicSide:
         p1 = self._vectorize_public_side("mySide")
         p2 = self._vectorize_public_side("farSide")
         combined_fields = {}
@@ -245,26 +313,108 @@ class VectorizedState:
             combined_fields[field] = torch.stack((value1, value2), dim=2)
         return PublicSide(**combined_fields)
 
+    def _vectorize_private_side(self) -> PrivateSide:
+        reserve = [
+            self._vectorize_private_pokemon(pokemon)
+            for pokemon in self.battle["myPokemon"]
+        ]
+        reserve = torch.stack(reserve)
+        reserve = expand_bt(reserve)
+        return PrivateSide(reserve=reserve)
+
+    def _vectorize_private_pokemon(self, pokemon: Dict[str, Any]):
+        if self.gen == 9:
+            if pokemon.get("commanding"):
+                commanding = 1
+            else:
+                commanding = 0
+
+            if pokemon.get("reviving"):
+                reviving = 1
+            else:
+                reviving = 0
+
+            if pokemon.get("teraType"):
+                teraType = get_type_token(self.gen, pokemon["teraType"])
+            else:
+                teraType = -1
+
+            if pokemon.get("terastallized"):
+                terastallized = 1
+            else:
+                terastallized = 0
+
+        else:
+            commanding = None
+            reviving = None
+            teraType = None
+            terastallized = None
+
+        if self.gen == 8:
+            if pokemon.get("canGmax"):
+                canGmax = 1
+            else:
+                canGmax = 0
+        else:
+            canGmax = None
+
+        myside = self.moves.get("mySide") or {}
+        move_track = myside.get(pokemon["ident"]) or {}
+
+        moves = []
+        for move in pokemon["moves"]:
+            pp = move_track.get(move, 0)
+            moves += [get_move_token(self.gen, "id", move), pp]
+
+        forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
+
+        return PrivatePokemon(
+            ability=get_ability_token(self.gen, "id", pokemon["baseAbility"]),
+            active=1 if pokemon["active"] else 0,
+            canGmax=canGmax,
+            commanding=commanding,
+            fainted=1 if pokemon.get("fainted") else 0,
+            gender=get_gender_token(pokemon["gender"]),
+            hp=pokemon["hp"],
+            item=get_item_token(self.gen, "name", pokemon["item"]),
+            level=pokemon["level"],
+            maxhp=pokemon["maxhp"],
+            moves=moves,
+            reviving=reviving,
+            name=get_species_token(self.gen, "name", pokemon["name"]),
+            forme=get_species_token(self.gen, "forme", forme),
+            stat_atk=pokemon["stats"]["atk"],
+            stat_def=pokemon["stats"]["def"],
+            stat_spa=pokemon["stats"]["spa"],
+            stat_spd=pokemon["stats"]["spd"],
+            stat_spe=pokemon["stats"]["spe"],
+            status=get_status_token(pokemon["status"]),
+            teraType=teraType,
+            terastallized=terastallized,
+        ).vector()
+
     def _vectorize_public_side(self, side_id: str):
         side = self.battle[side_id]
 
         controlling = self.battle["pokemonControlled"]
 
         # This is a measure for removing duplicates from zoroak
-        # To be clear, this doest not remove zoroark, but onyl mons 
+        # To be clear, this doesn't remove zoroark, but only mons
         # that are affected by -replace
         # TODO: account for zororak duplicates somehow...
         pokemon = [p for p in side["pokemon"] if not p.get("status", "") != "???"]
 
         active = [
-            self._vectorize_public_active_pokemon(p) for p in pokemon[:controlling]
+            self._vectorize_public_active_pokemon(side_id, p)
+            for p in pokemon[:controlling]
         ]
         active += [torch.zeros(_ACTIVE_SIZE) for _ in range(controlling - len(active))]
         active = torch.stack(active)
         active = expand_bt(active)
 
         reserve = [
-            self._vectorize_public_reserve_pokemon(p) for p in pokemon[controlling:]
+            self._vectorize_public_reserve_pokemon(side_id, p)
+            for p in pokemon[controlling:]
         ]
         num_reserve_padding = 6 - controlling - len(reserve)
         reserve += [torch.zeros(_RESERVE_SIZE) for _ in range(num_reserve_padding)]
@@ -324,15 +474,23 @@ class VectorizedState:
             wisher=wisher_slot,
         )
 
-    def _vectorize_public_active_pokemon(self, pokemon):
+    def _vectorize_public_active_pokemon(self, side_id: str, pokemon: Dict[str, Any]):
         if pokemon is None:
             return None
 
         moves = []
+        if side_id not in self.moves:
+            self.moves[side_id] = {}
+        if pokemon["ident"] not in self.moves[side_id]:
+            self.moves[side_id][pokemon["ident"]] = {}
+
         for move, pp in pokemon["moveTrack"]:
+            self.moves[side_id][pokemon["ident"]][move] = pp
             moves += [get_move_token(self.gen, "name", move), pp]
+
         for _ in range(8 - int(len(moves) / 2)):
             moves += [-1, -1]
+
         boosts = [pokemon["boosts"].get(boost, 0) for boost in BOOSTS]
         volatiles = [
             1 if volatile in pokemon["volatiles"] else 0 for volatile in VOLATILES
@@ -364,10 +522,11 @@ class VectorizedState:
             toxic_turns=pokemon["statusData"]["toxicTurns"],
         ).vector()
 
-    def _vectorize_public_reserve_pokemon(self, pokemon):
+    def _vectorize_public_reserve_pokemon(self, side_id: str, pokemon: Dict[str, Any]):
         moves = []
         for move, pp in pokemon["moveTrack"]:
             moves += [get_move_token(self.gen, "name", move), pp]
+        self.moves[pokemon["ident"]] = moves
         for _ in range(8 - int(len(moves) / 2)):
             moves += [-1, -1]
         forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")

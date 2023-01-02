@@ -1,3 +1,5 @@
+import uuid
+import json
 import random
 import asyncio
 
@@ -54,7 +56,7 @@ class SelfPlayWorker:
         await asyncio.sleep(1)
 
         # battle_format = "gen8randomdoublesbattle"
-        battle_format = "gen9randombattle"
+        battle_format = "gen3randombattle"
         # battle_format = "gen3randombattle"
         team = "null"
         # battle_format = "gen9doublesou"
@@ -115,7 +117,7 @@ class SelfPlayWorker:
 
 def main():
     procs = []
-    for i in range(20):  # num workes (check with os.cpu_count())
+    for i in range(1):  # num workes (check with os.cpu_count())
         worker = SelfPlayWorker(i, 2)  # 2 is players per worker
         # This config will spawn 20 workers with 2 players each
         # for a total of 40 players, playing 20 games.
