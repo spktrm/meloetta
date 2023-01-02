@@ -65,7 +65,7 @@ def load_feature_embedding(type: str, gen: int):
 
 
 Schema = Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]
-with open("pretrained/schema.json", "r") as f:
+with open("meloetta/pretrained/schema.json", "r") as f:
     schema: Schema = json.loads(f.read())
 
 tokenized_schema = deepcopy(schema)
@@ -115,7 +115,7 @@ def get_status_token(value: str):
     return STATUS.get(value, -1)
 
 
-with open("pretrained/wsnc.json", "r") as f:
+with open("meloetta/pretrained/wsnc.json", "r") as f:
     WSNC = json.loads(f.read())
 
 VOLATILES = WSNC["volatiles"]

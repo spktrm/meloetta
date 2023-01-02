@@ -366,6 +366,9 @@ class VectorizedState:
             pp = move_track.get(move, 0)
             moves += [get_move_token(self.gen, "id", move), pp]
 
+        for _ in range(8 - int(len(moves) / 2)):
+            moves += [-1, -1]
+
         forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
 
         return PrivatePokemon(
@@ -388,7 +391,7 @@ class VectorizedState:
             stat_spa=pokemon["stats"]["spa"],
             stat_spd=pokemon["stats"]["spd"],
             stat_spe=pokemon["stats"]["spe"],
-            status=get_status_token(pokemon["status"]),
+            status=get_status_token(pokemon.get("status")),
             teraType=teraType,
             terastallized=terastallized,
         ).vector()
