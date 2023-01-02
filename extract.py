@@ -63,11 +63,11 @@ def main():
         except:
             print(f"{export} failed to write")
         else:
-            with open(f"js/data/{export}.json", "w") as f:
+            with open(f"meloetta/js/data/{export}.json", "w") as f:
                 json.dump(obj, f)
 
     try:
-        os.system("npx prettier -w --tab-width 4 js")
+        os.system("npx prettier -w --tab-width 4 meloetta/js")
     except:
         print("[OPTIONAL] run `npx install prettier` to install prettier")
         print("[OPTIONAL] then run `npx prettier -w --tab-width 4 js` to format")
