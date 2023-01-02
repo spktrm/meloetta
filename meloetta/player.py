@@ -25,9 +25,10 @@ class ChoiceBuilder:
         tier = room.get_js_attr("battle.tier")
         self.gen = int(re.search(r"([0-9])", tier).group())
         self.gametype = room.get_js_attr("battle.gameType")
-
         controls = room.get_js_attr("controls.controls")
-        choices = room.get_js_attr("choice.choices")
+
+        self.choice = self.room.get_js_attr("choice")
+        choices = self.choice.get("choices", [])
         choices = [c for c in choices if c is not None]
         self.choices: List[str] = choices
         self.pos = len(choices)
@@ -49,27 +50,72 @@ class ChoiceBuilder:
 
     def get_choices(self):
         choices = []
-        choices += self.get_teampreview()
-        choices += self.get_moves()
-        choices += self.get_switches()
+        action_masks = {}
+
+        switch = False
+        switch_mask = {index: False for index in range(6)}
+        switches = self.get_switches() + self.get_teampreview()
+        if switches:
+            switch = True
+            switch_mask.update(
+                {int(action[0].split("|")[-1]): True for action in switches}
+            )
+        switch_mask = torch.tensor(list(switch_mask.values()))
+        choices += switches
+
+        move = False
+        moves = self.get_moves()
+        move_mask = {index: False for index in range(1, 5)}
+        if moves:
+            move = True
+            move_mask.update({int(action[2][0]): True for action in moves})
+        move_mask = torch.tensor(list(move_mask.values()))
+        choices += moves
 
         targets = self.get_move_targets() + self.get_switch_targets()
+        n = 2 if self.gametype == "doubles" else 3
+        target_values = list(range(-n, n + 1))
+        target_values.remove(0)
+        target_mask = {index: False for index in target_values}
         if targets:
             targeting = torch.tensor(1)
+            target_mask.update({int(action[2][0]): True for action in targets})
         else:
             targeting = torch.tensor(0)
+        target_mask = torch.tensor(list(target_mask.values()))
         targeting = expand_bt(targeting)
 
         choices += targets
 
-        if self.gen == 8:
-            choices += self.get_max_moves()
+        tera = False
+        max = False
+        mega = False
+        zmove = False
+
         if self.gen == 9:
-            choices += self.get_tera_moves()
+            tera_moves = self.get_tera_moves()
+            choices += tera_moves
+            if tera_moves:
+                tera = True
+
+        if self.gen == 8:
+            max_moves = self.get_max_moves()
+            choices += max_moves
+            if max_moves:
+                max = True
+
         if self.gen == 7:
-            choices += self.get_zmoves()
+            zmoves = self.get_zmoves()
+            choices += zmoves
+            if zmoves:
+                zmove = True
+
         if self.gen == 7 or self.gen == 6:
-            choices += self.get_mega()
+            mega_moves = self.get_mega()
+            choices += mega_moves
+            if mega_moves:
+                mega = True
+
         if self.gametype == "triples" and self.pos != 1:
             choices += self.get_shifts()
 
@@ -77,6 +123,15 @@ class ChoiceBuilder:
             prev_choices = self.get_prev_choices()
         else:
             prev_choices = None
+
+        action_type = torch.tensor([move, switch])
+        flags = torch.tensor([mega, zmove, max, tera])
+
+        action_masks["action_type"] = expand_bt(action_type)
+        action_masks["valid_moves"] = expand_bt(move_mask)
+        action_masks["valid_switches"] = expand_bt(switch_mask)
+        action_masks["flags"] = expand_bt(flags)
+        action_masks["targets"] = expand_bt(target_mask)
 
         return targeting, prev_choices, choices
 
@@ -117,8 +172,14 @@ class ChoiceBuilder:
             )
             choices.append(prev_choice_tensor)
 
+        done = len(self.choices) or self.choice.get("done", 0)
         choices += [torch.tensor([-1, -1, -1, -1]) for _ in range(remaining)]
-        return expand_bt(torch.stack(choices))
+        choices = expand_bt(torch.stack(choices))
+
+        return {
+            "choices": choices,
+            "done": expand_bt(torch.tensor(done)),
+        }
 
     def get_teampreview(self):
         teampreview = self.soup.find_all(attrs={"name": "chooseTeamPreview"})
