@@ -1,4 +1,5 @@
 import re
+import json
 import torch
 
 from typing import Dict, Union, Any, List
@@ -177,6 +178,7 @@ class ChoiceBuilder:
         return max_moves
 
     def get_mega(self):
+        mega_moves = []
         if not self.isMega and "megaevo" in self.checkboxes:
             mega_moves = self.soup.find_all(attrs={"name": "chooseMove"})
             return [
@@ -195,6 +197,7 @@ class ChoiceBuilder:
                 )
                 for choice in mega_moves
             ]
+        return mega_moves
 
     def get_zmoves(self):
         z_moves = []
@@ -219,6 +222,7 @@ class ChoiceBuilder:
                 for choice in z_moves
             ]
             return z_moves
+        return z_moves
 
     def get_tera_moves(self):
         tera_moves = []
@@ -302,7 +306,6 @@ class Player:
         cls = Player()
         cls.client = await Client.create(username, password, address)
         cls.room = BattleRoom()
-        cls.action_required = False
         cls.request = None
         cls.started = False
         return cls
@@ -333,12 +336,11 @@ class Player:
 
     def reset(self):
         self.room.reset()
-        self.choice = None
+        self.started = False
         self.request = None
 
     def get_state(self, raw: bool = False):
-        self.state = self.room.get_state(raw=raw)
-        return self.state
+        return self.room.get_state(raw=raw)
 
     def get_choices(self):
         return ChoiceBuilder(self.room).get_choices()
