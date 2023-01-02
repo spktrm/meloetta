@@ -6,7 +6,7 @@ from copy import deepcopy
 from typing import Dict, Any
 
 
-DATA_DIR = "js/data"
+DATA_DIR = "meloetta/js/data"
 
 with open(os.path.join(DATA_DIR, "BattleAbilities.json"), "r") as f:
     BattleAbilities = json.loads(f.read())

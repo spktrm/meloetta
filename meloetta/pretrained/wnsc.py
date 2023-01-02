@@ -76,7 +76,7 @@ def main():
         "item_effects": item_effects,
         "side_conditions": side_conditions,
     }
-    with open("pretrained/wsnc.json", "w") as f:
+    with open("meloetta/pretrained/wsnc.json", "w") as f:
         json.dump(wsnc, f)
 
 

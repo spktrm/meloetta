@@ -13,10 +13,10 @@ from sklearn.cluster import KMeans
 from tqdm import tqdm
 
 descriptors = [
-    "js/data/BattlePokedex.json",
-    "js/data/BattleAbilities.json",
-    "js/data/BattleItems.json",
-    "js/data/BattleMovedex.json",
+    "meloetta/js/data/BattlePokedex.json",
+    "meloetta/js/data/BattleAbilities.json",
+    "meloetta/js/data/BattleItems.json",
+    "meloetta/js/data/BattleMovedex.json",
 ]
 
 

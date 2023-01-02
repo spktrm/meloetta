@@ -319,7 +319,7 @@ def main():
         battle = BattleRoom()
         battle.set_gen(gen)
 
-        with open("js/data/BattleTeambuilderTable.json", "r") as f:
+        with open("meloetta/js/data/BattleTeambuilderTable.json", "r") as f:
             teambuilder_table = json.load(f)
 
         save_dir = f"pretrained/gen{gen}"
