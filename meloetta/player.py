@@ -1,8 +1,8 @@
 import re
-import json
 import torch
 
-from typing import Dict, Union, Any, List
+from collections import OrderedDict
+from typing import Union, NamedTuple, Tuple, Callable, Dict, Any, List
 
 from meloetta.client import Client
 from meloetta.room import BattleRoom
@@ -19,12 +19,25 @@ from bs4 import BeautifulSoup
 State = Dict[str, Union[str, Dict[str, Any], List[str]]]
 
 
+class Choices(NamedTuple):
+    targeting: torch.Tensor
+    prev_choices: torch.Tensor
+    action_masks: Dict[str, torch.Tensor]
+    choices: Dict[str, Tuple[Callable, List[Any], Dict[str, Any]]]
+
+
 class ChoiceBuilder:
     def __init__(self, room: BattleRoom):
         self.room = room
         tier = room.get_js_attr("battle.tier")
         self.gen = int(re.search(r"([0-9])", tier).group())
         self.gametype = room.get_js_attr("battle.gameType")
+        if self.gametype == "singles":
+            self.n = 1
+        if self.gametype == "doubles":
+            self.n = 2
+        if self.gametype == "triples":
+            self.n = 3
         controls = room.get_js_attr("controls.controls")
 
         self.choice = self.room.get_js_attr("choice")
@@ -49,44 +62,48 @@ class ChoiceBuilder:
         }
 
     def get_choices(self):
-        choices = []
+        choices = {}
         action_masks = {}
 
         switch = False
-        switch_mask = {index: False for index in range(6)}
-        switches = self.get_switches() + self.get_teampreview()
+        switch_mask = OrderedDict({index: False for index in range(6)})
+        switches = self.get_switches()
+        switches.update(self.get_teampreview())
         if switches:
             switch = True
-            switch_mask.update(
-                {int(action[0].split("|")[-1]): True for action in switches}
-            )
+            switch_mask.update({index: True for index in switches})
+
         switch_mask = torch.tensor(list(switch_mask.values()))
-        choices += switches
+        choices["switches"] = switches
 
         move = False
         moves = self.get_moves()
-        move_mask = {index: False for index in range(1, 5)}
+        move_mask = OrderedDict({index: False for index in range(4)})
+        max_move_mask = OrderedDict({index: False for index in range(4)})
+
         if moves:
             move = True
-            move_mask.update({int(action[2][0]): True for action in moves})
-        move_mask = torch.tensor(list(move_mask.values()))
-        choices += moves
+            move_mask.update({index: True for index in moves})
 
-        targets = self.get_move_targets() + self.get_switch_targets()
-        n = 2 if self.gametype == "doubles" else 3
-        target_values = list(range(-n, n + 1))
-        target_values.remove(0)
-        target_mask = {index: False for index in target_values}
+        move_targets = self.get_move_targets()
+        switch_targets = self.get_switch_targets()
+        targets = move_targets
+        targets.update(switch_targets)
+
+        target_values = list(range(2 * self.n))
+        target_mask = OrderedDict({index: False for index in target_values})
+
         if targets:
             targeting = torch.tensor(1)
-            target_mask.update({int(action[2][0]): True for action in targets})
+            target_mask.update({index: True for index in targets})
         else:
             targeting = torch.tensor(0)
+
         target_mask = torch.tensor(list(target_mask.values()))
+        choices["targets"] = targets
         targeting = expand_bt(targeting)
 
-        choices += targets
-
+        noflag = True
         tera = False
         max = False
         mega = False
@@ -94,49 +111,69 @@ class ChoiceBuilder:
 
         if self.gen == 9:
             tera_moves = self.get_tera_moves()
-            choices += tera_moves
             if tera_moves:
+                choices["tera_moves"] = tera_moves
+                move_mask.update({index: True for index in tera_moves})
+                move = True
                 tera = True
 
         if self.gen == 8:
             max_moves = self.get_max_moves()
-            choices += max_moves
             if max_moves:
+                choices["max_moves"] = max_moves
+                max_move_mask.update({index: True for index in max_moves})
+                move = True
                 max = True
+                if not moves:
+                    noflag = False
 
         if self.gen == 7:
             zmoves = self.get_zmoves()
-            choices += zmoves
             if zmoves:
+                choices["zmoves"] = zmoves
+                move_mask.update({index: True for index in zmoves})
+                move = True
                 zmove = True
 
         if self.gen == 7 or self.gen == 6:
             mega_moves = self.get_mega()
-            choices += mega_moves
             if mega_moves:
+                choices["mega_moves"] = mega_moves
+                move_mask.update({index: True for index in mega_moves})
+                move = True
                 mega = True
 
         if self.gametype == "triples" and self.pos != 1:
-            choices += self.get_shifts()
+            choices.update(self.get_shifts())
 
         if self.gametype != "singles":  # only relevant for gamemodes not singles
             prev_choices = self.get_prev_choices()
         else:
             prev_choices = None
 
+        max_move_mask = torch.tensor(list(max_move_mask.values()))
+        move_mask = torch.tensor(list(move_mask.values()))
+        choices["moves"] = moves
+
         action_type = torch.tensor([move, switch])
-        flags = torch.tensor([mega, zmove, max, tera])
+        flags = torch.tensor([noflag, mega, zmove, max, tera])
 
-        action_masks["action_type"] = expand_bt(action_type)
-        action_masks["valid_moves"] = expand_bt(move_mask)
-        action_masks["valid_switches"] = expand_bt(switch_mask)
-        action_masks["flags"] = expand_bt(flags)
-        action_masks["targets"] = expand_bt(target_mask)
+        action_masks["action_type_mask"] = expand_bt(action_type)
+        action_masks["moves_mask"] = expand_bt(move_mask)
+        action_masks["max_moves_mask"] = expand_bt(max_move_mask)
+        action_masks["switches_mask"] = expand_bt(switch_mask)
+        action_masks["flags_mask"] = expand_bt(flags)
+        action_masks["targets_mask"] = expand_bt(target_mask)
 
-        return targeting, prev_choices, choices
+        return Choices(
+            targeting,
+            prev_choices,
+            action_masks,
+            choices,
+        )
 
     def get_prev_choices(self):
-        choices = []
+        prev_choices = []
         total = 2 if self.gametype == "doubles" else 3
         remaining = total - len(self.choices) - 1
         for prev_choice in self.choices:
@@ -170,38 +207,46 @@ class ChoiceBuilder:
             prev_choice_tensor = torch.tensor(
                 [prev_choice_token, index, flag_token, target_token]
             )
-            choices.append(prev_choice_tensor)
+            prev_choices.append(prev_choice_tensor)
 
         done = len(self.choices) or self.choice.get("done", 0)
-        choices += [torch.tensor([-1, -1, -1, -1]) for _ in range(remaining)]
-        choices = expand_bt(torch.stack(choices))
+        prev_choices += [torch.tensor([-1, -1, -1, -1]) for _ in range(remaining)]
+        prev_choices = expand_bt(torch.stack(prev_choices))
 
         return {
-            "choices": choices,
-            "done": expand_bt(torch.tensor(done)),
+            "prev_choices": prev_choices,
+            "choices_done": expand_bt(torch.tensor(done)),
         }
 
     def get_teampreview(self):
-        teampreview = self.soup.find_all(attrs={"name": "chooseTeamPreview"})
-        return [
-            (
-                choice.attrs.get("data-tooltip"),
+        teampreview = self.soup.find_all(
+            lambda tag: ("disabled" not in tag.attrs),
+            attrs={"name": "chooseTeamPreview"},
+        )
+        choices = {}
+        for choice in teampreview:
+            index = choice.attrs.get("value")
+            choices[int(index)] = (
                 self.room.choose_team_preview,
                 [choice.attrs.get("value")],
                 {},
             )
-            for choice in teampreview
-        ]
+        return choices
 
     def get_moves(self):
         self.reg_moves = self.soup.find_all(
-            attrs={"name": "chooseMove", "data-tooltip": re.compile(r"^move\|")}
+            lambda tag: ("disabled" not in tag.attrs),
+            attrs={
+                "name": "chooseMove",
+                "data-tooltip": re.compile(r"^move\|"),
+            },
         )
-        return [
-            (
-                choice.attrs.get("data-tooltip"),
+        choices = {}
+        for choice in self.reg_moves:
+            index = choice.attrs.get("value")
+            choices[int(index) - 1] = (
                 self.room.choose_move,
-                [choice.attrs.get("value")],
+                [index],
                 {
                     "target": choice.attrs.get("data-target"),
                     "isMega": False,
@@ -211,20 +256,23 @@ class ChoiceBuilder:
                     "isTerastal": False,
                 },
             )
-            for choice in self.reg_moves
-        ]
+        return choices
 
     def get_max_moves(self):
-        max_moves = []
-        if not self.isDynamax:
+        choices = {}
+        if not self.isDynamax:  # and "dynamax" in self.checkboxes:
             max_moves = self.soup.find_all(
-                attrs={"name": "chooseMove", "data-tooltip": re.compile(r"^maxmove\|")}
+                lambda tag: ("disabled" not in tag.attrs),
+                attrs={
+                    "name": "chooseMove",
+                    "data-tooltip": re.compile(r"^maxmove\|"),
+                },
             )
-            max_moves = [
-                (
-                    choice.attrs.get("data-tooltip"),
+            for choice in list(max_moves):
+                index = choice.attrs.get("value")
+                choices[int(index) - 1] = (
                     self.room.choose_move,
-                    [choice.attrs.get("value")],
+                    [index],
                     {
                         "target": choice.attrs.get("data-target"),
                         "isMega": False,
@@ -234,17 +282,18 @@ class ChoiceBuilder:
                         "isTerastal": False,
                     },
                 )
-                for choice in max_moves
-            ]
-        return max_moves
+        return choices
 
     def get_mega(self):
-        mega_moves = []
+        choices = {}
         if not self.isMega and "megaevo" in self.checkboxes:
-            mega_moves = self.soup.find_all(attrs={"name": "chooseMove"})
-            return [
-                (
-                    choice.attrs.get("data-tooltip"),
+            mega_moves = self.soup.find_all(
+                lambda tag: ("disabled" not in tag.attrs),
+                attrs={"name": "chooseMove"},
+            )
+            for choice in mega_moves:
+                index = choice.attrs.get("value")
+                choices[int(index) - 1] = (
                     self.room.choose_move,
                     [choice.attrs.get("value")],
                     {
@@ -256,21 +305,20 @@ class ChoiceBuilder:
                         "isTerastal": False,
                     },
                 )
-                for choice in mega_moves
-            ]
-        return mega_moves
+        return choices
 
     def get_zmoves(self):
-        z_moves = []
+        choices = {}
         if not self.isZMove and "zmove" in self.checkboxes:
             z_moves = self.soup.find_all(
-                attrs={"name": "chooseMove", "data-tooltip": re.compile(r"^zmove\|")}
+                lambda tag: ("disabled" not in tag.attrs),
+                attrs={"name": "chooseMove", "data-tooltip": re.compile(r"^zmove\|")},
             )
-            z_moves = [
-                (
-                    choice.attrs.get("data-tooltip"),
+            for choice in list(z_moves):
+                index = choice.attrs.get("value")
+                choices[int(index) - 1] = (
                     self.room.choose_move,
-                    [choice.attrs.get("value")],
+                    [index],
                     {
                         "target": choice.attrs.get("data-target"),
                         "isMega": False,
@@ -280,19 +328,16 @@ class ChoiceBuilder:
                         "isTerastal": False,
                     },
                 )
-                for choice in z_moves
-            ]
-            return z_moves
-        return z_moves
+        return choices
 
     def get_tera_moves(self):
-        tera_moves = []
+        choices = {}
         if not self.isTerastal and "terastallize" in self.checkboxes:
-            tera_moves = [
-                (
-                    choice.attrs.get("data-tooltip") + " tera",
+            for choice in self.reg_moves:
+                index = choice.attrs.get("value")
+                choices[int(index) - 1] = (
                     self.room.choose_move,
-                    [choice.attrs.get("value")],
+                    [index],
                     {
                         "target": choice.attrs.get("data-target"),
                         "isMega": False,
@@ -302,57 +347,54 @@ class ChoiceBuilder:
                         "isTerastal": True,
                     },
                 )
-                for choice in self.reg_moves
-            ]
-        return tera_moves
+        return choices
 
     def get_move_targets(self):
-        move_targets = self.soup.find_all(attrs={"name": "chooseMoveTarget"})
-        return [
-            (
-                choice.attrs.get("data-tooltip"),
-                self.room.choose_move_target,
-                [choice.attrs.get("value")],
-                {},
-            )
-            for choice in move_targets
-        ]
+        move_targets = self.soup.find_all(
+            lambda tag: ("disabled" not in tag.attrs),
+            attrs={"name": "chooseMoveTarget"},
+        )
+        choices = {}
+        for choice in move_targets:
+            index = choice.attrs.get("value")
+            key = int(index)
+            if key > 0:
+                key -= 1
+            key += self.n
+            choices[key] = (self.room.choose_move_target, [index], {})
+        return choices
 
     def get_switches(self):
-        switches = self.soup.find_all(attrs={"name": "chooseSwitch"})
-        return [
-            (
-                choice.attrs.get("data-tooltip"),
-                self.room.choose_switch,
-                [choice.attrs.get("value")],
-                {},
-            )
-            for choice in switches
-        ]
+        switches = self.soup.find_all(
+            lambda tag: ("disabled" not in tag.attrs),
+            attrs={"name": "chooseSwitch"},
+        )
+        choices = {}
+        for choice in switches:
+            index = choice.attrs.get("value")
+            choices[int(index)] = (self.room.choose_switch, [index], {})
+        return choices
 
     def get_switch_targets(self):
-        switch_targets = self.soup.find_all(attrs={"name": "chooseSwitchTarget"})
-        return [
-            (
-                choice.attrs.get("data-tooltip"),
-                self.room.choose_switch_target,
-                [choice.attrs.get("value")],
-                {},
-            )
-            for choice in switch_targets
-        ]
+        switch_targets = self.soup.find_all(
+            lambda tag: ("disabled" not in tag.attrs),
+            attrs={"name": "chooseSwitchTarget"},
+        )
+        choices = {}
+        for choice in switch_targets:
+            index = choice.attrs.get("value")
+            choices[int(index)] = (self.room.choose_switch_target, [index], {})
+        return choices
 
     def get_shifts(self):
-        shift = self.soup.find_all(attrs={"name": "chooseShift"})
-        return [
-            (
-                choice.attrs.get("data-tooltip"),
-                self.room.choose_shift,
-                [],
-                {},
-            )
+        shift = self.soup.find_all(
+            lambda tag: ("disabled" not in tag.attrs),
+            attrs={"name": "chooseShift"},
+        )
+        return {
+            int(choice.attrs.get("value")): (self.room.choose_shift, [], {})
             for choice in shift
-        ]
+        }
 
 
 class Player:

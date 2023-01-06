@@ -42,7 +42,7 @@ DATA_SRC = [
 def main():
     for src_path in CLIENT_SRC:
         file = os.path.split(src_path)[-1]
-        dst_path = os.path.join("js/client", file)
+        dst_path = os.path.join("meloetta/js/client", file)
         shutil.copy(src_path, dst_path)
 
     _ctx = MiniRacer()

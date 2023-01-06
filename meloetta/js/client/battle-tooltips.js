@@ -105,17 +105,17 @@
         if (!weatherName) weatherName = this.weatherName;
         else if (weatherName !== this.weatherName) return false;
         for (
-            var _i2 = 0, _this$battle$sides2 = this.battle.sides;
-            _i2 < _this$battle$sides2.length;
-            _i2++
+            var _i = 0, _this$battle$sides = this.battle.sides;
+            _i < _this$battle$sides.length;
+            _i++
         ) {
-            var side = _this$battle$sides2[_i2];
+            var side = _this$battle$sides[_i];
             for (
-                var _i4 = 0, _side$active2 = side.active;
-                _i4 < _side$active2.length;
-                _i4++
+                var _i2 = 0, _side$active = side.active;
+                _i2 < _side$active.length;
+                _i2++
             ) {
-                var active = _side$active2[_i4];
+                var active = _side$active[_i2];
                 if (
                     active &&
                     ["Air Lock", "Cloud Nine"].includes(active.ability)
@@ -341,11 +341,11 @@ var BattleTooltips = (function () {
                     var species = _pokemon.getBaseSpecies().baseSpecies;
                     var index = 1;
                     for (
-                        var _i6 = 0, _side$pokemon2 = side.pokemon;
-                        _i6 < _side$pokemon2.length;
-                        _i6++
+                        var _i3 = 0, _side$pokemon = side.pokemon;
+                        _i3 < _side$pokemon.length;
+                        _i3++
                     ) {
-                        var otherPokemon = _side$pokemon2[_i6];
+                        var otherPokemon = _side$pokemon[_i3];
                         if (
                             otherPokemon.getBaseSpecies().baseSpecies ===
                             species
@@ -659,11 +659,11 @@ var BattleTooltips = (function () {
             var difference = false;
             var basePowers = [];
             for (
-                var _i8 = 0, _foeActive2 = foeActive;
-                _i8 < _foeActive2.length;
-                _i8++
+                var _i4 = 0, _foeActive = foeActive;
+                _i4 < _foeActive.length;
+                _i4++
             ) {
-                var active = _foeActive2[_i8];
+                var active = _foeActive[_i4];
                 if (!active) continue;
                 value = this.getMoveBasePower(move, moveType, value, active);
                 _basePower = "" + value;
@@ -1090,21 +1090,21 @@ var BattleTooltips = (function () {
             var battlePokemon =
                 clientPokemon || this.battle.findCorrespondingPokemon(pokemon);
             for (
-                var _i10 = 0, _serverPokemon$moves2 = serverPokemon.moves;
-                _i10 < _serverPokemon$moves2.length;
-                _i10++
+                var _i5 = 0, _serverPokemon$moves = serverPokemon.moves;
+                _i5 < _serverPokemon$moves.length;
+                _i5++
             ) {
-                var _moveid = _serverPokemon$moves2[_i10];
+                var _moveid = _serverPokemon$moves[_i5];
                 var move = Dex.moves.get(_moveid);
                 var moveName = "&#8226; " + move.name;
                 if (battlePokemon != null && battlePokemon.moveTrack) {
                     for (
-                        var _i12 = 0,
-                            _battlePokemon$moveTr2 = battlePokemon.moveTrack;
-                        _i12 < _battlePokemon$moveTr2.length;
-                        _i12++
+                        var _i6 = 0,
+                            _battlePokemon$moveTr = battlePokemon.moveTrack;
+                        _i6 < _battlePokemon$moveTr.length;
+                        _i6++
                     ) {
-                        var row = _battlePokemon$moveTr2[_i12];
+                        var row = _battlePokemon$moveTr[_i6];
                         if (moveName === row[0]) {
                             moveName = this.getPPUseText(row, true);
                             break;
@@ -1121,11 +1121,11 @@ var BattleTooltips = (function () {
         ) {
             text += '<p class="section">';
             for (
-                var _i14 = 0, _clientPokemon$moveTr2 = clientPokemon.moveTrack;
-                _i14 < _clientPokemon$moveTr2.length;
-                _i14++
+                var _i7 = 0, _clientPokemon$moveTr = clientPokemon.moveTrack;
+                _i7 < _clientPokemon$moveTr.length;
+                _i7++
             ) {
-                var _row = _clientPokemon$moveTr2[_i14];
+                var _row = _clientPokemon$moveTr[_i7];
                 text += this.getPPUseText(_row) + "<br />";
             }
             if (
@@ -1158,11 +1158,11 @@ var BattleTooltips = (function () {
 
         var atLeastOne = false;
         for (
-            var _i16 = 0, _this$battle$sides4 = this.battle.sides;
-            _i16 < _this$battle$sides4.length;
-            _i16++
+            var _i8 = 0, _this$battle$sides2 = this.battle.sides;
+            _i8 < _this$battle$sides2.length;
+            _i8++
         ) {
-            var side = _this$battle$sides4[_i16];
+            var side = _this$battle$sides2[_i8];
             var sideConditions = scene.sideConditionsLeft(side, true);
             if (sideConditions) atLeastOne = true;
             buf +=
@@ -1186,11 +1186,11 @@ var BattleTooltips = (function () {
         var side = pokemon.side;
         if (side.battle.speciesClause) return false;
         for (
-            var _i18 = 0, _side$pokemon4 = side.pokemon;
-            _i18 < _side$pokemon4.length;
-            _i18++
+            var _i9 = 0, _side$pokemon2 = side.pokemon;
+            _i9 < _side$pokemon2.length;
+            _i9++
         ) {
-            var ally = _side$pokemon4[_i18];
+            var ally = _side$pokemon2[_i9];
             if (pokemon !== ally && pokemon.searchid === ally.searchid) {
                 return true;
             }
@@ -1212,11 +1212,11 @@ var BattleTooltips = (function () {
                 ? void 0
                 : clientPokemon.volatiles["powertrick"];
         for (
-            var _i20 = 0, _Dex$statNamesExceptH2 = Dex.statNamesExceptHP;
-            _i20 < _Dex$statNamesExceptH2.length;
-            _i20++
+            var _i10 = 0, _Dex$statNamesExceptH = Dex.statNamesExceptHP;
+            _i10 < _Dex$statNamesExceptH.length;
+            _i10++
         ) {
-            var statName = _Dex$statNamesExceptH2[_i20];
+            var statName = _Dex$statNamesExceptH[_i10];
             var sourceStatName = statName;
             if (isPowerTrick) {
                 if (statName === "atk") sourceStatName = "def";
@@ -1275,11 +1275,11 @@ var BattleTooltips = (function () {
 
         if (this.battle.gen <= 1) {
             for (
-                var _i22 = 0, _Dex$statNamesExceptH4 = Dex.statNamesExceptHP;
-                _i22 < _Dex$statNamesExceptH4.length;
-                _i22++
+                var _i11 = 0, _Dex$statNamesExceptH2 = Dex.statNamesExceptHP;
+                _i11 < _Dex$statNamesExceptH2.length;
+                _i11++
             ) {
-                var _statName = _Dex$statNamesExceptH4[_i22];
+                var _statName = _Dex$statNamesExceptH2[_i11];
                 if (stats[_statName] > 999) stats[_statName] = 999;
             }
             return stats;
@@ -1413,8 +1413,8 @@ var BattleTooltips = (function () {
                             ? void 0
                             : clientPokemon.side.active;
                     if (allyActive) {
-                        for (var _i24 = 0; _i24 < allyActive.length; _i24++) {
-                            var ally = allyActive[_i24];
+                        for (var _i12 = 0; _i12 < allyActive.length; _i12++) {
+                            var ally = allyActive[_i12];
                             if (!ally || ally.fainted) continue;
                             var allyAbility = this.getAllyAbility(ally);
                             if (
@@ -1455,11 +1455,11 @@ var BattleTooltips = (function () {
                 speedModifiers.push(2);
             }
             for (
-                var _i26 = 0, _Dex$statNamesExceptH6 = Dex.statNamesExceptHP;
-                _i26 < _Dex$statNamesExceptH6.length;
-                _i26++
+                var _i13 = 0, _Dex$statNamesExceptH3 = Dex.statNamesExceptHP;
+                _i13 < _Dex$statNamesExceptH3.length;
+                _i13++
             ) {
-                var _statName2 = _Dex$statNamesExceptH6[_i26];
+                var _statName2 = _Dex$statNamesExceptH3[_i13];
                 if (
                     clientPokemon.volatiles["protosynthesis" + _statName2] ||
                     clientPokemon.volatiles["quarkdrive" + _statName2]
@@ -1534,8 +1534,8 @@ var BattleTooltips = (function () {
             var _allyActive = clientPokemon.side.active;
             if (_allyActive.length > 1) {
                 var abilityName = ability === "plus" ? "Plus" : "Minus";
-                for (var _i28 = 0; _i28 < _allyActive.length; _i28++) {
-                    var _ally = _allyActive[_i28];
+                for (var _i14 = 0; _i14 < _allyActive.length; _i14++) {
+                    var _ally = _allyActive[_i14];
                     if (!_ally || _ally === clientPokemon || _ally.fainted)
                         continue;
                     var _allyAbility = this.getAllyAbility(_ally);
@@ -1587,8 +1587,8 @@ var BattleTooltips = (function () {
         }
 
         var chainedSpeedModifier = 1;
-        for (var _i30 = 0; _i30 < speedModifiers.length; _i30++) {
-            var modifier = speedModifiers[_i30];
+        for (var _i15 = 0; _i15 < speedModifiers.length; _i15++) {
+            var modifier = speedModifiers[_i15];
             chainedSpeedModifier *= modifier;
         }
 
@@ -1640,11 +1640,11 @@ var BattleTooltips = (function () {
         if (!short) {
             var hasModifiedStat = false;
             for (
-                var _i32 = 0, _Dex$statNamesExceptH8 = Dex.statNamesExceptHP;
-                _i32 < _Dex$statNamesExceptH8.length;
-                _i32++
+                var _i16 = 0, _Dex$statNamesExceptH4 = Dex.statNamesExceptHP;
+                _i16 < _Dex$statNamesExceptH4.length;
+                _i16++
             ) {
-                var statName = _Dex$statNamesExceptH8[_i32];
+                var statName = _Dex$statNamesExceptH4[_i16];
                 if (this.battle.gen === 1 && statName === "spd") continue;
                 var statLabel =
                     this.battle.gen === 1 && statName === "spa"
@@ -1665,11 +1665,11 @@ var BattleTooltips = (function () {
             buf += "<p>";
         }
         for (
-            var _i34 = 0, _Dex$statNamesExceptH10 = Dex.statNamesExceptHP;
-            _i34 < _Dex$statNamesExceptH10.length;
-            _i34++
+            var _i17 = 0, _Dex$statNamesExceptH5 = Dex.statNamesExceptHP;
+            _i17 < _Dex$statNamesExceptH5.length;
+            _i17++
         ) {
-            var _statName3 = _Dex$statNamesExceptH10[_i34];
+            var _statName3 = _Dex$statNamesExceptH5[_i17];
             if (this.battle.gen === 1 && _statName3 === "spd") continue;
             var _statLabel =
                 this.battle.gen === 1 && _statName3 === "spa"
@@ -1739,11 +1739,11 @@ var BattleTooltips = (function () {
     };
     _proto2.ppUsed = function ppUsed(move, pokemon) {
         for (
-            var _i36 = 0, _pokemon$moveTrack2 = pokemon.moveTrack;
-            _i36 < _pokemon$moveTrack2.length;
-            _i36++
+            var _i18 = 0, _pokemon$moveTrack = pokemon.moveTrack;
+            _i18 < _pokemon$moveTrack.length;
+            _i18++
         ) {
-            var _ref2 = _pokemon$moveTrack2[_i36];
+            var _ref2 = _pokemon$moveTrack[_i18];
             var moveName = _ref2[0];
             var ppUsed = _ref2[1];
             if (moveName.charAt(0) === "*") moveName = moveName.substr(1);
@@ -1905,7 +1905,10 @@ var BattleTooltips = (function () {
             "weatherball",
         ];
 
-        if (!noTypeOverride.includes(move.id)) {
+        var allowTypeOverride =
+            !noTypeOverride.includes(move.id) &&
+            (move.id !== "terablast" || !pokemon.terastallized);
+        if (allowTypeOverride) {
             if (this.battle.rules["Revelationmons Mod"]) {
                 var _pokemon$getTypes = pokemon.getTypes(serverPokemon),
                     types = _pokemon$getTypes[0];
@@ -2013,11 +2016,11 @@ var BattleTooltips = (function () {
             value.modify(5 / 3, "Gravity");
         }
         for (
-            var _i38 = 0, _pokemon$side$active2 = pokemon.side.active;
-            _i38 < _pokemon$side$active2.length;
-            _i38++
+            var _i19 = 0, _pokemon$side$active = pokemon.side.active;
+            _i19 < _pokemon$side$active.length;
+            _i19++
         ) {
-            var active = _pokemon$side$active2[_i38];
+            var active = _pokemon$side$active[_i19];
             if (!active || active.fainted) continue;
             var ability = this.getAllyAbility(active);
             if (ability === "Victory Star") {
@@ -2040,8 +2043,8 @@ var BattleTooltips = (function () {
         }
 
         var chain = 4096;
-        for (var _i40 = 0; _i40 < accuracyModifiers.length; _i40++) {
-            var mod = accuracyModifiers[_i40];
+        for (var _i20 = 0; _i20 < accuracyModifiers.length; _i20++) {
+            var mod = accuracyModifiers[_i20];
             if (mod !== 4096) {
                 chain = (chain * mod + 2048) >> 12;
             }
@@ -2171,11 +2174,11 @@ var BattleTooltips = (function () {
         if (move.id === "punishment" && target) {
             var boostCount = 0;
             for (
-                var _i42 = 0, _Object$values2 = Object.values(target.boosts);
-                _i42 < _Object$values2.length;
-                _i42++
+                var _i21 = 0, _Object$values = Object.values(target.boosts);
+                _i21 < _Object$values.length;
+                _i21++
             ) {
-                var boost = _Object$values2[_i42];
+                var boost = _Object$values[_i21];
                 if (boost > 0) boostCount += boost;
             }
             value.set(Math.min(60 + 20 * boostCount, 200));
@@ -2188,11 +2191,11 @@ var BattleTooltips = (function () {
         if (["storedpower", "powertrip"].includes(move.id) && target) {
             var _boostCount = 0;
             for (
-                var _i44 = 0, _Object$values4 = Object.values(pokemon.boosts);
-                _i44 < _Object$values4.length;
-                _i44++
+                var _i22 = 0, _Object$values2 = Object.values(pokemon.boosts);
+                _i22 < _Object$values2.length;
+                _i22++
             ) {
-                var _boost = _Object$values4[_i44];
+                var _boost = _Object$values2[_i22];
                 if (_boost > 0) _boostCount += _boost;
             }
             value.set(20 + 20 * _boostCount);
@@ -2404,14 +2407,16 @@ var BattleTooltips = (function () {
             "revelationdance",
             "struggle",
             "technoblast",
-            "terablast",
             "terrainpulse",
             "weatherball",
         ];
 
+        var allowTypeOverride =
+            !noTypeOverride.includes(move.id) &&
+            (move.id !== "terablast" || !pokemon.terastallized);
         if (
             move.category !== "Status" &&
-            !noTypeOverride.includes(move.id) &&
+            allowTypeOverride &&
             !move.isZ &&
             !move.isMax &&
             !move.id.startsWith("hiddenpower")
@@ -2446,11 +2451,11 @@ var BattleTooltips = (function () {
             var auraBoosted = "";
             var auraBroken = false;
             for (
-                var _i46 = 0, _pokemon$side$active4 = pokemon.side.active;
-                _i46 < _pokemon$side$active4.length;
-                _i46++
+                var _i23 = 0, _pokemon$side$active2 = pokemon.side.active;
+                _i23 < _pokemon$side$active2.length;
+                _i23++
             ) {
-                var ally = _pokemon$side$active4[_i46];
+                var ally = _pokemon$side$active2[_i23];
                 if (!ally || ally.fainted) continue;
                 var allyAbility = this.getAllyAbility(ally);
                 if (moveType === "Fairy" && allyAbility === "Fairy Aura") {
@@ -2470,11 +2475,11 @@ var BattleTooltips = (function () {
                 }
             }
             for (
-                var _i48 = 0, _pokemon$side$foe$act2 = pokemon.side.foe.active;
-                _i48 < _pokemon$side$foe$act2.length;
-                _i48++
+                var _i24 = 0, _pokemon$side$foe$act = pokemon.side.foe.active;
+                _i24 < _pokemon$side$foe$act.length;
+                _i24++
             ) {
-                var foe = _pokemon$side$foe$act2[_i48];
+                var foe = _pokemon$side$foe$act[_i24];
                 if (!foe || foe.fainted) continue;
                 if (foe.ability === "Fairy Aura") {
                     if (moveType === "Fairy") auraBoosted = "Fairy Aura";
@@ -2555,7 +2560,7 @@ var BattleTooltips = (function () {
         return value;
     };
     _proto2.getItemBoost = function getItemBoost(move, value, moveType) {
-        var _value$pokemon$volati;
+        var _value$pokemon$volati, _BattleTooltips$orbUs, _BattleTooltips$orbTy;
         var item = this.battle.dex.items.get(value.serverPokemon.item);
         var itemName = item.name;
         var moveName = move.name;
@@ -2600,8 +2605,12 @@ var BattleTooltips = (function () {
 
         if (item.name === "Soul Dew" && this.battle.gen < 7) return value;
         if (
-            BattleTooltips.orbUsers[speciesName] === item.name &&
-            [BattleTooltips.orbTypes[item.name], "Dragon"].includes(moveType)
+            (_BattleTooltips$orbUs = BattleTooltips.orbUsers[speciesName]) !=
+                null &&
+            _BattleTooltips$orbUs.includes(item.name) &&
+            (_BattleTooltips$orbTy = BattleTooltips.orbTypes[item.name]) !=
+                null &&
+            _BattleTooltips$orbTy.includes(moveType)
         ) {
             value.itemModify(1.2);
             return value;
@@ -2632,8 +2641,8 @@ var BattleTooltips = (function () {
     };
     _proto2.pokemonHasType = function pokemonHasType(pokemon, type, types) {
         if (!types) types = this.getPokemonTypes(pokemon);
-        for (var _i50 = 0, _types2 = types; _i50 < _types2.length; _i50++) {
-            var curType = _types2[_i50];
+        for (var _i25 = 0, _types = types; _i25 < _types.length; _i25++) {
+            var curType = _types[_i25];
             if (curType === type) return true;
         }
         return false;
@@ -2819,17 +2828,22 @@ BattleTooltips.itemTypes = {
     "Twisted Spoon": "Psychic",
 };
 BattleTooltips.orbUsers = {
-    Latias: "Soul Dew",
-    Latios: "Soul Dew",
-    Dialga: "Adamant Orb",
-    Palkia: "Lustrous Orb",
-    Giratina: "Griseous Orb",
+    Latias: ["Soul Dew"],
+    Latios: ["Soul Dew"],
+    Dialga: ["Adamant Crystal", "Adamant Orb"],
+    Palkia: ["Lustrous Globe", "Lustrous Orb"],
+    Giratina: ["Griseous Core", "Griseous Orb"],
+    Venomicon: ["Vile Vial"],
 };
 BattleTooltips.orbTypes = {
-    "Soul Dew": "Psychic",
-    "Adamant Orb": "Steel",
-    "Lustrous Orb": "Water",
-    "Griseous Orb": "Ghost",
+    "Soul Dew": ["Psychic", "Dragon"],
+    "Adamant Crystal": ["Steel", "Dragon"],
+    "Adamant Orb": ["Steel", "Dragon"],
+    "Lustrous Globe": ["Water", "Dragon"],
+    "Lustrous Orb": ["Water", "Dragon"],
+    "Griseous Core": ["Ghost", "Dragon"],
+    "Griseous Orb": ["Ghost", "Dragon"],
+    "Vile Vial": ["Poison", "Flying"],
 };
 BattleTooltips.noGemMoves = [
     "Fire Pledge",
@@ -3415,8 +3429,9 @@ var BattleStatGuesser = (function () {
                         ev - 4,
                         plusStat === primaryStat ? 1.1 : 1.0
                     )
-            )
+            ) {
                 ev -= 4;
+            }
             evs[primaryStat] = ev;
             evTotal += ev;
 
@@ -3439,8 +3454,9 @@ var BattleStatGuesser = (function () {
                         ev - 4,
                         plusStat === secondaryStat ? 1.1 : 1.0
                     )
-            )
+            ) {
                 ev -= 4;
+            }
             evs[secondaryStat] = ev;
             evTotal += ev;
 
@@ -3565,16 +3581,21 @@ var BattleStatGuesser = (function () {
                     while (
                         ev > 0 &&
                         stat === this.getStat(secondaryStat, set, ev - 4)
-                    )
+                    ) {
                         ev -= 4;
+                    }
                     if (ev) evs[secondaryStat] = ev;
                     remaining -= ev;
                 }
                 if (remaining && !evs["spe"]) {
                     ev = remaining;
                     stat = this.getStat("spe", set, ev);
-                    while (ev > 0 && stat === this.getStat("spe", set, ev - 4))
+                    while (
+                        ev > 0 &&
+                        stat === this.getStat("spe", set, ev - 4)
+                    ) {
                         ev -= 4;
+                    }
                     if (ev) evs["spe"] = ev;
                 }
             }

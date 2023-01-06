@@ -426,8 +426,8 @@
     _proto.textList = function textList(list) {
         var message = "";
         var listNoDuplicates = [];
-        for (var _i2 = 0, _list2 = list; _i2 < _list2.length; _i2++) {
-            var user = _list2[_i2];
+        for (var _i = 0, _list = list; _i < _list.length; _i++) {
+            var user = _list[_i];
             if (!listNoDuplicates.includes(user)) listNoDuplicates.push(user);
         }
         list = listNoDuplicates;
@@ -508,11 +508,11 @@
         var classContains = " uhtml-" + id + " ";
         var elements = [];
         for (
-            var _i4 = 0, _ref2 = this.innerElem.childNodes;
-            _i4 < _ref2.length;
-            _i4++
+            var _i2 = 0, _ref = this.innerElem.childNodes;
+            _i2 < _ref.length;
+            _i2++
         ) {
-            var node = _ref2[_i4];
+            var node = _ref[_i2];
             if (
                 node.className &&
                 (" " + node.className + " ").includes(classContains)
@@ -522,11 +522,11 @@
         }
         if (this.preemptElem) {
             for (
-                var _i6 = 0, _ref4 = this.preemptElem.childNodes;
-                _i6 < _ref4.length;
-                _i6++
+                var _i3 = 0, _ref2 = this.preemptElem.childNodes;
+                _i3 < _ref2.length;
+                _i3++
             ) {
-                var _node = _ref4[_i6];
+                var _node = _ref2[_i3];
                 if (
                     _node.className &&
                     (" " + _node.className + " ").includes(classContains)
@@ -536,15 +536,15 @@
             }
         }
         if (htmlSrc && elements.length && !forceAdd) {
-            for (var _i8 = 0; _i8 < elements.length; _i8++) {
-                var element = elements[_i8];
+            for (var _i4 = 0; _i4 < elements.length; _i4++) {
+                var element = elements[_i4];
                 element.innerHTML = BattleLog.sanitizeHTML(htmlSrc);
             }
             this.updateScroll();
             return;
         }
-        for (var _i10 = 0; _i10 < elements.length; _i10++) {
-            var _element = elements[_i10];
+        for (var _i5 = 0; _i5 < elements.length; _i5++) {
+            var _element = elements[_i5];
             _element.parentElement.removeChild(_element);
         }
         if (!htmlSrc) return;
@@ -569,11 +569,11 @@
         var classStart = "chat chatmessage-" + userid + " ";
         var nodes = [];
         for (
-            var _i12 = 0, _ref6 = this.innerElem.childNodes;
-            _i12 < _ref6.length;
-            _i12++
+            var _i6 = 0, _ref3 = this.innerElem.childNodes;
+            _i6 < _ref3.length;
+            _i6++
         ) {
-            var node = _ref6[_i12];
+            var node = _ref3[_i6];
             if (
                 node.className &&
                 (node.className + " ").startsWith(classStart)
@@ -583,11 +583,11 @@
         }
         if (this.preemptElem) {
             for (
-                var _i14 = 0, _ref8 = this.preemptElem.childNodes;
-                _i14 < _ref8.length;
-                _i14++
+                var _i7 = 0, _ref4 = this.preemptElem.childNodes;
+                _i7 < _ref4.length;
+                _i7++
             ) {
-                var _node2 = _ref8[_i14];
+                var _node2 = _ref4[_i7];
                 if (
                     _node2.className &&
                     (_node2.className + " ").startsWith(classStart)
@@ -597,8 +597,8 @@
             }
         }
         if (lineCount) nodes = nodes.slice(-lineCount);
-        for (var _i16 = 0, _nodes2 = nodes; _i16 < _nodes2.length; _i16++) {
-            var _node3 = _nodes2[_i16];
+        for (var _i8 = 0, _nodes = nodes; _i8 < _nodes.length; _i8++) {
+            var _node3 = _nodes[_i8];
             _node3.style.display = "none";
             _node3.className = "revealed " + _node3.className;
         }
@@ -620,8 +620,8 @@
         lastNode.appendChild(button);
     };
     BattleLog.unlinkNodeList = function unlinkNodeList(nodeList, classStart) {
-        for (var _i18 = 0, _ref10 = nodeList; _i18 < _ref10.length; _i18++) {
-            var node = _ref10[_i18];
+        for (var _i9 = 0, _ref5 = nodeList; _i9 < _ref5.length; _i9++) {
+            var node = _ref5[_i9];
             if (
                 node.className &&
                 (node.className + " ").startsWith(classStart)
@@ -633,11 +633,11 @@
                     var parent = linkNode.parentElement;
                     if (!parent) continue;
                     for (
-                        var _i20 = 0, _ref12 = linkNode.childNodes;
-                        _i20 < _ref12.length;
-                        _i20++
+                        var _i10 = 0, _ref6 = linkNode.childNodes;
+                        _i10 < _ref6.length;
+                        _i10++
                     ) {
-                        var childNode = _ref12[_i20];
+                        var childNode = _ref6[_i10];
                         parent.insertBefore(childNode, linkNode);
                     }
                     parent.removeChild(linkNode);
@@ -1445,8 +1445,8 @@ BattleLog.interstice = (function () {
             if (uri[0] === "/" && uri[1] !== "/") {
                 return true;
             }
-            for (var _i22 = 0; _i22 < patterns.length; _i22++) {
-                var pattern = patterns[_i22];
+            for (var _i11 = 0; _i11 < patterns.length; _i11++) {
+                var pattern = patterns[_i11];
                 if (pattern.test(uri)) return true;
             }
             return false;

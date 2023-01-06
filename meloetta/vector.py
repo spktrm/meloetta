@@ -63,17 +63,13 @@ class PrivateSide(NamedTuple):
 class PrivatePokemon(NamedTuple):
     ability: Union[torch.Tensor, None]
     active: Union[torch.Tensor, None]
-    canGmax: Union[torch.Tensor, None]
-    commanding: Union[torch.Tensor, None]
     fainted: Union[torch.Tensor, None]
     gender: Union[torch.Tensor, None]
     hp: Union[torch.Tensor, None]
     item: Union[torch.Tensor, None]
     level: Union[torch.Tensor, None]
     maxhp: Union[torch.Tensor, None]
-    moves: Union[torch.Tensor, None]
     name: Union[torch.Tensor, None]
-    reviving: Union[torch.Tensor, None]
     forme: Union[torch.Tensor, None]
     stat_atk: Union[torch.Tensor, None]
     stat_def: Union[torch.Tensor, None]
@@ -81,8 +77,12 @@ class PrivatePokemon(NamedTuple):
     stat_spd: Union[torch.Tensor, None]
     stat_spe: Union[torch.Tensor, None]
     status: Union[torch.Tensor, None]
+    canGmax: Union[torch.Tensor, None]
+    commanding: Union[torch.Tensor, None]
+    reviving: Union[torch.Tensor, None]
     teraType: Union[torch.Tensor, None]
     terastallized: Union[torch.Tensor, None]
+    moves: Union[torch.Tensor, None]
 
     def vector(
         self,
@@ -243,6 +243,20 @@ class State(NamedTuple):
     turn: torch.Tensor
     log: List[str]
 
+    def to_dict(self):
+        return {
+            "private_reserve": self.private_side.reserve,
+            **{
+                "public_" + key: value
+                for key, value in self.public_sides._asdict().items()
+            },
+            "weather": self.weather,
+            "weather_time_left": self.weather_time_left,
+            "weather_min_time_left": self.weather_min_time_left,
+            "pseudo_weather": self.pseudo_weather,
+            "turn": self.turn,
+        }
+
 
 Battle = Dict[str, Dict[str, Dict[str, Any]]]
 
@@ -366,7 +380,7 @@ class VectorizedState:
             pp = move_track.get(move, 0)
             moves += [get_move_token(self.gen, "id", move), pp]
 
-        for _ in range(8 - int(len(moves) / 2)):
+        for _ in range(4 - int(len(moves) / 2)):
             moves += [-1, -1]
 
         forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
@@ -374,16 +388,12 @@ class VectorizedState:
         return PrivatePokemon(
             ability=get_ability_token(self.gen, "id", pokemon["baseAbility"]),
             active=1 if pokemon["active"] else 0,
-            canGmax=canGmax,
-            commanding=commanding,
             fainted=1 if pokemon.get("fainted") else 0,
             gender=get_gender_token(pokemon["gender"]),
             hp=pokemon["hp"],
-            item=get_item_token(self.gen, "name", pokemon["item"]),
+            item=get_item_token(self.gen, "id", pokemon["item"]),
             level=pokemon["level"],
             maxhp=pokemon["maxhp"],
-            moves=moves,
-            reviving=reviving,
             name=get_species_token(self.gen, "name", pokemon["name"]),
             forme=get_species_token(self.gen, "forme", forme),
             stat_atk=pokemon["stats"]["atk"],
@@ -392,8 +402,12 @@ class VectorizedState:
             stat_spd=pokemon["stats"]["spd"],
             stat_spe=pokemon["stats"]["spe"],
             status=get_status_token(pokemon.get("status")),
+            canGmax=canGmax,
+            commanding=commanding,
+            reviving=reviving,
             teraType=teraType,
             terastallized=terastallized,
+            moves=moves,
         ).vector()
 
     def _vectorize_public_side(self, side_id: str):
@@ -404,6 +418,7 @@ class VectorizedState:
         # This is a measure for removing duplicates from zoroak
         # To be clear, this doesn't remove zoroark, but only mons
         # that are affected by -replace
+        # There could be up to 5 extra mons generated from zoroark alone
         # TODO: account for zororak duplicates somehow...
         pokemon = [p for p in side["pokemon"] if not p.get("status", "") != "???"]
 
@@ -419,7 +434,7 @@ class VectorizedState:
             self._vectorize_public_reserve_pokemon(side_id, p)
             for p in pokemon[controlling:]
         ]
-        num_reserve_padding = 6 - controlling - len(reserve)
+        num_reserve_padding = 7 - controlling - len(reserve)
         reserve += [torch.zeros(_RESERVE_SIZE) for _ in range(num_reserve_padding)]
 
         reserve = torch.stack(reserve)
