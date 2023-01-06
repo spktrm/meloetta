@@ -156,7 +156,7 @@ class PrivateEncoder(nn.Module):
             + self.level_bin.embedding_dim
             + self.hp_bin.embedding_dim
             + self.pokedex_embedding.embedding_dim
-            + self.pokedex_embedding.embedding_dim
+            + self.forme_onehot.embedding_dim
             + self.atk_bin.embedding_dim
             + self.def_bin.embedding_dim
             + self.spa_bin.embedding_dim
@@ -164,7 +164,21 @@ class PrivateEncoder(nn.Module):
             + self.spd_bin.embedding_dim
             + self.status_onehot.embedding_dim
         )
-        move_lin_in = self.move_embedding.embedding_dim + self.pp_bin.embedding_dim
+        if gen == 9:
+            mon_lin_in += (
+                self.commanding_onehot.embedding_dim
+                + self.reviving_onehot.embedding_dim
+                + self.tera_onehot.embedding_dim
+                + self.teratype_onehot.embedding_dim
+            )
+        elif gen == 8:
+            mon_lin_in += self.can_gmax_onehot.embedding_dim
+
+        move_lin_in = (
+            self.move_embedding.embedding_dim
+            + self.pp_bin.embedding_dim
+            + self.move_slot_onehot.embedding_dim
+        )
 
         self.mon_lin = nn.Linear(mon_lin_in, embedding_dim)
         self.move_lin = nn.Linear(move_lin_in, embedding_dim)
@@ -185,16 +199,16 @@ class PrivateEncoder(nn.Module):
         stat_spa = private_reserve[..., 12]
         stat_spd = private_reserve[..., 13]
         stat_spe = private_reserve[..., 14]
-        status = private_reserve[..., 15]
+        status = private_reserve[..., 15] + 1
 
         if self.gen == 9:
-            commanding = private_reserve[..., 15]
-            reviving = private_reserve[..., 16]
-            teraType = private_reserve[..., 17]
-            terastallized = private_reserve[..., 18]
+            commanding = private_reserve[..., 16]
+            reviving = private_reserve[..., 17]
+            teraType = private_reserve[..., 18]
+            terastallized = private_reserve[..., 19]
 
         elif self.gen == 8:
-            canGmax = private_reserve[..., 15]
+            canGmax = private_reserve[..., 16]
 
         moves = private_reserve[..., -8:]
         moves = moves.view(*moves.shape[:-1], 4, 2)
@@ -241,7 +255,7 @@ class PrivateEncoder(nn.Module):
         move_used_emb = self.pp_bin(move_used)
         move_slot = torch.ones_like(move_used)
         for i in range(4):
-            move_slot[..., i, :] = i
+            move_slot[..., i] = i
         move_slot_emb = self.move_slot_onehot(move_used)
         move_emb = [move_emb, move_used_emb, move_slot_emb]
 
@@ -734,7 +748,7 @@ class Model(nn.Module):
 
 class NaiveAIController(Controller):
     def __init__(self):
-        self.model = Model()
+        self.model = Model(gen=8)
         self.model.eval()
 
     def choose_action(
