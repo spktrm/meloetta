@@ -68,38 +68,38 @@ Schema = Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]
 with open("meloetta/pretrained/schema.json", "r") as f:
     schema: Schema = json.loads(f.read())
 
-tokenized_schema = deepcopy(schema)
+TOKENIZED_SCHEMA = deepcopy(schema)
 
-for gen in tokenized_schema:
+for gen in TOKENIZED_SCHEMA:
     for dex_type in schema[gen]:
         for key, values in schema[gen][dex_type].items():
-            tokenized_schema[gen][dex_type][key] = {
+            TOKENIZED_SCHEMA[gen][dex_type][key] = {
                 str(values): index for index, values in enumerate(values)
             }
 
 
 def get_type_token(gen: int, value: Any):
-    lookup = tokenized_schema[f"gen{gen}"]["movedex"]["type"]
+    lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["movedex"]["type"]
     return lookup.get(value, -1)
 
 
 def get_species_token(gen: int, key: int, value: Any):
-    lookup = tokenized_schema[f"gen{gen}"]["pokedex"][key]
+    lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["pokedex"][key]
     return lookup.get(value, -1)
 
 
 def get_move_token(gen: int, key: int, value: Any):
-    lookup = tokenized_schema[f"gen{gen}"]["movedex"][key]
+    lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["movedex"][key]
     return lookup.get(value, -1)
 
 
 def get_ability_token(gen: int, key: int, value: Any):
-    lookup = tokenized_schema[f"gen{gen}"]["abilitydex"][key]
+    lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["abilitydex"][key]
     return lookup.get(value, -1)
 
 
 def get_item_token(gen: int, key: int, value: Any):
-    lookup = tokenized_schema[f"gen{gen}"]["itemdex"][key]
+    lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["itemdex"][key]
     return lookup.get(value, -1)
 
 

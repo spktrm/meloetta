@@ -313,6 +313,7 @@ class Abilitydex(Dex):
 
 
 def main():
+    # os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
 
     schema = {}
     for gen in range(1, 10):
@@ -322,7 +323,7 @@ def main():
         with open("meloetta/js/data/BattleTeambuilderTable.json", "r") as f:
             teambuilder_table = json.load(f)
 
-        save_dir = f"pretrained/gen{gen}"
+        save_dir = f"meloetta/pretrained/gen{gen}"
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
 
@@ -369,7 +370,7 @@ def main():
                         schema[f"gen{gen}"][dex_name][key][index] = json.loads(value)
                 torch.save(data, os.path.join(save_dir, dex_name + ".pt"))
 
-    with open("pretrained/schema.json", "w") as f:
+    with open("meloetta/pretrained/schema.json", "w") as f:
         json.dump(schema, f)
 
 

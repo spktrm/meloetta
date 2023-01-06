@@ -10,7 +10,7 @@ class PokedexEmbedding(nn.Module):
         embeddings: torch.Tensor
         embeddings = torch.load(f"meloetta/pretrained/gen{gen}/pokedex.pt")
         embeddings = embeddings.to(dtype)
-        self.feature_dim = embeddings.shape[-1]
+        self.embedding_dim = embeddings.shape[-1]
         self.emb = nn.Embedding.from_pretrained(embeddings)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -24,7 +24,7 @@ class AbilityEmbedding(nn.Module):
         embeddings: torch.Tensor
         embeddings = torch.load(f"meloetta/pretrained/gen{gen}/abilitydex.pt")
         embeddings = embeddings.to(dtype)
-        self.feature_dim = embeddings.shape[-1]
+        self.embedding_dim = embeddings.shape[-1]
         self.emb = nn.Embedding.from_pretrained(embeddings)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -38,7 +38,7 @@ class MoveEmbedding(nn.Module):
         embeddings: torch.Tensor
         embeddings = torch.load(f"meloetta/pretrained/gen{gen}/movedex.pt")
         embeddings = embeddings.to(dtype)
-        self.feature_dim = embeddings.shape[-1]
+        self.embedding_dim = embeddings.shape[-1]
         self.emb = nn.Embedding.from_pretrained(embeddings)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -52,7 +52,7 @@ class ItemEmbedding(nn.Module):
         embeddings: torch.Tensor
         embeddings = torch.load(f"meloetta/pretrained/gen{gen}/itemdex.pt")
         embeddings = embeddings.to(dtype)
-        self.feature_dim = embeddings.shape[-1]
+        self.embedding_dim = embeddings.shape[-1]
         self.emb = nn.Embedding.from_pretrained(embeddings)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

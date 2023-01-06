@@ -186,7 +186,7 @@
         "otherFormes": ["Charizard-Mega-X", "Charizard-Mega-Y"],
         "formeOrder": ["Charizard", "Charizard-Mega-X", "Charizard-Mega-Y"],
         "canGigantamax": "G-Max Wildfire",
-        "tier": "OU"
+        "tier": "UU"
     },
     "charizardmegax": {
         "num": 6,
@@ -1321,7 +1321,7 @@
         "eggGroups": ["Field", "Fairy"],
         "otherFormes": ["Raichu-Alola"],
         "formeOrder": ["Raichu", "Raichu-Alola"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "raichualola": {
         "num": 26,
@@ -1792,7 +1792,7 @@
         "evoType": "useItem",
         "evoItem": "Moon Stone",
         "eggGroups": ["Fairy"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "zubat": {
         "num": 41,
@@ -1995,7 +1995,7 @@
         "prevo": "Venonat",
         "evoLevel": 31,
         "eggGroups": ["Bug"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "diglett": {
         "num": 50,
@@ -2067,7 +2067,7 @@
         "eggGroups": ["Field"],
         "otherFormes": ["Dugtrio-Alola"],
         "formeOrder": ["Dugtrio", "Dugtrio-Alola"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "dugtrioalola": {
         "num": 51,
@@ -2209,7 +2209,7 @@
         "eggGroups": ["Field"],
         "otherFormes": ["Persian-Alola"],
         "formeOrder": ["Persian", "Persian-Alola"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "persianalola": {
         "num": 53,
@@ -2274,7 +2274,7 @@
         "prevo": "Psyduck",
         "evoLevel": 33,
         "eggGroups": ["Water 1", "Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "mankey": {
         "num": 56,
@@ -2396,7 +2396,7 @@
         "eggGroups": ["Field"],
         "otherFormes": ["Arcanine-Hisui"],
         "formeOrder": ["Arcanine", "Arcanine-Hisui"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "arcaninehisui": {
         "num": 59,
@@ -3122,7 +3122,7 @@
         "eggGroups": ["Monster", "Water 1"],
         "otherFormes": ["Slowbro-Mega", "Slowbro-Galar"],
         "formeOrder": ["Slowbro", "Slowbro-Mega", "Slowbro-Galar"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "slowbromega": {
         "num": 80,
@@ -3429,7 +3429,7 @@
         "eggGroups": ["Amorphous"],
         "otherFormes": ["Muk-Alola"],
         "formeOrder": ["Muk", "Muk-Alola"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "mukalola": {
         "num": 89,
@@ -3499,7 +3499,7 @@
         "evoType": "useItem",
         "evoItem": "Water Stone",
         "eggGroups": ["Water 3"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "gastly": {
         "num": 92,
@@ -3673,7 +3673,7 @@
         "prevo": "Drowzee",
         "evoLevel": 26,
         "eggGroups": ["Human-Like"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "krabby": {
         "num": 98,
@@ -3823,7 +3823,7 @@
         "eggGroups": ["Mineral"],
         "otherFormes": ["Electrode-Hisui"],
         "formeOrder": ["Electrode", "Electrode-Hisui"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "electrodehisui": {
         "num": 101,
@@ -4732,7 +4732,7 @@
         "weightkg": 88.4,
         "color": "Black",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "taurospaldeafire": {
         "num": 128,
@@ -4754,7 +4754,7 @@
         "weightkg": 88.4,
         "color": "Black",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "taurospaldeawater": {
         "num": 128,
@@ -4914,7 +4914,7 @@
         "weightkg": 4,
         "color": "Purple",
         "eggGroups": ["Ditto"],
-        "tier": "OU"
+        "tier": "UU"
     },
     "eevee": {
         "num": 133,
@@ -5029,7 +5029,7 @@
         "evoType": "useItem",
         "evoItem": "Water Stone",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "jolteon": {
         "num": 135,
@@ -5052,7 +5052,7 @@
         "evoType": "useItem",
         "evoItem": "Thunder Stone",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "flareon": {
         "num": 136,
@@ -5075,7 +5075,7 @@
         "evoType": "useItem",
         "evoItem": "Fire Stone",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "porygon": {
         "num": 137,
@@ -6338,7 +6338,7 @@
         "eggGroups": ["Monster", "Field"],
         "otherFormes": ["Ampharos-Mega"],
         "formeOrder": ["Ampharos", "Ampharos-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "ampharosmega": {
         "num": 181,
@@ -6428,7 +6428,7 @@
         "prevo": "Marill",
         "evoLevel": 18,
         "eggGroups": ["Water 1", "Fairy"],
-        "tier": "UU"
+        "tier": "OU"
     },
     "sudowoodo": {
         "num": 185,
@@ -6451,7 +6451,7 @@
         "evoMove": "Mimic",
         "eggGroups": ["Mineral"],
         "canHatch": true,
-        "tier": "UU"
+        "tier": "RU"
     },
     "politoed": {
         "num": 186,
@@ -6549,7 +6549,7 @@
         "prevo": "Skiploom",
         "evoLevel": 27,
         "eggGroups": ["Fairy", "Grass"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "aipom": {
         "num": 190,
@@ -6620,7 +6620,7 @@
         "evoType": "useItem",
         "evoItem": "Sun Stone",
         "eggGroups": ["Grass"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "yanma": {
         "num": 193,
@@ -6733,7 +6733,7 @@
         "evoType": "levelFriendship",
         "evoCondition": "during the day",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "umbreon": {
         "num": 197,
@@ -6756,7 +6756,7 @@
         "evoType": "levelFriendship",
         "evoCondition": "at night",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "murkrow": {
         "num": 198,
@@ -7177,7 +7177,7 @@
         "eggGroups": ["Water 2"],
         "otherFormes": ["Qwilfish-Hisui"],
         "formeOrder": ["Qwilfish", "Qwilfish-Hisui"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "qwilfishhisui": {
         "num": 211,
@@ -7292,7 +7292,7 @@
         "eggGroups": ["Bug"],
         "otherFormes": ["Heracross-Mega"],
         "formeOrder": ["Heracross", "Heracross-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "heracrossmega": {
         "num": 214,
@@ -7402,7 +7402,7 @@
         "evoLevel": 30,
         "evos": ["Ursaluna"],
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "slugma": {
         "num": 218,
@@ -7606,7 +7606,7 @@
         "weightkg": 16,
         "color": "Red",
         "eggGroups": ["Water 1", "Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "mantine": {
         "num": 226,
@@ -7697,7 +7697,7 @@
         "eggGroups": ["Field"],
         "otherFormes": ["Houndoom-Mega"],
         "formeOrder": ["Houndoom", "Houndoom-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "houndoommega": {
         "num": 229,
@@ -7829,7 +7829,7 @@
         "color": "Brown",
         "evos": ["Wyrdeer"],
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "smeargle": {
         "num": 235,
@@ -8012,7 +8012,7 @@
         "prevo": "Chansey",
         "evoType": "levelFriendship",
         "eggGroups": ["Fairy"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "raikou": {
         "num": 243,
@@ -8143,7 +8143,7 @@
         "eggGroups": ["Monster"],
         "otherFormes": ["Tyranitar-Mega"],
         "formeOrder": ["Tyranitar", "Tyranitar-Mega"],
-        "tier": "OU"
+        "tier": "UU"
     },
     "tyranitarmega": {
         "num": 248,
@@ -9061,7 +9061,7 @@
         "eggGroups": ["Human-Like", "Amorphous"],
         "otherFormes": ["Gardevoir-Mega"],
         "formeOrder": ["Gardevoir", "Gardevoir-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "gardevoirmega": {
         "num": 282,
@@ -9125,7 +9125,7 @@
         "prevo": "Surskit",
         "evoLevel": 22,
         "eggGroups": ["Water 1", "Bug"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "shroomish": {
         "num": 285,
@@ -9237,7 +9237,7 @@
         "prevo": "Vigoroth",
         "evoLevel": 36,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "nincada": {
         "num": 290,
@@ -9413,7 +9413,7 @@
         "prevo": "Makuhita",
         "evoLevel": 24,
         "eggGroups": ["Human-Like"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "azurill": {
         "num": 298,
@@ -9531,7 +9531,7 @@
         "eggGroups": ["Human-Like"],
         "otherFormes": ["Sableye-Mega"],
         "formeOrder": ["Sableye", "Sableye-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "sableyemega": {
         "num": 302,
@@ -9737,7 +9737,7 @@
         "eggGroups": ["Human-Like"],
         "otherFormes": ["Medicham-Mega"],
         "formeOrder": ["Medicham", "Medicham-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "medichammega": {
         "num": 308,
@@ -9988,7 +9988,7 @@
         "prevo": "Gulpin",
         "evoLevel": 26,
         "eggGroups": ["Amorphous"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "carvanha": {
         "num": 318,
@@ -10146,7 +10146,7 @@
         "eggGroups": ["Field"],
         "otherFormes": ["Camerupt-Mega"],
         "formeOrder": ["Camerupt", "Camerupt-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "cameruptmega": {
         "num": 323,
@@ -10229,7 +10229,7 @@
         "prevo": "Spoink",
         "evoLevel": 32,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "spinda": {
         "num": 327,
@@ -10360,7 +10360,7 @@
         "prevo": "Cacnea",
         "evoLevel": 32,
         "eggGroups": ["Grass", "Human-Like"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "swablu": {
         "num": 333,
@@ -10403,7 +10403,7 @@
         "eggGroups": ["Flying", "Dragon"],
         "otherFormes": ["Altaria-Mega"],
         "formeOrder": ["Altaria", "Altaria-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "altariamega": {
         "num": 334,
@@ -10445,7 +10445,7 @@
         "weightkg": 40.3,
         "color": "White",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "seviper": {
         "num": 336,
@@ -10464,7 +10464,7 @@
         "weightkg": 52.5,
         "color": "Black",
         "eggGroups": ["Field", "Dragon"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "lunatone": {
         "num": 337,
@@ -10555,7 +10555,7 @@
         "prevo": "Barboach",
         "evoLevel": 30,
         "eggGroups": ["Water 2"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "corphish": {
         "num": 341,
@@ -10952,7 +10952,7 @@
         "eggGroups": ["Amorphous"],
         "otherFormes": ["Banette-Mega"],
         "formeOrder": ["Banette", "Banette-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "banettemega": {
         "num": 354,
@@ -11038,7 +11038,7 @@
         "weightkg": 100,
         "color": "Green",
         "eggGroups": ["Monster", "Grass"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "chimecho": {
         "num": 358,
@@ -11172,7 +11172,7 @@
         "eggGroups": ["Fairy", "Mineral"],
         "otherFormes": ["Glalie-Mega"],
         "formeOrder": ["Glalie", "Glalie-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "glaliemega": {
         "num": 362,
@@ -11369,7 +11369,7 @@
         "weightkg": 8.7,
         "color": "Pink",
         "eggGroups": ["Water 2"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "bagon": {
         "num": 371,
@@ -12336,7 +12336,7 @@
         "prevo": "Kricketot",
         "evoLevel": 10,
         "eggGroups": ["Bug"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "shinx": {
         "num": 403,
@@ -12399,7 +12399,7 @@
         "prevo": "Luxio",
         "evoLevel": 30,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "budew": {
         "num": 406,
@@ -12708,7 +12708,7 @@
         "prevo": "Combee",
         "evoLevel": 21,
         "eggGroups": ["Bug"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "pachirisu": {
         "num": 417,
@@ -12727,7 +12727,7 @@
         "weightkg": 3.9,
         "color": "White",
         "eggGroups": ["Field", "Fairy"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "buizel": {
         "num": 418,
@@ -12956,7 +12956,7 @@
         "prevo": "Drifloon",
         "evoLevel": 28,
         "eggGroups": ["Amorphous"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "buneary": {
         "num": 427,
@@ -13046,7 +13046,7 @@
         "evoType": "useItem",
         "evoItem": "Dusk Stone",
         "eggGroups": ["Amorphous"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "honchkrow": {
         "num": 430,
@@ -13068,7 +13068,7 @@
         "evoType": "useItem",
         "evoItem": "Dusk Stone",
         "eggGroups": ["Flying"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "glameow": {
         "num": 431,
@@ -13176,7 +13176,7 @@
         "prevo": "Stunky",
         "evoLevel": 34,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "bronzor": {
         "num": 436,
@@ -13219,7 +13219,7 @@
         "prevo": "Bronzor",
         "evoLevel": 33,
         "eggGroups": ["Mineral"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "bonsly": {
         "num": 438,
@@ -13327,7 +13327,7 @@
         "weightkg": 108,
         "color": "Purple",
         "eggGroups": ["Amorphous"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "gible": {
         "num": 443,
@@ -13642,7 +13642,7 @@
         "prevo": "Croagunk",
         "evoLevel": 37,
         "eggGroups": ["Human-Like"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "carnivine": {
         "num": 455,
@@ -13711,7 +13711,7 @@
         "prevo": "Finneon",
         "evoLevel": 31,
         "eggGroups": ["Water 2"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "mantyke": {
         "num": 458,
@@ -13780,7 +13780,7 @@
         "eggGroups": ["Monster", "Grass"],
         "otherFormes": ["Abomasnow-Mega"],
         "formeOrder": ["Abomasnow", "Abomasnow-Mega"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "abomasnowmega": {
         "num": 460,
@@ -13826,7 +13826,7 @@
         "evoItem": "Razor Claw",
         "evoCondition": "at night",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "magnezone": {
         "num": 462,
@@ -13849,7 +13849,7 @@
         "evoType": "useItem",
         "evoItem": "Thunder Stone",
         "eggGroups": ["Mineral"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "lickilicky": {
         "num": 463,
@@ -14044,7 +14044,7 @@
         "evoType": "useItem",
         "evoItem": "Leaf Stone",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "glaceon": {
         "num": 471,
@@ -14067,7 +14067,7 @@
         "evoType": "useItem",
         "evoItem": "Ice Stone",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "gliscor": {
         "num": 472,
@@ -14260,7 +14260,7 @@
         "evoType": "useItem",
         "evoItem": "Dawn Stone",
         "eggGroups": ["Fairy", "Mineral"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "rotom": {
         "num": 479,
@@ -14295,7 +14295,7 @@
             "Rotom-Fan",
             "Rotom-Mow"
         ],
-        "tier": "UU"
+        "tier": "RU"
     },
     "rotomheat": {
         "num": 479,
@@ -14318,7 +14318,7 @@
         "color": "Red",
         "eggGroups": ["Amorphous"],
         "changesFrom": "Rotom",
-        "tier": "UU"
+        "tier": "RU"
     },
     "rotomwash": {
         "num": 479,
@@ -14341,7 +14341,7 @@
         "color": "Red",
         "eggGroups": ["Amorphous"],
         "changesFrom": "Rotom",
-        "tier": "UU"
+        "tier": "OU"
     },
     "rotomfrost": {
         "num": 479,
@@ -14364,7 +14364,7 @@
         "color": "Red",
         "eggGroups": ["Amorphous"],
         "changesFrom": "Rotom",
-        "tier": "UU"
+        "tier": "RU"
     },
     "rotomfan": {
         "num": 479,
@@ -14387,7 +14387,7 @@
         "color": "Red",
         "eggGroups": ["Amorphous"],
         "changesFrom": "Rotom",
-        "tier": "UU"
+        "tier": "RU"
     },
     "rotommow": {
         "num": 479,
@@ -14410,7 +14410,7 @@
         "color": "Red",
         "eggGroups": ["Amorphous"],
         "changesFrom": "Rotom",
-        "tier": "UU"
+        "tier": "RU"
     },
     "uxie": {
         "num": 480,
@@ -16616,7 +16616,7 @@
         "eggGroups": ["Grass"],
         "otherFormes": ["Lilligant-Hisui"],
         "formeOrder": ["Lilligant", "Lilligant-Hisui"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "lilliganthisui": {
         "num": 549,
@@ -16672,7 +16672,7 @@
             "Basculin-Blue-Striped",
             "Basculin-White-Striped"
         ],
-        "tier": "UU"
+        "tier": "RU"
     },
     "basculinbluestriped": {
         "num": 550,
@@ -16697,7 +16697,7 @@
         "weightkg": 18,
         "color": "Green",
         "eggGroups": ["Water 2"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "basculinwhitestriped": {
         "num": 550,
@@ -16788,7 +16788,7 @@
         "prevo": "Krokorok",
         "evoLevel": 40,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "darumaka": {
         "num": 554,
@@ -17369,7 +17369,7 @@
         "eggGroups": ["Field"],
         "otherFormes": ["Zoroark-Hisui"],
         "formeOrder": ["Zoroark", "Zoroark-Hisui"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "zoroarkhisui": {
         "num": 571,
@@ -17514,7 +17514,7 @@
         "prevo": "Gothorita",
         "evoLevel": 41,
         "eggGroups": ["Human-Like"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "solosis": {
         "num": 577,
@@ -17778,7 +17778,7 @@
             "Sawsbuck-Autumn",
             "Sawsbuck-Winter"
         ],
-        "tier": "UU"
+        "tier": "RU"
     },
     "emolga": {
         "num": 587,
@@ -18164,7 +18164,7 @@
         "evoType": "useItem",
         "evoItem": "Thunder Stone",
         "eggGroups": ["Amorphous"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "elgyem": {
         "num": 605,
@@ -18349,7 +18349,7 @@
         "prevo": "Fraxure",
         "evoLevel": 48,
         "eggGroups": ["Monster", "Dragon"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "cubchoo": {
         "num": 613,
@@ -18394,7 +18394,7 @@
         "prevo": "Cubchoo",
         "evoLevel": 37,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "cryogonal": {
         "num": 615,
@@ -18414,7 +18414,7 @@
         "weightkg": 148,
         "color": "Blue",
         "eggGroups": ["Mineral"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "shelmet": {
         "num": 616,
@@ -18664,7 +18664,7 @@
         "evoLevel": 52,
         "evos": ["Kingambit"],
         "eggGroups": ["Human-Like"],
-        "tier": "NFE"
+        "tier": "UU"
     },
     "bouffalant": {
         "num": 626,
@@ -18729,7 +18729,7 @@
         "eggGroups": ["Flying"],
         "otherFormes": ["Braviary-Hisui"],
         "formeOrder": ["Braviary", "Braviary-Hisui"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "braviaryhisui": {
         "num": 628,
@@ -19992,7 +19992,7 @@
         "prevo": "Spewpa",
         "evoLevel": 12,
         "eggGroups": ["Bug"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "vivillonpokeball": {
         "num": 666,
@@ -20057,7 +20057,7 @@
         "prevo": "Litleo",
         "evoLevel": 35,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "flabebe": {
         "num": 669,
@@ -20191,7 +20191,7 @@
             "Florges-White",
             "Florges-Yellow"
         ],
-        "tier": "UU"
+        "tier": "RU"
     },
     "skiddo": {
         "num": 672,
@@ -20232,7 +20232,7 @@
         "prevo": "Skiddo",
         "evoLevel": 32,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "pancham": {
         "num": 674,
@@ -20721,7 +20721,7 @@
         "prevo": "Skrelp",
         "evoLevel": 48,
         "eggGroups": ["Water 1", "Dragon"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "clauncher": {
         "num": 692,
@@ -20762,7 +20762,7 @@
         "prevo": "Clauncher",
         "evoLevel": 37,
         "eggGroups": ["Water 1", "Water 3"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "helioptile": {
         "num": 694,
@@ -20921,7 +20921,7 @@
         "evoType": "levelExtra",
         "evoCondition": "with a Fairy-type move and two levels of Affection",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "hawlucha": {
         "num": 701,
@@ -20959,7 +20959,7 @@
         "weightkg": 2.2,
         "color": "Yellow",
         "eggGroups": ["Field", "Fairy"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "carbink": {
         "num": 703,
@@ -21072,7 +21072,7 @@
         "eggGroups": ["Dragon"],
         "otherFormes": ["Goodra-Hisui"],
         "formeOrder": ["Goodra", "Goodra-Hisui"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "goodrahisui": {
         "num": 706,
@@ -21403,7 +21403,7 @@
         "eggGroups": ["Monster", "Mineral"],
         "otherFormes": ["Avalugg-Hisui"],
         "formeOrder": ["Avalugg", "Avalugg-Hisui"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "avalugghisui": {
         "num": 713,
@@ -22091,7 +22091,7 @@
         "eggGroups": ["Field"],
         "otherFormes": ["Gumshoos-Totem"],
         "formeOrder": ["Gumshoos", "Gumshoos-Totem"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "gumshoostotem": {
         "num": 735,
@@ -22253,7 +22253,7 @@
         "evoType": "useItem",
         "evoItem": "Ice Stone",
         "eggGroups": ["Water 3"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "oricorio": {
         "num": 741,
@@ -22281,7 +22281,7 @@
             "Oricorio-Pa'u",
             "Oricorio-Sensu"
         ],
-        "tier": "UU"
+        "tier": "RU"
     },
     "oricoriopompom": {
         "num": 741,
@@ -22304,7 +22304,7 @@
         "color": "Yellow",
         "eggGroups": ["Flying"],
         "changesFrom": "Oricorio",
-        "tier": "UU"
+        "tier": "RU"
     },
     "oricoriopau": {
         "num": 741,
@@ -22327,7 +22327,7 @@
         "color": "Pink",
         "eggGroups": ["Flying"],
         "changesFrom": "Oricorio",
-        "tier": "UU"
+        "tier": "RU"
     },
     "oricoriosensu": {
         "num": 741,
@@ -22350,7 +22350,7 @@
         "color": "Purple",
         "eggGroups": ["Flying"],
         "changesFrom": "Oricorio",
-        "tier": "UU"
+        "tier": "RU"
     },
     "cutiefly": {
         "num": 742,
@@ -22476,7 +22476,7 @@
         "eggGroups": ["Field"],
         "otherFormes": ["Lycanroc-Midnight", "Lycanroc-Dusk"],
         "formeOrder": ["Lycanroc", "Lycanroc-Midnight", "Lycanroc-Dusk"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "lycanrocmidnight": {
         "num": 745,
@@ -22500,7 +22500,7 @@
         "evoLevel": 25,
         "evoCondition": "at night",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "lycanrocdusk": {
         "num": 745,
@@ -22524,7 +22524,7 @@
         "evoLevel": 25,
         "evoCondition": "from a special Rockruff",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "wishiwashi": {
         "num": 746,
@@ -22652,7 +22652,7 @@
         "prevo": "Mudbray",
         "evoLevel": 30,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "dewpider": {
         "num": 751,
@@ -22762,7 +22762,7 @@
         "eggGroups": ["Grass"],
         "otherFormes": ["Lurantis-Totem"],
         "formeOrder": ["Lurantis", "Lurantis-Totem"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "lurantistotem": {
         "num": 754,
@@ -22880,7 +22880,7 @@
         "eggGroups": ["Monster", "Dragon"],
         "otherFormes": ["Salazzle-Totem"],
         "formeOrder": ["Salazzle", "Salazzle-Totem"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "salazzletotem": {
         "num": 758,
@@ -23057,7 +23057,7 @@
         "weightkg": 76,
         "color": "White",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "passimian": {
         "num": 766,
@@ -23076,7 +23076,7 @@
         "weightkg": 82.8,
         "color": "White",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "wimpod": {
         "num": 767,
@@ -23160,7 +23160,7 @@
         "prevo": "Sandygast",
         "evoLevel": 42,
         "eggGroups": ["Amorphous"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "pyukumuku": {
         "num": 771,
@@ -23781,7 +23781,7 @@
         "weightkg": 19.9,
         "color": "Blue",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "turtonator": {
         "num": 776,
@@ -23962,7 +23962,7 @@
         "weightkg": 19,
         "color": "Pink",
         "eggGroups": ["Water 2"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "drampa": {
         "num": 780,
@@ -25107,7 +25107,7 @@
         "prevo": "Skwovet",
         "evoLevel": 24,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "rookidee": {
         "num": 821,
@@ -25471,7 +25471,7 @@
         "evoLevel": 22,
         "eggGroups": ["Monster", "Water 1"],
         "canGigantamax": "G-Max Stonesurge",
-        "tier": "UU"
+        "tier": "RU"
     },
     "drednawgmax": {
         "num": 834,
@@ -25617,7 +25617,7 @@
         "evoLevel": 34,
         "eggGroups": ["Mineral"],
         "canGigantamax": "G-Max Volcalith",
-        "tier": "UU"
+        "tier": "RU"
     },
     "coalossalgmax": {
         "num": 839,
@@ -25687,7 +25687,7 @@
         "evoItem": "Tart Apple",
         "eggGroups": ["Grass", "Dragon"],
         "canGigantamax": "G-Max Tartness",
-        "tier": "UU"
+        "tier": "RU"
     },
     "flapplegmax": {
         "num": 841,
@@ -25733,7 +25733,7 @@
         "evoItem": "Sweet Apple",
         "eggGroups": ["Grass", "Dragon"],
         "canGigantamax": "G-Max Sweetness",
-        "tier": "UU"
+        "tier": "RU"
     },
     "appletungmax": {
         "num": 842,
@@ -25798,7 +25798,7 @@
         "evoLevel": 36,
         "eggGroups": ["Field", "Dragon"],
         "canGigantamax": "G-Max Sandblast",
-        "tier": "UU"
+        "tier": "RU"
     },
     "sandacondagmax": {
         "num": 844,
@@ -25976,7 +25976,7 @@
         "otherFormes": ["Toxtricity-Low-Key"],
         "formeOrder": ["Toxtricity", "Toxtricity-Low-Key"],
         "canGigantamax": "G-Max Stun Shock",
-        "tier": "UU"
+        "tier": "RU"
     },
     "toxtricitylowkey": {
         "num": 849,
@@ -26000,7 +26000,7 @@
         "evoLevel": 30,
         "eggGroups": ["Human-Like"],
         "canGigantamax": "G-Max Stun Shock",
-        "tier": "UU"
+        "tier": "RU"
     },
     "toxtricitygmax": {
         "num": 849,
@@ -26345,7 +26345,7 @@
         "evoLevel": 42,
         "eggGroups": ["Fairy"],
         "canGigantamax": "G-Max Smite",
-        "tier": "UU"
+        "tier": "OU"
     },
     "hatterenegmax": {
         "num": 858,
@@ -26512,7 +26512,7 @@
         "prevo": "Meowth-Galar",
         "evoLevel": 28,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "cursola": {
         "num": 864,
@@ -26720,7 +26720,7 @@
         "weightkg": 62,
         "color": "Yellow",
         "eggGroups": ["Fairy", "Mineral"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "pincurchin": {
         "num": 871,
@@ -26739,7 +26739,7 @@
         "weightkg": 1,
         "color": "Purple",
         "eggGroups": ["Water 1", "Amorphous"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "snom": {
         "num": 872,
@@ -26781,7 +26781,7 @@
         "evoType": "levelFriendship",
         "evoCondition": "at night",
         "eggGroups": ["Bug"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "stonjourner": {
         "num": 874,
@@ -26800,7 +26800,7 @@
         "weightkg": 520,
         "color": "Gray",
         "eggGroups": ["Mineral"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "eiscue": {
         "num": 875,
@@ -26821,7 +26821,7 @@
         "eggGroups": ["Water 1", "Field"],
         "otherFormes": ["Eiscue-Noice"],
         "formeOrder": ["Eiscue", "Eiscue-Noice"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "eiscuenoice": {
         "num": 875,
@@ -26896,7 +26896,7 @@
         "weightkg": 28,
         "color": "Purple",
         "eggGroups": ["Fairy"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "morpeko": {
         "num": 877,
@@ -26983,7 +26983,7 @@
         "evoLevel": 34,
         "eggGroups": ["Field", "Mineral"],
         "canGigantamax": "G-Max Steelsurge",
-        "tier": "UU"
+        "tier": "RU"
     },
     "copperajahgmax": {
         "num": 879,
@@ -28189,7 +28189,7 @@
         "otherFormes": ["Oinkologne-F"],
         "formeOrder": ["Oinkologne", "Oinkologne-F"],
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "oinkolognef": {
         "num": 916,
@@ -28213,7 +28213,7 @@
         "prevo": "Lechonk",
         "evoLevel": 18,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "tarountula": {
         "num": 917,
@@ -28254,7 +28254,7 @@
         "prevo": "Tarountula",
         "evoLevel": 15,
         "eggGroups": ["Bug"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "nymble": {
         "num": 919,
@@ -28295,7 +28295,7 @@
         "prevo": "Nymble",
         "evoLevel": 24,
         "eggGroups": ["Bug"],
-        "tier": "OU"
+        "tier": "UU"
     },
     "pawmi": {
         "num": 921,
@@ -28367,7 +28367,7 @@
         "evoType": "other",
         "evoCondition": "walk 1000 steps in Let's Go",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "OU"
     },
     "tandemaus": {
         "num": 924,
@@ -28417,7 +28417,7 @@
         "otherFormes": ["Maushold-Four"],
         "formeOrder": ["Maushold", "Maushold-Four"],
         "eggGroups": ["Field", "Fairy"],
-        "tier": "OU"
+        "tier": "UU"
     },
     "mausholdfour": {
         "num": 925,
@@ -28485,7 +28485,7 @@
         "prevo": "Fidough",
         "evoLevel": 26,
         "eggGroups": ["Field", "Mineral"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "smoliv": {
         "num": 928,
@@ -28548,7 +28548,7 @@
         "prevo": "Dolliv",
         "evoLevel": 35,
         "eggGroups": ["Grass"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "squawkabilly": {
         "num": 931,
@@ -28579,7 +28579,7 @@
             "Squawkabilly-White"
         ],
         "eggGroups": ["Flying"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "squawkabillyblue": {
         "num": 931,
@@ -28820,7 +28820,7 @@
         "evoType": "useItem",
         "evoItem": "Thunder Stone",
         "eggGroups": ["Water 1"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "wattrel": {
         "num": 940,
@@ -28910,7 +28910,7 @@
         "prevo": "Maschiff",
         "evoLevel": 30,
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "shroodle": {
         "num": 944,
@@ -29057,7 +29057,7 @@
         "weightkg": 79,
         "color": "Red",
         "eggGroups": ["Water 3"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "capsakid": {
         "num": 951,
@@ -29099,7 +29099,7 @@
         "evoType": "useItem",
         "evoItem": "Fire Stone",
         "eggGroups": ["Grass"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "rellor": {
         "num": 953,
@@ -29141,7 +29141,7 @@
         "evoType": "other",
         "evoCondition": "walk 1000 steps in Let's Go",
         "eggGroups": ["Bug"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "flittle": {
         "num": 955,
@@ -29182,7 +29182,7 @@
         "prevo": "Flittle",
         "evoLevel": 35,
         "eggGroups": ["Flying"],
-        "tier": "UU"
+        "tier": "UUBL"
     },
     "tinkatink": {
         "num": 957,
@@ -29301,7 +29301,7 @@
         "prevo": "Wiglett",
         "evoLevel": 26,
         "eggGroups": ["Water 3"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "bombirdier": {
         "num": 962,
@@ -29324,7 +29324,7 @@
         "weightkg": 42.9,
         "color": "White",
         "eggGroups": ["Flying"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "finizen": {
         "num": 963,
@@ -29431,7 +29431,7 @@
         "prevo": "Varoom",
         "evoLevel": 40,
         "eggGroups": ["Mineral"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "cyclizar": {
         "num": 967,
@@ -29469,7 +29469,7 @@
         "weightkg": 310,
         "color": "Pink",
         "eggGroups": ["Field"],
-        "tier": "OU"
+        "tier": "UU"
     },
     "glimmet": {
         "num": 969,
@@ -29571,7 +29571,7 @@
         "weightkg": 37,
         "color": "Pink",
         "eggGroups": ["Flying"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "cetoddle": {
         "num": 974,
@@ -29621,7 +29621,7 @@
         "evoType": "useItem",
         "evoItem": "Ice Stone",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "veluza": {
         "num": 976,
@@ -29640,7 +29640,7 @@
         "weightkg": 90,
         "color": "Gray",
         "eggGroups": ["Water 2"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "dondozo": {
         "num": 977,
@@ -29681,7 +29681,7 @@
         "cosmeticFormes": ["Tatsugiri-Droopy", "Tatsugiri-Stretchy"],
         "formeOrder": ["Tatsugiri", "Tatsugiri-Droopy", "Tatsugiri-Stretchy"],
         "eggGroups": ["Water 2"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "annihilape": {
         "num": 979,
@@ -29754,7 +29754,7 @@
         "evoType": "levelMove",
         "evoMove": "Twin Beam",
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "dudunsparce": {
         "num": 982,
@@ -29779,7 +29779,7 @@
         "otherFormes": ["Dudunsparce-Three-Segment"],
         "formeOrder": ["Dudunsparce", "Dudunsparce-Three-Segment"],
         "eggGroups": ["Field"],
-        "tier": "UU"
+        "tier": "RU"
     },
     "dudunsparcethreesegment": {
         "num": 982,
@@ -30143,7 +30143,7 @@
         "prevo": "Arctibax",
         "evoLevel": 54,
         "eggGroups": ["Dragon", "Mineral"],
-        "tier": "OU"
+        "tier": "UU"
     },
     "gimmighoul": {
         "num": 999,

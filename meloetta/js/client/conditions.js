@@ -868,7 +868,7 @@ const Conditions = {
                 type === "Flying" &&
                 typeMod > 0
             ) {
-                this.add("-activate", "", "deltastream");
+                this.add("-fieldactivate", "Delta Stream");
                 return 0;
             }
         },
