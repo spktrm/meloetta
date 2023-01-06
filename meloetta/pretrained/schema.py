@@ -359,8 +359,6 @@ def main():
                     )
                     sample["feature_vector"] = torch.from_numpy(feature_vector)
                 data = torch.stack([sample["feature_vector"] for sample in samples])
-            except ValueError:
-                pass
             except:
                 traceback.print_exc()
             else:
@@ -368,7 +366,8 @@ def main():
                 for key, values in schema[f"gen{gen}"][dex_name].items():
                     for index, value in enumerate(values):
                         schema[f"gen{gen}"][dex_name][key][index] = json.loads(value)
-                torch.save(data, os.path.join(save_dir, dex_name + ".pt"))
+                save_path = os.path.join(save_dir, dex_name + ".pt")
+                torch.save(data, save_path)
 
     with open("meloetta/pretrained/schema.json", "w") as f:
         json.dump(schema, f)
