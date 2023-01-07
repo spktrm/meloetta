@@ -6,6 +6,15 @@ requirements = [
     "py_mini_racer==0.6.0",
     "requests==2.28.1",
     "websockets==10.4",
+    "beautifulsoup4==4.11.1",
+    "detoxify==0.5.1",
+    "numpy==1.21.6",
+    "pandas==1.3.5",
+    "plotly==5.11.0",
+    "scikit_learn==1.0.2",
+    "setuptools==65.3.0",
+    "torch==1.12.1",
+    "tqdm==4.64.1",
 ]
 
 

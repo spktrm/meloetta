@@ -1,99 +1,34 @@
-import random
-import asyncio
-
 import multiprocessing as mp
 
-from meloetta.player import Player
-from typing import Any
-from tqdm import tqdm
+from meloetta.worker import SelfPlayWorker
+from meloetta.controllers.random import RandomController
+from meloetta.controllers.naiveai import NaiveAIController
 
 
-class SelfPlayWorker:
-    def __init__(
-        self,
-        worker_index: int,
-        num_players: int,
-    ):
-        self.worker_index = worker_index
-        self.num_players = num_players
+BATTLE_FORMAT = "gen8randomdoublesbattle"
+# BATTLE_FORMAT = "gen3randombattle"
+# BATTLE_FORMAT = "gen3randombattle"
+# BATTLE_FORMAT = "gen9doublesou"
 
-    def __repr__(self) -> str:
-        return f"Worker{self.worker_index}"
-
-    def run(self) -> Any:
-        """
-        Start selfplay between two asynchronous actors-
-        """
-
-        async def selfplay():
-            return await asyncio.gather(
-                *[
-                    self.actor(self.worker_index * self.num_players + i)
-                    for i in range(self.num_players)
-                ]
-            )
-
-        results = asyncio.run(selfplay())
-        return results
-
-    async def actor(self, player_index: int) -> Any:
-        username = f"p{player_index}"
-
-        player = await Player.create(username, None, "localhost:8000")
-        await player.client.login()
-        await asyncio.sleep(1)
-
-        battle_format = "gen1randombattle"
-        team = "null"
-
-        progress = tqdm(range(10)) if player_index == 0 else range(10)
-        for _ in progress:  # 10 battles each player-player pair
-            if player_index % 2 == 0:
-                await player.client.challenge_user(
-                    f"p{player_index + 1}", battle_format, team
-                )
-            else:
-                await player.client.accept_challenge(battle_format, team)
-
-            while True:
-                message = await player.client.receive_message()
-                action_required = await player.recieve(message)
-                if "|error" in message:
-                    if "Can't switch: The active Pokémon is trapped" in message:
-                        message = await player.client.receive_message()
-                        action_required = await player.recieve(message)
-                        action_required = True
-                    else:
-                        print(message)
-
-                if action_required:
-                    state = player.get_state()
-                    choices = player.get_choices()
-                    # The magic
-                    choice = (
-                        "/choose " + random.choice(choices)
-                        if choices
-                        else "/choose default"
-                    )
-                    msg_list = [choice, player.rqid]
-                    await player.client.send_message(player.battle.battle_tag, msg_list)
-
-                if player.battle.ended:
-                    await player.client.leave_battle(player.battle.battle_tag)
-                    player.reset()
-                    break
+TEAM = "null"
+# TEAM = "Charizard||HeavyDutyBoots|Blaze|hurricane,fireblast,toxic,roost||85,,85,85,85,85||,0,,,,||88|]Venusaur||BlackSludge|Chlorophyll|leechseed,substitute,sleeppowder,sludgebomb||85,,85,85,85,85||,0,,,,||82|]Blastoise||WhiteHerb|Torrent|shellsmash,earthquake,icebeam,hydropump||85,85,85,85,85,85||||86|"
+# TEAM = "Ceruledge||LifeOrb|WeakArmor|bitterblade,closecombat,shadowsneak,swordsdance||85,85,85,85,85,85||||82|,,,,,Fighting]Grafaiai||Leftovers|Prankster|encore,gunkshot,knockoff,partingshot||85,85,85,85,85,85||||86|,,,,,Dark]Greedent||SitrusBerry|CheekPouch|bodyslam,psychicfangs,swordsdance,firefang||85,85,85,85,85,85||||88|,,,,,Psychic]Quaquaval||LifeOrb|Moxie|aquastep,closecombat,swordsdance,icespinner||85,85,85,85,85,85||||80|,,,,,Fighting]Flapple||LifeOrb|Hustle|gravapple,outrage,dragondance,suckerpunch||85,85,85,85,85,85||||84|,,,,,Grass]Pachirisu||AssaultVest|VoltAbsorb|nuzzle,superfang,thunderbolt,uturn||85,85,85,85,85,85||||94|,,,,,Flying"
 
 
 def main():
+    # controller = RandomController()
+    controller = NaiveAIController()
+
     procs = []
-    for i in range(2): # num workes (check with os.cpu_count())
-        worker = SelfPlayWorker(i, 1) # 2 is players per worker
+    for i in range(1):  # num workes (check with os.cpu_count())
+        worker = SelfPlayWorker(i, 2, BATTLE_FORMAT, TEAM)  # 2 is players per worker
         # This config will spawn 20 workers with 2 players each
         # for a total of 40 players, playing 20 games.
         # it is recommended to have an even number of players per worker
 
         process = mp.Process(
             target=worker.run,
+            args=(controller,),
             name=repr(worker),
         )
         process.start()
@@ -104,5 +39,5 @@ def main():
 
 
 if __name__ == "__main__":
-    mp.set_start_method("spawn")
+    mp.set_start_method("fork")
     main()
