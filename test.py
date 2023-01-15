@@ -5,7 +5,7 @@ from typing import Tuple, List
 
 from tqdm import tqdm
 
-from meloetta.worker import SelfPlayWorker
+from meloetta.actor import SelfPlayWorker
 from meloetta.buffers.buffer import ReplayBuffer
 from meloetta.controllers.random import RandomController
 from meloetta.controllers.naiveai import MewZeroController, Model
