@@ -5,10 +5,10 @@ from typing import Tuple, List
 
 from tqdm import tqdm
 
-from meloetta.actor import SelfPlayWorker
+from meloetta.worker import SelfPlayWorker
 from meloetta.buffers.buffer import ReplayBuffer
-from meloetta.controllers.random import RandomController
-from meloetta.controllers.naiveai import MewZeroController, Model
+from meloetta.actors.random import RandomActor
+from meloetta.actors.naiveai import MewZeroActor, Model
 
 
 TRAJECTORY_LENGTH = 1024
@@ -44,7 +44,7 @@ def main():
     model.eval()
 
     replay_buffer = ReplayBuffer(TRAJECTORY_LENGTH, gen, gametype, NUM_BUFFERS)
-    controller = MewZeroController(model, replay_buffer)
+    controller = MewZeroActor(model, replay_buffer)
 
     procs: List[mp.Process] = []
     for i in range(16):  # This config will spawn 20 workers with 2 players each
