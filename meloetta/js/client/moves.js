@@ -17401,7 +17401,7 @@ const Moves = {
                 if (target !== source) {
                     this.debug("interrupting setStatus");
                     if (
-                        effect.id === "synchronize" ||
+                        effect.name === "Synchronize" ||
                         (effect.effectType === "Move" && !effect.secondaries)
                     ) {
                         this.add("-activate", target, "move: Safeguard");
@@ -20500,12 +20500,11 @@ const Moves = {
             if (!pokemon.getItem().isBerry) pokemon.disableMove("stuffcheeks");
         },
         onTry(source) {
-            const item = source.getItem();
-            if (item.isBerry && source.eatItem(true)) {
-                this.boost({ def: 2 }, source, null, null, false, true);
-            } else {
-                return false;
-            }
+            return source.getItem().isBerry;
+        },
+        onHit(pokemon) {
+            if (!this.boost({ def: 2 })) return null;
+            pokemon.eatItem(true);
         },
         secondary: null,
         target: "self",
@@ -21355,23 +21354,29 @@ const Moves = {
         priority: 0,
         flags: { bypasssub: 1 },
         onHitField(target, source, move) {
-            let result = false;
-            for (const active of this.getAllActive()) {
+            const targets = [];
+            for (const pokemon of this.getAllActive()) {
                 if (
-                    this.runEvent("Invulnerability", active, source, move) ===
+                    this.runEvent("Invulnerability", pokemon, source, move) ===
                     false
                 ) {
-                    this.add("-miss", source, active);
-                    result = true;
-                } else if (this.runEvent("TryHit", active, source, move)) {
-                    const item = active.getItem();
-                    if (active.hp && item.isBerry) {
-                        active.eatItem(true);
-                        result = true;
-                    }
+                    this.add("-miss", source, pokemon);
+                } else if (
+                    this.runEvent("TryHit", pokemon, source, move) &&
+                    pokemon.getItem().isBerry
+                ) {
+                    targets.push(pokemon);
                 }
             }
-            return result;
+            this.add("-fieldactivate", "move: Teatime");
+            if (!targets.length) {
+                this.add("-fail", source, "move: Teatime");
+                this.attrLastMove("[still]");
+                return this.NOT_FAIL;
+            }
+            for (const pokemon of targets) {
+                pokemon.eatItem(true);
+            }
         },
         secondary: null,
         target: "all",

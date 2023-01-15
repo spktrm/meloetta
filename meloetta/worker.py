@@ -83,10 +83,9 @@ class SelfPlayWorker:
                     battle = player.room.get_battle()
                     vstate = VectorizedState.from_battle(player.room, battle)
 
+                ended = player.room.get_js_attr("battle?.ended")
                 while (
-                    action_required
-                    and not waiting_for_opp(player.room)
-                    and not player.room.get_js_attr("battle.ended")
+                    action_required and not waiting_for_opp(player.room) and not ended
                 ):
                     choices = player.get_choices()
                     state = {
@@ -106,7 +105,9 @@ class SelfPlayWorker:
                         player.room.battle_tag + "|" + outgoing_message
                     )
 
-                if player.room.get_js_attr("battle?.ended"):
+                if ended:
                     await player.client.leave_battle(player.room.battle_tag)
+                    datum = player.room.get_reward()
+                    controller.store_reward(player.room, datum["pid"], datum["reward"])
                     player.reset()
                     break

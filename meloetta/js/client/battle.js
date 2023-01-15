@@ -69,6 +69,7 @@
         this.shiny = data.shiny;
         this.gender = data.gender || "N";
         this.ident = data.ident;
+        this.terastallized = data.terastallized || "";
         this.searchid = data.searchid;
 
         this.sprite = side.battle.scene.addPokemonSprite(this);
@@ -981,12 +982,14 @@ var Side = (function () {
             pokemon.maxhp = oldpokemon.maxhp;
             pokemon.hpcolor = oldpokemon.hpcolor;
             pokemon.status = oldpokemon.status;
+            pokemon.terastallized = oldpokemon.terastallized;
             pokemon.copyVolatileFrom(oldpokemon, true);
             pokemon.statusData = Object.assign({}, oldpokemon.statusData);
 
             oldpokemon.fainted = false;
             oldpokemon.hp = oldpokemon.maxhp;
             oldpokemon.status = "???";
+            oldpokemon.terastallized = "";
         }
         this.active[slot] = pokemon;
         pokemon.slot = slot;
@@ -1069,6 +1072,8 @@ var Side = (function () {
         pokemon.fainted = true;
         pokemon.hp = 0;
         pokemon.terastallized = "";
+        pokemon.details = pokemon.details.replace(/, tera:[a-z]+/i, "");
+        pokemon.searchid = pokemon.searchid.replace(/, tera:[a-z]+/i, "");
         if (pokemon.side.faintCounter < 100) pokemon.side.faintCounter++;
 
         this.battle.scene.animFaint(pokemon);
@@ -2352,6 +2357,9 @@ var Battle = (function () {
                     case "protectivepads":
                         _poke16.item = "Protective Pads";
                         break;
+                    case "abilityshield":
+                        _poke16.item = "Ability Shield";
+                        break;
                 }
 
                 this.log(args, kwArgs);
@@ -2767,19 +2775,8 @@ var Battle = (function () {
                 _poke27.searchid =
                     args[1].substr(0, 2) + args[1].substr(3) + "|" + args[2];
 
-                if (_poke27.getSpeciesForme() === "Palafin-Hero") {
-                    _poke27.sprite.sp = Dex.getSpriteData(
-                        _poke27,
-                        _poke27.sprite.isFrontSprite,
-                        {
-                            gen: _poke27.sprite.scene.gen,
-                            mod: _poke27.sprite.scene.mod,
-                        }
-                    );
-                    _poke27.sprite.oldsp = null;
-                } else {
-                    this.scene.animTransform(_poke27, true, true);
-                }
+                var isCustomAnim = species.id !== "palafinhero";
+                this.scene.animTransform(_poke27, isCustomAnim, true);
                 this.log(args, kwArgs);
                 break;
             }
@@ -2835,7 +2832,7 @@ var Battle = (function () {
                 var _poke29 = this.getPokemon(args[1]);
                 var _species = Dex.species.get(args[2]);
                 var _fromeffect2 = Dex.getEffect(kwArgs.from);
-                var isCustomAnim = _species.name.startsWith("Wishiwashi");
+                var _isCustomAnim = _species.name.startsWith("Wishiwashi");
                 if (
                     !_poke29.getSpeciesForme().endsWith("-Gmax") &&
                     !_species.name.endsWith("-Gmax")
@@ -2849,7 +2846,7 @@ var Battle = (function () {
                     this.activateAbility(_poke29, _fromeffect2);
                 }
                 _poke29.addVolatile("formechange", _species.name);
-                this.scene.animTransform(_poke29, isCustomAnim);
+                this.scene.animTransform(_poke29, _isCustomAnim);
                 this.log(args, kwArgs);
                 break;
             }
@@ -3626,6 +3623,11 @@ var Battle = (function () {
         output.ident = !isTeamPreview ? pokemonid : "";
         output.searchid = !isTeamPreview ? pokemonid + "|" + details : "";
         var splitDetails = details.split(", ");
+        if (splitDetails[splitDetails.length - 1].startsWith("tera:")) {
+            output.terastallized =
+                splitDetails[splitDetails.length - 1].slice(5);
+            splitDetails.pop();
+        }
         if (splitDetails[splitDetails.length - 1] === "shiny") {
             output.shiny = true;
             splitDetails.pop();
@@ -4107,11 +4109,16 @@ var Battle = (function () {
             case "switch":
             case "drag":
             case "replace": {
+                var _args$2$match;
                 this.endLastTurn();
                 var poke = this.getSwitchedPokemon(args[1], args[2]);
                 var slot = poke.slot;
                 poke.healthParse(args[3]);
                 poke.removeVolatile("itemremoved");
+                poke.terastallized =
+                    ((_args$2$match = args[2].match(/tera:([a-z]+)$/i)) == null
+                        ? void 0
+                        : _args$2$match[1]) || "";
                 if (args[0] === "switch") {
                     if (poke.side.active[slot]) {
                         poke.side.switchOut(poke.side.active[slot], kwArgs);

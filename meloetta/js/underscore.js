@@ -128,7 +128,7 @@ var isFunction$1 = isFunction;
 var hasObjectTag = tagTester("Object");
 
 var hasStringTagBug =
-    supportsDataView && hasObjectTag(new DataView(new ArrayBuffer(8))),
+        supportsDataView && hasObjectTag(new DataView(new ArrayBuffer(8))),
     isIE11 = typeof Map !== "undefined" && hasObjectTag(new Map());
 
 var isDataView = tagTester("DataView");
@@ -512,7 +512,7 @@ var extendOwn = createAssigner(keys);
 var defaults = createAssigner(allKeys, true);
 
 function ctor() {
-    return function () { };
+    return function () {};
 }
 
 function baseCreate(prototype) {
@@ -650,7 +650,7 @@ function mapObject(obj, iteratee, context) {
     return results;
 }
 
-function noop() { }
+function noop() {}
 
 function propertyOf(obj) {
     if (obj == null) return noop;

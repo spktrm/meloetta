@@ -313,7 +313,7 @@ class Abilitydex(Dex):
 
 
 def main():
-    # os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
+    os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
 
     schema = {}
     for gen in range(1, 10):
@@ -359,6 +359,7 @@ def main():
                     )
                     sample["feature_vector"] = torch.from_numpy(feature_vector)
                 data = torch.stack([sample["feature_vector"] for sample in samples])
+                data = torch.cat((torch.zeros_like(data[0]).unsqueeze(0), data), dim=0)
             except:
                 traceback.print_exc()
             else:

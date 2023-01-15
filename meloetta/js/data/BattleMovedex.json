@@ -293,8 +293,8 @@
         "type": "Psychic",
         "zMove": { "boost": { "spe": 2 } },
         "contestType": "Clever",
-        "desc": "The user swaps positions with its ally. Fails if the user is the only Pokemon on its side.",
-        "shortDesc": "The user swaps positions with its ally."
+        "desc": "The user swaps positions with its ally. Fails if the user is the only Pokemon on its side. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails or if the user's last move used is not Ally Switch.",
+        "shortDesc": "User and ally swap positions; using again can fail."
     },
     "amnesia": {
         "num": 133,
@@ -699,7 +699,7 @@
         "zMove": { "boost": { "spe": 1 } },
         "contestType": "Beautiful",
         "desc": "For 5 turns, the user and its party members take 0.5x damage from physical and special attacks, or 0.66x damage if in a Double Battle; does not reduce damage further with Reflect or Light Screen. Critical hits ignore this protection. It is removed from the user's side if the user or an ally is successfully hit by Brick Break, Psychic Fangs, or Defog. Brick Break and Psychic Fangs remove the effect before damage is calculated. Lasts for 8 turns if the user is holding Light Clay. Fails unless the weather is Hail.",
-        "shortDesc": "For 5 turns, damage to allies is halved. Hail only."
+        "shortDesc": "For 5 turns, damage to allies halved. Snow only."
     },
     "autotomize": {
         "num": 475,
@@ -926,8 +926,8 @@
         "secondary": null,
         "target": "normal",
         "type": "Steel",
-        "desc": "Damage doubles if the target is Dynamaxed.",
-        "shortDesc": "Damage doubles if the target is Dynamaxed."
+        "desc": "No additional effect.",
+        "shortDesc": "No additional effect."
     },
     "behemothblade": {
         "num": 781,
@@ -941,8 +941,8 @@
         "secondary": null,
         "target": "normal",
         "type": "Steel",
-        "desc": "Damage doubles if the target is Dynamaxed.",
-        "shortDesc": "Damage doubles if the target is Dynamaxed."
+        "desc": "No additional effect.",
+        "shortDesc": "No additional effect."
     },
     "belch": {
         "num": 562,
@@ -1181,8 +1181,8 @@
         "target": "allAdjacentFoes",
         "type": "Ice",
         "contestType": "Beautiful",
-        "desc": "Has a 10% chance to freeze the target. If the weather is Hail, this move does not check accuracy.",
-        "shortDesc": "10% chance to freeze foe(s). Can't miss in hail."
+        "desc": "Has a 10% chance to freeze the target. If the weather is Snow, this move does not check accuracy.",
+        "shortDesc": "10% chance to freeze foe(s). Can't miss in Snow."
     },
     "block": {
         "num": 335,
@@ -1691,7 +1691,7 @@
         "target": "normal",
         "type": "Fire",
         "contestType": "Clever",
-        "desc": "Fails unless the user is a Fire type. If this move is successful, the user's Fire type becomes typeless as long as it remains active.",
+        "desc": "Fails unless the user is a Fire type. If this move is successful and the user is not Terastallized, the user's Fire type becomes typeless as long as it remains active.",
         "shortDesc": "User's Fire type becomes typeless; must be Fire."
     },
     "buzzybuzz": {
@@ -1837,7 +1837,7 @@
         "type": "Electric",
         "zMove": { "boost": { "spd": 1 } },
         "contestType": "Clever",
-        "desc": "Raises the user's Special Defense by 1 stage. The user's next Electric-type attack will have its power doubled.",
+        "desc": "Raises the user's Special Defense by 1 stage. The user's next Electric-type attack will have its power doubled; the effect ends when the user is no longer active, or after the user attempts to use any Electric-type move besides Charge, even if it is not successful.",
         "shortDesc": "+1 SpD, user's next Electric move 2x power."
     },
     "chargebeam": {
@@ -3131,7 +3131,7 @@
         "target": "normal",
         "type": "Electric",
         "contestType": "Clever",
-        "desc": "Fails unless the user is an Electric type. If this move is successful, the user's Electric type becomes typeless as long as it remains active.",
+        "desc": "Fails unless the user is an Electric type. If this move is successful and the user is not Terastallized, the user's Electric type becomes typeless as long as it remains active.",
         "shortDesc": "User's Electric type: typeless; must be Electric."
     },
     "doubleslap": {
@@ -3522,8 +3522,8 @@
         "secondary": null,
         "target": "normal",
         "type": "Dragon",
-        "desc": "Damage doubles if the target is Dynamaxed.",
-        "shortDesc": "Damage doubles if the target is Dynamaxed."
+        "desc": "No additional effect.",
+        "shortDesc": "No additional effect."
     },
     "dynamicpunch": {
         "num": 223,
@@ -8508,7 +8508,7 @@
         "secondary": null,
         "target": "normal",
         "type": "Psychic",
-        "desc": "Causes the target to become a Psychic type. Fails if the target is an Arceus or a Silvally, or if the target is already purely Psychic type.",
+        "desc": "Causes the target to become a Psychic type. Fails if the target is an Arceus or a Silvally, if the target is already purely Psychic type, or if the target is Terastallized.",
         "shortDesc": "Changes the target's type to Psychic."
     },
     "magicroom": {
@@ -9746,7 +9746,7 @@
         "type": "Fairy",
         "zMove": { "effect": "clearnegativeboost" },
         "contestType": "Beautiful",
-        "desc": "The user restores 1/2 of its maximum HP if Delta Stream or no weather conditions are in effect or if the user is holding Utility Umbrella, 2/3 of its maximum HP if the weather is Desolate Land or Sunny Day, and 1/4 of its maximum HP if the weather is Hail, Primordial Sea, Rain Dance, or Sandstorm, all rounded half down.",
+        "desc": "The user restores 1/2 of its maximum HP if Delta Stream or no weather conditions are in effect or if the user is holding Utility Umbrella, 2/3 of its maximum HP if the weather is Desolate Land or Sunny Day, and 1/4 of its maximum HP if the weather is Primordial Sea, Rain Dance, Sandstorm, or Snow, all rounded half down.",
         "shortDesc": "Heals the user by a weather-dependent amount."
     },
     "morningsun": {
@@ -9763,7 +9763,7 @@
         "type": "Normal",
         "zMove": { "effect": "clearnegativeboost" },
         "contestType": "Beautiful",
-        "desc": "The user restores 1/2 of its maximum HP if Delta Stream or no weather conditions are in effect or if the user is holding Utility Umbrella, 2/3 of its maximum HP if the weather is Desolate Land or Sunny Day, and 1/4 of its maximum HP if the weather is Hail, Primordial Sea, Rain Dance, or Sandstorm, all rounded half down.",
+        "desc": "The user restores 1/2 of its maximum HP if Delta Stream or no weather conditions are in effect or if the user is holding Utility Umbrella, 2/3 of its maximum HP if the weather is Desolate Land or Sunny Day, and 1/4 of its maximum HP if the weather is Primordial Sea, Rain Dance, Sandstorm, or Snow, all rounded half down.",
         "shortDesc": "Heals the user by a weather-dependent amount."
     },
     "mortalspin": {
@@ -11762,7 +11762,7 @@
         "type": "Normal",
         "zMove": { "boost": { "spa": 1 } },
         "contestType": "Clever",
-        "desc": "Causes the user's types to become the same as the current types of the target. If the target's current types include typeless and a non-added type, typeless is ignored. If the target's current types include typeless and an added type from Forest's Curse or Trick-or-Treat, typeless is copied as the Normal type instead. Fails if the user is an Arceus or a Silvally, or if the target's current type is typeless alone.",
+        "desc": "Causes the user's types to become the same as the current types of the target. If the target's current types include typeless and a non-added type, typeless is ignored. If the target's current types include typeless and an added type from Forest's Curse or Trick-or-Treat, typeless is copied as the Normal type instead. Fails if the user is an Arceus or a Silvally, if the user is Terastallized, or if the target's current type is typeless alone.",
         "shortDesc": "User becomes the same type as the target."
     },
     "refresh": {
@@ -13583,7 +13583,7 @@
         "type": "Water",
         "zMove": { "boost": { "spa": 1 } },
         "contestType": "Cute",
-        "desc": "Causes the target to become a Water type. Fails if the target is an Arceus or a Silvally, or if the target is already purely Water type.",
+        "desc": "Causes the target to become a Water type. Fails if the target is an Arceus or a Silvally, if the target is already purely Water type, or if the target is Terastallized.",
         "shortDesc": "Changes the target's type to Water."
     },
     "softboiled": {
@@ -13617,7 +13617,7 @@
         "target": "normal",
         "type": "Grass",
         "contestType": "Cool",
-        "desc": "This attack charges on the first turn and executes on the second. Power is halved if the weather is Hail, Primordial Sea, Rain Dance, or Sandstorm and the user is not holding Utility Umbrella. If the user is holding a Power Herb or the weather is Desolate Land or Sunny Day, the move completes in one turn. If the user is holding Utility Umbrella and the weather is Desolate Land or Sunny Day, the move still requires a turn to charge.",
+        "desc": "This attack charges on the first turn and executes on the second. Power is halved if the weather is Primordial Sea, Rain Dance, Sandstorm, or Snow and the user is not holding Utility Umbrella. If the user is holding a Power Herb or the weather is Desolate Land or Sunny Day, the move completes in one turn. If the user is holding Utility Umbrella and the weather is Desolate Land or Sunny Day, the move still requires a turn to charge.",
         "shortDesc": "Charges turn 1. Hits turn 2. No charge in sunlight."
     },
     "solarblade": {
@@ -14833,7 +14833,7 @@
         "type": "Grass",
         "zMove": { "effect": "clearnegativeboost" },
         "contestType": "Clever",
-        "desc": "The user restores 1/2 of its maximum HP if Delta Stream or no weather conditions are in effect or if the user is holding Utility Umbrella, 2/3 of its maximum HP if the weather is Desolate Land or Sunny Day, and 1/4 of its maximum HP if the weather is Hail, Primordial Sea, Rain Dance, or Sandstorm, all rounded half down.",
+        "desc": "The user restores 1/2 of its maximum HP if Delta Stream or no weather conditions are in effect or if the user is holding Utility Umbrella, 2/3 of its maximum HP if the weather is Desolate Land or Sunny Day, and 1/4 of its maximum HP if the weather is Primordial Sea, Rain Dance, Sandstorm, or Snow, all rounded half down.",
         "shortDesc": "Heals the user by a weather-dependent amount."
     },
     "tackle": {
@@ -16239,7 +16239,7 @@
         "zMove": { "basePower": 160 },
         "maxMove": { "basePower": 130 },
         "contestType": "Beautiful",
-        "desc": "Power doubles if a weather condition other than Delta Stream is active, and this move's type changes to match. Ice type during Hail, Water type during Primordial Sea or Rain Dance, Rock type during Sandstorm, and Fire type during Desolate Land or Sunny Day. If the user is holding Utility Umbrella and uses Weather Ball during Primordial Sea, Rain Dance, Desolate Land, or Sunny Day, the move is still Normal-type and does not have a base power boost.",
+        "desc": "Power doubles if a weather condition other than Delta Stream is active, and this move's type changes to match. Ice type during Snow, Water type during Primordial Sea or Rain Dance, Rock type during Sandstorm, and Fire type during Desolate Land or Sunny Day. If the user is holding Utility Umbrella and uses Weather Ball during Primordial Sea, Rain Dance, Desolate Land, or Sunny Day, this move remains Normal type and does not double in power.",
         "shortDesc": "Power doubles and type varies in each weather."
     },
     "whirlpool": {

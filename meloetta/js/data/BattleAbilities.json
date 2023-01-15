@@ -457,6 +457,13 @@
         "desc": "This Pokemon is immune to Water-type moves and restores 1/4 of its maximum HP, rounded down, when hit by a Water-type move. The power of Fire-type moves is multiplied by 1.25 when used on this Pokemon. At the end of each turn, this Pokemon restores 1/8 of its maximum HP, rounded down, if the weather is Rain Dance, and loses 1/8 of its maximum HP, rounded down, if the weather is Sunny Day. The weather effects are prevented if this Pokemon is holding a Utility Umbrella.",
         "shortDesc": "This Pokemon is healed 1/4 by Water, 1/8 by Rain; is hurt 1.25x by Fire, 1/8 by Sun."
     },
+    "earlybird": {
+        "name": "Early Bird",
+        "rating": 1.5,
+        "num": 48,
+        "desc": "This Pokemon's sleep counter drops by 2 instead of 1.",
+        "shortDesc": "This Pokemon's sleep counter drops by 2 instead of 1."
+    },
     "eartheater": {
         "isBreakable": true,
         "name": "Earth Eater",
@@ -464,13 +471,6 @@
         "num": 297,
         "desc": "This Pokemon is immune to Ground-type moves and restores 1/4 of its maximum HP, rounded down, when hit by a Ground-type move.",
         "shortDesc": "This Pokemon heals 1/4 of its max HP when hit by Ground moves; Ground immunity."
-    },
-    "earlybird": {
-        "name": "Early Bird",
-        "rating": 1.5,
-        "num": 48,
-        "desc": "This Pokemon's sleep counter drops by 2 instead of 1.",
-        "shortDesc": "This Pokemon's sleep counter drops by 2 instead of 1."
     },
     "effectspore": {
         "name": "Effect Spore",
@@ -978,13 +978,6 @@
         "desc": "This Pokemon is immune to Electric-type moves and raises its Special Attack by 1 stage when hit by an Electric-type move. If this Pokemon is not the target of a single-target Electric-type move used by another Pokemon, this Pokemon redirects that move to itself if it is within the range of that move. If multiple Pokemon could redirect with this Ability, it goes to the one with the highest Speed, or in the case of a tie to the one that has had this Ability active longer.",
         "shortDesc": "This Pokemon draws Electric moves to itself to raise Sp. Atk by 1; Electric immunity."
     },
-    "lingeringaroma": {
-        "name": "Lingering Aroma",
-        "rating": 2,
-        "num": 268,
-        "desc": "Pokemon making contact with this Pokemon have their Ability changed to Lingering Aroma. Does not affect Pokemon with the As One, Battle Bond, Comatose, Commander, Disguise, Gulp Missile, Hadron Engine, Ice Face, Lingering Aroma, Multitype, Orichalcum Pulse, Power Construct, Protosynthesis, Quark Drive, RKS System, Schooling, Shields Down, Stance Change, Zen Mode, or Zero to Hero Abilities.",
-        "shortDesc": "Making contact with this Pokemon has the attacker's Ability become Lingering Aroma."
-    },
     "limber": {
         "isBreakable": true,
         "name": "Limber",
@@ -992,6 +985,13 @@
         "num": 7,
         "desc": "This Pokemon cannot be paralyzed. Gaining this Ability while paralyzed cures it.",
         "shortDesc": "This Pokemon cannot be paralyzed. Gaining this Ability while paralyzed cures it."
+    },
+    "lingeringaroma": {
+        "name": "Lingering Aroma",
+        "rating": 2,
+        "num": 268,
+        "desc": "Pokemon making contact with this Pokemon have their Ability changed to Lingering Aroma. Does not affect Pokemon with the As One, Battle Bond, Comatose, Commander, Disguise, Gulp Missile, Hadron Engine, Ice Face, Lingering Aroma, Multitype, Orichalcum Pulse, Power Construct, Protosynthesis, Quark Drive, RKS System, Schooling, Shields Down, Stance Change, Zen Mode, or Zero to Hero Abilities.",
+        "shortDesc": "Making contact with this Pokemon has the attacker's Ability become Lingering Aroma."
     },
     "liquidooze": {
         "name": "Liquid Ooze",
@@ -2350,6 +2350,7 @@
         "shortDesc": "If Darmanitan, at end of turn changes Mode to Standard if > 1/2 max HP, else Zen."
     },
     "zerotohero": {
+        "isPermanent": true,
         "name": "Zero to Hero",
         "rating": 5,
         "num": 278,
