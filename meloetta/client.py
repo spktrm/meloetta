@@ -82,11 +82,6 @@ class Client:
         message = ["/leave {}".format(battle_tag)]
         await self.send_message("", message)
 
-        while True:
-            msg = await self.receive_message()
-            if battle_tag in msg and "deinit" in msg:
-                return
-
     async def join_room(self, room_name):
         message = "/join {}".format(room_name)
         await self.send_message("", [message])

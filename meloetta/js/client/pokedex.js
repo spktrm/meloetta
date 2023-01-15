@@ -18264,7 +18264,7 @@ const Pokedex = {
         heightm: 2.2,
         weightkg: 320,
         color: "Purple",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     screamtail: {
@@ -18277,7 +18277,7 @@ const Pokedex = {
         heightm: 1.2,
         weightkg: 8,
         color: "Pink",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     brutebonnet: {
@@ -18290,7 +18290,7 @@ const Pokedex = {
         heightm: 1.2,
         weightkg: 21,
         color: "Gray",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     fluttermane: {
@@ -18303,7 +18303,7 @@ const Pokedex = {
         heightm: 1.4,
         weightkg: 4,
         color: "Gray",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     slitherwing: {
@@ -18316,7 +18316,7 @@ const Pokedex = {
         heightm: 3.2,
         weightkg: 92,
         color: "Red",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     sandyshocks: {
@@ -18329,7 +18329,7 @@ const Pokedex = {
         heightm: 2.3,
         weightkg: 60,
         color: "Gray",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     irontreads: {
@@ -18342,7 +18342,7 @@ const Pokedex = {
         heightm: 0.9,
         weightkg: 240,
         color: "Gray",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     ironbundle: {
@@ -18355,7 +18355,7 @@ const Pokedex = {
         heightm: 0.6,
         weightkg: 11,
         color: "Red",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     ironhands: {
@@ -18368,7 +18368,7 @@ const Pokedex = {
         heightm: 1.8,
         weightkg: 380.7,
         color: "Gray",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     ironjugulis: {
@@ -18381,7 +18381,7 @@ const Pokedex = {
         heightm: 1.3,
         weightkg: 111,
         color: "Blue",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     ironmoth: {
@@ -18394,7 +18394,7 @@ const Pokedex = {
         heightm: 1.2,
         weightkg: 36,
         color: "Yellow",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     ironthorns: {
@@ -18407,7 +18407,7 @@ const Pokedex = {
         heightm: 1.6,
         weightkg: 303,
         color: "Green",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     frigibax: {
@@ -18557,7 +18557,7 @@ const Pokedex = {
         heightm: 2,
         weightkg: 380,
         color: "Green",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     ironvaliant: {
@@ -18570,7 +18570,7 @@ const Pokedex = {
         heightm: 1.4,
         weightkg: 35,
         color: "White",
-        tags: ["Sub-Legendary", "Paradox"],
+        tags: ["Paradox"],
         eggGroups: ["Undiscovered"],
     },
     koraidon: {

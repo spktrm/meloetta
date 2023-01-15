@@ -170,7 +170,6 @@ CHOICE_FLAGS = {
 CHOICE_TARGETS = list(range(-3, 3))
 CHOICE_TARGETS.remove(0)
 CHOICE_TARGETS = {str(target): i for i, target in enumerate(CHOICE_TARGETS)}
-CHOICE_TARGETS
 
 
 def get_choice_flag_token(name: str):
@@ -183,3 +182,32 @@ def get_choice_target_token(name: str):
 
 def get_choice_token(name: str):
     return CHOICE_TOKENS[name]
+
+
+_STATE_FIELDS = {
+    "private_reserve",
+    "public_n",
+    "public_total_pokemon",
+    "public_faint_counter",
+    "public_side_conditions",
+    "public_wisher",
+    "public_active",
+    "public_reserve",
+    "public_stealthrock",
+    "public_spikes",
+    "public_toxicspikes",
+    "public_stickyweb",
+    "weather",
+    "weather_time_left",
+    "weather_min_time_left",
+    "pseudo_weather",
+    "turn",
+    "prev_choices",
+    "choices_done",
+    "action_type_mask",
+    "moves_mask",
+    "max_moves_mask",
+    "switches_mask",
+    "flags_mask",
+    "targets_mask",
+}

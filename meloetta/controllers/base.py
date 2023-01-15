@@ -10,3 +10,6 @@ class Controller(ABC):
     @abstractmethod
     def choose_action(self):
         raise NotImplementedError
+
+    def store_reward(self, reward: float = None):
+        pass

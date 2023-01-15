@@ -3840,7 +3840,7 @@ const FormatsData = {
         tier: "NFE",
     },
     hydreigon: {
-        tier: "UU",
+        tier: "UUBL",
         doublesTier: "DOU",
         natDexTier: "RU",
     },
@@ -4926,7 +4926,7 @@ const FormatsData = {
     magearna: {
         isNonstandard: "Unobtainable",
         tier: "Unreleased",
-        natDexTier: "OU",
+        natDexTier: "Uber",
     },
     magearnaoriginal: {
         isNonstandard: "Unobtainable",
@@ -4969,7 +4969,7 @@ const FormatsData = {
     melmetal: {
         isNonstandard: "Past",
         tier: "Illegal",
-        natDexTier: "OU",
+        natDexTier: "Uber",
     },
     melmetalgmax: {
         isNonstandard: "Past",
@@ -5447,7 +5447,7 @@ const FormatsData = {
     regieleki: {
         isNonstandard: "Unobtainable",
         tier: "Unreleased",
-        natDexTier: "OU",
+        natDexTier: "Uber",
     },
     regidrago: {
         isNonstandard: "Unobtainable",
@@ -5662,7 +5662,7 @@ const FormatsData = {
         tier: "NFE",
     },
     baxcalibur: {
-        tier: "UU",
+        tier: "UUBL",
         doublesTier: "DOU",
         natDexTier: "RU",
     },
@@ -5672,7 +5672,7 @@ const FormatsData = {
         natDexTier: "RU",
     },
     cyclizar: {
-        tier: "OU",
+        tier: "Uber",
         doublesTier: "DUU",
         natDexTier: "OU",
     },
@@ -5820,7 +5820,7 @@ const FormatsData = {
     },
     ironmoth: {
         tier: "OU",
-        doublesTier: "DOU",
+        doublesTier: "DUU",
         natDexTier: "UU",
     },
     ironhands: {
@@ -5856,7 +5856,7 @@ const FormatsData = {
     chienpao: {
         tier: "OU",
         doublesTier: "DOU",
-        natDexTier: "OU",
+        natDexTier: "Uber",
     },
     wochien: {
         tier: "UU",
@@ -5864,7 +5864,7 @@ const FormatsData = {
         natDexTier: "RU",
     },
     chiyu: {
-        tier: "OU",
+        tier: "Uber",
         doublesTier: "DOU",
         natDexTier: "Uber",
     },
@@ -5921,7 +5921,7 @@ const FormatsData = {
         natDexTier: "OU",
     },
     annihilape: {
-        tier: "OU",
+        tier: "Uber",
         doublesTier: "DOU",
         natDexTier: "UUBL",
     },

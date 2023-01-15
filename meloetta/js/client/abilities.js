@@ -1287,6 +1287,11 @@ const Abilities = {
         rating: 3,
         num: 87,
     },
+    earlybird: {
+        name: "Early Bird",
+        rating: 1.5,
+        num: 48,
+    },
     eartheater: {
         onTryHit(target, source, move) {
             if (target !== source && move.type === "Ground") {
@@ -1300,11 +1305,6 @@ const Abilities = {
         name: "Earth Eater",
         rating: 3.5,
         num: 297,
-    },
-    earlybird: {
-        name: "Early Bird",
-        rating: 1.5,
-        num: 48,
     },
     effectspore: {
         onDamagingHit(damage, target, source, move) {
@@ -1559,7 +1559,7 @@ const Abilities = {
             ) {
                 this.debug("interrupting setStatus with Flower Veil");
                 if (
-                    effect.id === "synchronize" ||
+                    effect.name === "Synchronize" ||
                     (effect.effectType === "Move" && !effect.secondaries)
                 ) {
                     const effectHolder = this.effectState.target;
@@ -2647,6 +2647,25 @@ const Abilities = {
         rating: 3,
         num: 31,
     },
+    limber: {
+        onUpdate(pokemon) {
+            if (pokemon.status === "par") {
+                this.add("-activate", pokemon, "ability: Limber");
+                pokemon.cureStatus();
+            }
+        },
+        onSetStatus(status, target, source, effect) {
+            if (status.id !== "par") return;
+            if (effect?.status) {
+                this.add("-immune", target, "[from] ability: Limber");
+            }
+            return false;
+        },
+        isBreakable: true,
+        name: "Limber",
+        rating: 2,
+        num: 7,
+    },
     lingeringaroma: {
         onDamagingHit(damage, target, source, move) {
             const sourceAbility = source.getAbility();
@@ -2679,25 +2698,6 @@ const Abilities = {
         name: "Lingering Aroma",
         rating: 2,
         num: 268,
-    },
-    limber: {
-        onUpdate(pokemon) {
-            if (pokemon.status === "par") {
-                this.add("-activate", pokemon, "ability: Limber");
-                pokemon.cureStatus();
-            }
-        },
-        onSetStatus(status, target, source, effect) {
-            if (status.id !== "par") return;
-            if (effect?.status) {
-                this.add("-immune", target, "[from] ability: Limber");
-            }
-            return false;
-        },
-        isBreakable: true,
-        name: "Limber",
-        rating: 2,
-        num: 7,
     },
     liquidooze: {
         onSourceTryHeal(damage, target, source, effect) {
@@ -3370,8 +3370,8 @@ const Abilities = {
     opportunist: {
         onFoeAfterBoost(boost, target, source, effect) {
             if (
-                effect?.fullname?.endsWith("Opportunist") ||
-                effect?.fullname?.endsWith("Mirror Herb")
+                effect?.name === "Opportunist" ||
+                effect?.name === "Mirror Herb"
             )
                 return;
             const pokemon = this.effectState.target;
@@ -4251,7 +4251,7 @@ const Abilities = {
             }
         },
         onAfterBoost(boost, target, source, effect) {
-            if (effect && effect.id === "intimidate") {
+            if (effect?.name === "Intimidate") {
                 this.boost({ spe: 1 });
             }
         },
@@ -6247,27 +6247,23 @@ const Abilities = {
     },
     zerotohero: {
         onSwitchOut(pokemon) {
-            if (pokemon.baseSpecies.baseSpecies !== "Palafin") return;
-            if (pokemon.species.forme !== "Hero") {
-                pokemon.formeChange(
-                    "Palafin-Hero",
-                    this.effect,
-                    true,
-                    "[silent]"
-                );
-            }
-        },
-        onSwitchIn(pokemon) {
             if (
                 pokemon.baseSpecies.baseSpecies !== "Palafin" ||
-                pokemon.species.forme !== "Hero"
+                pokemon.transformed
             )
                 return;
-            if (!this.effectState.heroMessageDisplayed) {
-                this.add("-activate", pokemon, "ability: Zero to Hero");
-                this.effectState.heroMessageDisplayed = true;
+            if (pokemon.species.forme !== "Hero") {
+                pokemon.formeChange("Palafin-Hero", this.effect, true);
+                this.effectState.sendHeroMessage = true;
             }
         },
+        onStart(pokemon) {
+            if (this.effectState.sendHeroMessage) {
+                this.add("-activate", pokemon, "ability: Zero to Hero");
+                this.effectState.sendHeroMessage = false;
+            }
+        },
+        isPermanent: true,
         name: "Zero to Hero",
         rating: 5,
         num: 278,

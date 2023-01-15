@@ -36,7 +36,7 @@ const Items = {
             if (
                 effect &&
                 effect.effectType === "Ability" &&
-                !effect.fullname?.endsWith("Trace")
+                effect.name !== "Trace"
             ) {
                 this.add("-ability", source, effect);
             }
@@ -584,6 +584,21 @@ const Items = {
         num: 241,
         gen: 2,
     },
+    blackglasses: {
+        name: "Black Glasses",
+        spritenum: 35,
+        fling: {
+            basePower: 30,
+        },
+        onBasePowerPriority: 15,
+        onBasePower(basePower, user, target, move) {
+            if (move && move.type === "Dark") {
+                return this.chainModify([4915, 4096]);
+            }
+        },
+        num: 240,
+        gen: 2,
+    },
     blacksludge: {
         name: "Black Sludge",
         spritenum: 34,
@@ -601,21 +616,6 @@ const Items = {
         },
         num: 281,
         gen: 4,
-    },
-    blackglasses: {
-        name: "Black Glasses",
-        spritenum: 35,
-        fling: {
-            basePower: 30,
-        },
-        onBasePowerPriority: 15,
-        onBasePower(basePower, user, target, move) {
-            if (move && move.type === "Dark") {
-                return this.chainModify([4915, 4096]);
-            }
-        },
-        num: 240,
-        gen: 2,
     },
     blastoisinite: {
         name: "Blastoisinite",
@@ -4188,8 +4188,8 @@ const Items = {
         spritenum: 0,
         onFoeAfterBoost(boost, target, source, effect) {
             if (
-                effect?.fullname?.endsWith("Opportunist") ||
-                effect?.fullname?.endsWith("Mirror Herb")
+                effect?.name === "Opportunist" ||
+                effect?.name === "Mirror Herb"
             )
                 return;
             const boostPlus = {};

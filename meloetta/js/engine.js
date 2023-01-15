@@ -12,10 +12,11 @@ function serialize(obj) {
     return JSON.decycle(obj);
 }
 
+
 var engine = {
     start: function () {
         this.client = BattleRoom;
-        this.client.initialize();
+        this.reset();
         return 0;
     },
 
@@ -29,37 +30,44 @@ var engine = {
         return 0;
     },
 
-    add: function (command) {
-        this.client.battle.add(command);
-        return 0;
-    },
-
-    instantAdd: function (command) {
-        this.client.battle.run(command, true);
-        this.client.battle.preemptStepQueue.push(command);
-        this.client.battle.add(command);
-        return 0;
-    },
-
-    addToStepQueue: function (command) {
-        this.client.battle.stepQueue.push(command);
-        return 0;
-    },
-
-    seekTurn: function (turn, forceReset) {
-        this.client.battle.seekTurn(turn, forceReset);
-        return 0;
-    },
-
-    setPerspective: function (sideid) {
-        this.client.battle.setPerspective(sideid);
-        return 0;
+    getReward: function () {
+        end_idx = this.client.battle.stepQueue.length - 1;
+        win_msg = this.client.battle.stepQueue[end_idx];
+        sideid = this.client.side;
+        if (sideid === "p1") {
+            pid = 0;
+        } else if (sideid === "p2") {
+            pid = 1;
+        }
+        datum = win_msg.split("|");
+        win = datum[1];
+        winner = datum[2];
+        username = this.client.battle.mySide.name;
+        this.client.winner = winner;
+        if (username === winner) {
+            reward = 1
+        } else {
+            reward = -1
+        }
+        if (win === "tie") {
+            reward = 0
+        }
+        return {
+            "pid": pid,
+            "reward": reward
+        }
     },
 
     serialize: function () {
         serialized_state = serialize(this.client);
         // delete serialized_state.battle.stepQueue;
         return serialized_state;
+    },
+
+    serializeBattle: function () {
+        serialized_battle = serialize(this.client.battle);
+        delete serialized_battle.stepQueue;
+        return serialized_battle;
     },
 
     reset: function () {
@@ -69,20 +77,6 @@ var engine = {
         this.client.battleEnded = false;
         this.client.title = "";
         return 0;
-    },
-
-    // Battle Funcs
-
-    parsePokemonId: function (pokemonId) {
-        return this.client.battle.parsePokemonId(pokemonId);
-    },
-
-    getPokemon: function (pokemonId) {
-        return this.client.battle.getPokemon(pokemonId);
-    },
-
-    getNearSide: function () {
-        return this.client.battle.nearSide;
     },
 
     // Choices

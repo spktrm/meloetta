@@ -94,21 +94,6 @@ class BattleRoom:
                 exit()
         self._ctx.eval("engine.start()")
 
-    def recieve(self, data: str = ""):
-        return self._execute("engine.receive({})".format(json.dumps(data)))
-
-    def get_js_attr(self, attr: str):
-        return self._execute(f"engine.client.{attr}")
-
-    def get_battle(self, raw: bool = False):
-        battle = self._execute("serialize(engine.client.battle)")
-        if not raw:
-            battle = deserialize(battle)
-        return battle
-
-    def add(self, data: str = ""):
-        return self._call("engine.add", data)
-
     def _call(self, cmd, *args):
         js = cmd + "({})".format(json.dumps(args)[1:-1])
         return self._execute(js)
@@ -120,29 +105,17 @@ class BattleRoom:
             return None
         return self._ctx.json_impl.loads(ret)
 
-    def instantAdd(self, data: str):
-        return self._call("engine.instandAdd", data)
+    def recieve(self, data: str = ""):
+        return self._execute("engine.receive({})".format(json.dumps(data)))
 
-    def push_to_step_queue(self, data: str):
-        return self._call("engine.addToStepQueue", data)
+    def get_js_attr(self, attr: str):
+        return self._execute(f"engine.client.{attr}")
 
-    def seek_turn(self, turn: int, force_reset: bool):
-        return self._call("engine.seekTurn", turn, force_reset)
-
-    def setPerspective(self, sideid: str):
-        return self._call("engine.setPerspective", sideid)
-
-    def parsePokemonId(self, pokemonid: str):
-        return self._call("engine.parsePokemonId", pokemonid)
-
-    def getPokemon(self, pokemonid: str):
-        return self._call("engine.getPokemon", pokemonid)
-
-    def fixRequest(self, request):
-        return self._call("engine.fixRequest", request)
-
-    def get_choices(self, request):
-        return self._call("engine.getChoices", request)
+    def get_battle(self, raw: bool = False):
+        battle = self._execute("engine.serializeBattle()")
+        if not raw:
+            battle = deserialize(battle)
+        return battle
 
     def get_species(self, species):
         return self._call("engine.getSpecies", species)
@@ -156,11 +129,11 @@ class BattleRoom:
     def get_ability(self, ability):
         return self._call("engine.getAbility", ability)
 
-    def get_type(self, type):
-        return self._call("engine.getType", type)
-
     def set_gen(self, gen):
         return self._call("engine.setGen", gen)
+
+    def get_reward(self):
+        return self._execute("engine.getReward()")
 
     def reset(self):
         self._ctx.eval("engine.reset()")

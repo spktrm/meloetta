@@ -149,21 +149,30 @@ class ChoiceBuilder:
         if self.gametype != "singles":  # only relevant for gamemodes not singles
             prev_choices = self.get_prev_choices()
         else:
-            prev_choices = None
+            prev_choices = {
+                "prev_choices": None,
+                "choices_done": None,
+            }
 
         max_move_mask = torch.tensor(list(max_move_mask.values()))
         move_mask = torch.tensor(list(move_mask.values()))
         choices["moves"] = moves
 
-        action_type = torch.tensor([move, switch])
+        action_type = torch.tensor([move, switch, not (move or switch)])
         flags = torch.tensor([noflag, mega, zmove, max, tera])
 
         action_masks["action_type_mask"] = expand_bt(action_type)
         action_masks["moves_mask"] = expand_bt(move_mask)
-        action_masks["max_moves_mask"] = expand_bt(max_move_mask)
+        if self.gen == 8:
+            action_masks["max_moves_mask"] = expand_bt(max_move_mask)
+        else:
+            action_masks["max_moves_mask"] = None
         action_masks["switches_mask"] = expand_bt(switch_mask)
         action_masks["flags_mask"] = expand_bt(flags)
-        action_masks["targets_mask"] = expand_bt(target_mask)
+        if self.gametype != "singles" or self.gen == 9:
+            action_masks["targets_mask"] = expand_bt(target_mask)
+        else:
+            action_masks["targets_mask"] = None
 
         return Choices(
             targeting,
@@ -175,7 +184,8 @@ class ChoiceBuilder:
     def get_prev_choices(self):
         prev_choices = []
         total = 2 if self.gametype == "doubles" else 3
-        remaining = total - len(self.choices) - 1
+        remaining = total - len(self.choices)
+
         for prev_choice in self.choices:
             prev_choice_token = -1
             index = -1
@@ -409,7 +419,6 @@ class Player:
         cls = Player()
         cls.client = await Client.create(username, password, address)
         cls.room = BattleRoom()
-        cls.request = None
         cls.started = False
         return cls
 

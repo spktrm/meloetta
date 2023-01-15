@@ -2848,7 +2848,7 @@
     },
     "deino": { "tier": "LC" },
     "zweilous": { "tier": "NFE" },
-    "hydreigon": { "tier": "UU", "doublesTier": "DOU", "natDexTier": "RU" },
+    "hydreigon": { "tier": "UUBL", "doublesTier": "DOU", "natDexTier": "RU" },
     "larvesta": { "tier": "LC" },
     "volcarona": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "OU" },
     "cobalion": {
@@ -3710,7 +3710,7 @@
     "magearna": {
         "isNonstandard": "Unobtainable",
         "tier": "Unreleased",
-        "natDexTier": "OU"
+        "natDexTier": "Uber"
     },
     "magearnaoriginal": { "isNonstandard": "Unobtainable" },
     "marshadow": {
@@ -3751,7 +3751,7 @@
     "melmetal": {
         "isNonstandard": "Past",
         "tier": "Illegal",
-        "natDexTier": "OU"
+        "natDexTier": "Uber"
     },
     "melmetalgmax": { "isNonstandard": "Past", "tier": "Illegal" },
     "grookey": {
@@ -4025,7 +4025,7 @@
     "regieleki": {
         "isNonstandard": "Unobtainable",
         "tier": "Unreleased",
-        "natDexTier": "OU"
+        "natDexTier": "Uber"
     },
     "regidrago": {
         "isNonstandard": "Unobtainable",
@@ -4114,9 +4114,9 @@
     "cetitan": { "tier": "RU", "doublesTier": "(DUU)", "natDexTier": "RU" },
     "frigibax": { "tier": "LC" },
     "arctibax": { "tier": "NFE" },
-    "baxcalibur": { "tier": "UU", "doublesTier": "DOU", "natDexTier": "RU" },
+    "baxcalibur": { "tier": "UUBL", "doublesTier": "DOU", "natDexTier": "RU" },
     "tatsugiri": { "tier": "RU", "doublesTier": "DUber", "natDexTier": "RU" },
-    "cyclizar": { "tier": "OU", "doublesTier": "DUU", "natDexTier": "OU" },
+    "cyclizar": { "tier": "Uber", "doublesTier": "DUU", "natDexTier": "OU" },
     "pawmi": { "tier": "LC" },
     "pawmo": { "tier": "NFE" },
     "pawmot": { "tier": "OU", "doublesTier": "DUU", "natDexTier": "RU" },
@@ -4162,7 +4162,7 @@
     "slitherwing": { "tier": "UU", "doublesTier": "(DUU)", "natDexTier": "RU" },
     "roaringmoon": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "Uber" },
     "irontreads": { "tier": "OU", "doublesTier": "DUU", "natDexTier": "UU" },
-    "ironmoth": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "UU" },
+    "ironmoth": { "tier": "OU", "doublesTier": "DUU", "natDexTier": "UU" },
     "ironhands": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "RU" },
     "ironjugulis": { "tier": "UU", "doublesTier": "DUU", "natDexTier": "RU" },
     "ironthorns": { "tier": "UU", "doublesTier": "DUU", "natDexTier": "RU" },
@@ -4173,9 +4173,9 @@
     },
     "ironvaliant": { "tier": "OU", "doublesTier": "DUU", "natDexTier": "OU" },
     "tinglu": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "UU" },
-    "chienpao": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "OU" },
+    "chienpao": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "Uber" },
     "wochien": { "tier": "UU", "doublesTier": "(DUU)", "natDexTier": "RU" },
-    "chiyu": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "Uber" },
+    "chiyu": { "tier": "Uber", "doublesTier": "DOU", "natDexTier": "Uber" },
     "koraidon": {
         "tier": "Uber",
         "doublesTier": "DUber",
@@ -4192,7 +4192,11 @@
     "toedscruel": { "tier": "UU", "doublesTier": "(DUU)", "natDexTier": "RU" },
     "kingambit": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "OU" },
     "clodsire": { "tier": "OU", "doublesTier": "(DUU)", "natDexTier": "OU" },
-    "annihilape": { "tier": "OU", "doublesTier": "DOU", "natDexTier": "UUBL" },
+    "annihilape": {
+        "tier": "Uber",
+        "doublesTier": "DOU",
+        "natDexTier": "UUBL"
+    },
     "missingno": { "isNonstandard": "Custom", "tier": "Illegal" },
     "syclar": { "isNonstandard": "CAP", "tier": "CAP LC" },
     "syclant": { "isNonstandard": "CAP", "tier": "CAP" },
