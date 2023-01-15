@@ -1,11 +1,11 @@
 import random
 
 from meloetta.room import BattleRoom
-from meloetta.controllers.base import Controller
-from meloetta.controllers.types import State, Choices
+from meloetta.actors.base import Actor
+from meloetta.actors.types import State, Choices
 
 
-class RandomController(Controller):
+class RandomActor(Actor):
     def __init__(self):
         pass
 

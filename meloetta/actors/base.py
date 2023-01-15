@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-class Controller(ABC):
+class Actor(ABC):
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self.choose_action(*args, **kwds)
 

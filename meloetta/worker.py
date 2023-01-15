@@ -6,7 +6,7 @@ from tqdm import tqdm
 from meloetta.player import Player
 from meloetta.room import BattleRoom
 from meloetta.vector import VectorizedState
-from meloetta.controllers.base import Controller
+from meloetta.actors.base import Actor
 
 
 def waiting_for_opp(room: BattleRoom):
@@ -32,12 +32,12 @@ class SelfPlayWorker:
     def __repr__(self) -> str:
         return f"Worker{self.worker_index}"
 
-    def run(self, controller: Controller) -> Any:
+    def run(self, controller: Actor) -> Any:
         """
         Start selfplay between two asynchronous actors-
         """
 
-        async def selfplay(controller: Controller):
+        async def selfplay(controller: Actor):
             return await asyncio.gather(
                 *[
                     self.actor(self.worker_index * self.num_players + i, controller)
@@ -48,7 +48,7 @@ class SelfPlayWorker:
         results = asyncio.run(selfplay(controller))
         return results
 
-    async def actor(self, player_index: int, controller: Controller) -> Any:
+    async def actor(self, player_index: int, controller: Actor) -> Any:
         username = f"p{player_index}"
 
         player = await Player.create(username, None, "localhost:8000")

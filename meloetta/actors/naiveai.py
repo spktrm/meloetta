@@ -10,8 +10,8 @@ from meloetta.client import Client
 from meloetta.room import BattleRoom
 
 from meloetta.buffers.buffer import ReplayBuffer
-from meloetta.controllers.base import Controller
-from meloetta.controllers.types import State, Choices
+from meloetta.actors.base import Actor
+from meloetta.actors.types import State, Choices
 
 from meloetta.embeddings import (
     AbilityEmbedding,
@@ -1521,7 +1521,7 @@ class Model(nn.Module):
         return PostProcess(data, index)
 
 
-class MewZeroController(Controller):
+class MewZeroActor(Actor):
     def __init__(self, model: Model, replay_buffer: ReplayBuffer):
 
         self._model = model
