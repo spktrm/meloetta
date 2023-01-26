@@ -162,17 +162,17 @@ class ChoiceBuilder:
         flags = torch.tensor([noflag, mega, zmove, max, tera])
 
         action_masks["action_type_mask"] = expand_bt(action_type)
-        action_masks["moves_mask"] = expand_bt(move_mask)
+        action_masks["move_mask"] = expand_bt(move_mask)
         if self.gen == 8:
-            action_masks["max_moves_mask"] = expand_bt(max_move_mask)
+            action_masks["max_move_mask"] = expand_bt(max_move_mask)
         else:
-            action_masks["max_moves_mask"] = None
-        action_masks["switches_mask"] = expand_bt(switch_mask)
-        action_masks["flags_mask"] = expand_bt(flags)
+            action_masks["max_move_mask"] = None
+        action_masks["switch_mask"] = expand_bt(switch_mask)
+        action_masks["flag_mask"] = expand_bt(flags)
         if self.gametype != "singles" or self.gen == 9:
-            action_masks["targets_mask"] = expand_bt(target_mask)
+            action_masks["target_mask"] = expand_bt(target_mask)
         else:
-            action_masks["targets_mask"] = None
+            action_masks["target_mask"] = None
 
         return Choices(
             targeting,

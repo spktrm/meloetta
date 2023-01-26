@@ -5,6 +5,7 @@ from meloetta import __version__
 requirements = [
     "py_mini_racer==0.6.0",
     "requests==2.28.1",
+    "aioprocessing==2.0.1",
     "websockets==10.4",
     "beautifulsoup4==4.11.1",
     "detoxify==0.5.1",

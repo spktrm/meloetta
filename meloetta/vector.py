@@ -35,7 +35,7 @@ from meloetta.data import (
 
 _DEFAULT_BACKEND = "torch"
 _ACTIVE_SIZE = 158
-_RESERVE_SIZE = 35
+_RESERVE_SIZE = 37
 
 
 class NamedVector(NamedTuple):
@@ -139,7 +139,9 @@ class ReservePublicPokemon(NamedTuple):
     status_stage: torch.Tensor
     last_move: torch.Tensor
     times_attacked: torch.Tensor
-    side: torch.Tensor
+    sleep_turns: torch.Tensor
+    toxic_turns: torch.Tensor
+    sideid: torch.Tensor
     moves: torch.Tensor
 
     def vector(
@@ -237,7 +239,7 @@ class ActivePublicPokemon(NamedTuple):
 
 
 class State(NamedTuple):
-    pid: torch.Tensor
+    player_id: torch.Tensor
     private_side: PrivateSide
     public_sides: PublicSide
     weather: torch.Tensor
@@ -247,8 +249,9 @@ class State(NamedTuple):
     turn: torch.Tensor
     log: List[str]
 
-    def to_dict(self):
+    def to_dict(self, turns_since_last_move: int):
         return {
+            "player_id": self.player_id,
             "private_reserve": self.private_side.reserve,
             **{
                 "public_" + key: value
@@ -259,6 +262,7 @@ class State(NamedTuple):
             "weather_min_time_left": self.weather_min_time_left,
             "pseudo_weather": self.pseudo_weather,
             "turn": self.turn,
+            "turns_since_last_move": expand_bt(torch.tensor(turns_since_last_move)),
         }
 
 
@@ -285,9 +289,9 @@ class VectorizedState:
         private_side = self._vectorize_private_side()
 
         sideid = self.battle["mySide"]["sideid"]
-        pid = 0 if sideid == "p0" else 1
-        pid = torch.tensor(pid)
-        pid = expand_bt(pid)
+        player_id = 0 if sideid == "p1" else 1
+        player_id = torch.tensor(player_id)
+        player_id = expand_bt(player_id)
 
         pseudoweathers = {
             (pseudoweather[0]).replace(" ", "").lower(): pseudoweather[1:]
@@ -314,7 +318,7 @@ class VectorizedState:
         turn = expand_bt(turn)
 
         return State(
-            pid=pid,
+            player_id=player_id,
             private_side=private_side,
             public_sides=public_sides,
             weather=weather,
@@ -336,7 +340,7 @@ class VectorizedState:
     def _vectorize_private_side(self) -> PrivateSide:
         reserve = [
             self._vectorize_private_pokemon(pokemon)
-            for pokemon in self.battle["myPokemon"]
+            for pokemon in (self.battle["myPokemon"])
         ]
         reserve += [-torch.ones_like(reserve[0]) for _ in range(6 - len(reserve))]
 
@@ -393,7 +397,7 @@ class VectorizedState:
 
         forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
 
-        return PrivatePokemon(
+        private_pokemon = PrivatePokemon(
             ability=get_ability_token(self.gen, "id", pokemon["baseAbility"]),
             active=1 if pokemon["active"] else 0,
             fainted=1 if pokemon.get("fainted") else 0,
@@ -416,13 +420,13 @@ class VectorizedState:
             teraType=teraType,
             terastallized=terastallized,
             moves=moves,
-        ).vector()
+        )
+        return private_pokemon.vector()
 
     def _vectorize_public_side(self, side_id: str):
         side = self.battle[side_id]
 
         controlling = self.battle["pokemonControlled"]
-        side_id_token = 0 if side_id == "mySide" else 1
 
         # This is a measure for removing duplicates from zoroak
         # To be clear, this doesn't remove zoroark, but only mons
@@ -441,7 +445,6 @@ class VectorizedState:
         ]
         active += [-torch.ones(_ACTIVE_SIZE) for _ in range(controlling - len(active))]
         active = torch.stack(active)
-        active[..., -17] = side_id_token
         active = expand_bt(active)
 
         reserve = [
@@ -451,7 +454,6 @@ class VectorizedState:
         reserve += [-torch.ones(_RESERVE_SIZE) for _ in range(num_reserve_padding)]
 
         reserve = torch.stack(reserve)
-        reserve[..., 18] = side_id_token
         reserve = expand_bt(reserve)
 
         side_conditions = torch.stack(
@@ -486,7 +488,7 @@ class VectorizedState:
         total_pokemon = torch.tensor(side["totalPokemon"])
         total_pokemon = expand_bt(total_pokemon)
 
-        faint_counter = torch.tensor(side["faintCounter"])
+        faint_counter = torch.tensor(min(6, side["faintCounter"]))
         faint_counter = expand_bt(faint_counter)
 
         wisher_slot = (side["wisher"] or {"slot": -1})["slot"]
@@ -518,6 +520,7 @@ class VectorizedState:
             self.moves[side_id][pokemon["ident"]] = {}
 
         for move, pp in pokemon["moveTrack"]:
+            pp = max(pp, 0)
             self.moves[side_id][pokemon["ident"]][move] = pp
             moves += [get_move_token(self.gen, "name", move), pp]
 
@@ -529,7 +532,7 @@ class VectorizedState:
             1 if volatile in pokemon["volatiles"] else 0 for volatile in VOLATILES
         ]
         forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
-        return ActivePublicPokemon(
+        active = ActivePublicPokemon(
             species=get_species_token(self.gen, "name", pokemon["name"]),
             forme=get_species_token(self.gen, "forme", forme),
             slot=pokemon["slot"],
@@ -554,7 +557,8 @@ class VectorizedState:
             volatiles=volatiles,
             side=0 if side_id == "mySide" else 1,
             moves=moves,
-        ).vector()
+        )
+        return active.vector()
 
     def _vectorize_public_reserve_pokemon(self, side_id: str, pokemon: Dict[str, Any]):
         moves = []
@@ -567,7 +571,7 @@ class VectorizedState:
 
         forme = pokemon["speciesForme"].replace(pokemon["name"] + "-", "")
 
-        return ReservePublicPokemon(
+        reserve = ReservePublicPokemon(
             species=get_species_token(self.gen, "name", pokemon["name"]),
             forme=get_species_token(self.gen, "forme", forme),
             slot=pokemon["slot"],
@@ -586,6 +590,9 @@ class VectorizedState:
             status_stage=pokemon["statusStage"],
             last_move=get_move_token(self.gen, "name", pokemon["lastMove"]),
             times_attacked=min(pokemon["timesAttacked"], 6),
-            side=0 if side_id == "mySide" else 1,
+            sleep_turns=min(pokemon["statusData"]["sleepTurns"], 15),
+            toxic_turns=min(pokemon["statusData"]["toxicTurns"], 3),
+            sideid=0 if side_id == "mySide" else 1,
             moves=moves,  #
-        ).vector()
+        )
+        return reserve.vector()

@@ -72,7 +72,7 @@ TOKENIZED_SCHEMA = deepcopy(schema)
 
 for gen in TOKENIZED_SCHEMA:
     for dex_type in schema[gen]:
-        for key, values in schema[gen][dex_type].items():
+        for key, values in sorted(schema[gen][dex_type].items()):
             TOKENIZED_SCHEMA[gen][dex_type][key] = {
                 str(values): index for index, values in enumerate(values)
             }
@@ -185,6 +185,7 @@ def get_choice_token(name: str):
 
 
 _STATE_FIELDS = {
+    "player_id",
     "private_reserve",
     "public_n",
     "public_total_pokemon",
@@ -205,9 +206,9 @@ _STATE_FIELDS = {
     "prev_choices",
     "choices_done",
     "action_type_mask",
-    "moves_mask",
-    "max_moves_mask",
-    "switches_mask",
-    "flags_mask",
-    "targets_mask",
+    "move_mask",
+    "max_move_mask",
+    "switch_mask",
+    "flag_mask",
+    "target_mask",
 }
