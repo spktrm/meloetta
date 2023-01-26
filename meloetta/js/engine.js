@@ -41,16 +41,20 @@ var engine = {
         }
         datum = win_msg.split("|");
         win = datum[1];
-        winner = datum[2];
-        username = this.client.battle.mySide.name;
-        this.client.winner = winner;
-        if (username === winner) {
-            reward = 1
-        } else {
-            reward = -1
-        }
-        if (win === "tie") {
+        if (win !== "win") {
             reward = 0
+        } else {
+            winner = datum[2];
+            username = this.client.battle.mySide.name;
+            this.client.winner = winner;
+            if (username === winner) {
+                reward = 1
+            } else {
+                reward = -1
+            }
+            if (win === "tie") {
+                reward = 0
+            }
         }
         return {
             "pid": pid,

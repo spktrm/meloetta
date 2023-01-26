@@ -4,6 +4,7 @@ import multiprocessing as mp
 
 from typing import Dict, List
 
+from meloetta.frameworks.nash_ketchum.model.interfaces import Batch
 from meloetta.utils import create_buffers
 
 
@@ -70,7 +71,6 @@ class ReplayBuffer:
             except Exception as e:
                 raise e
         self.buffers["valid"][index][turn][...] = 1
-        self.buffers["rewards"][index][turn][...] = 0
         with self.turn_counters[index].get_lock():
             self.turn_counters[index].value += 1
 
@@ -93,10 +93,11 @@ class ReplayBuffer:
     def reset_index(self, index: int):
         self.turn_counters[index].value = 0
         self.buffers["valid"][index][...] = 0
+        self.buffers["rewards"][index][...] = 0
         for valid_mask in self.valid_masks:
             self.buffers[valid_mask][index][...] = 1
 
-    def get_batch(self, batch_size: int):
+    def get_batch(self, batch_size: int) -> Batch:
         with self.lock:
             while True:
                 if len(self.full_queue) >= batch_size:
@@ -105,7 +106,7 @@ class ReplayBuffer:
             indices = random.sample(list(self.full_queue), k=batch_size)
             valids = torch.stack([self.buffers["valid"][m] for m in indices])
             lengths = valids.sum(-1)
-            max_index = lengths.max().item()
+            max_length = lengths.max().item()
 
             indices = list(
                 zip(*sorted(list(zip(lengths.tolist(), indices)), key=lambda x: x[0]))
@@ -113,7 +114,7 @@ class ReplayBuffer:
 
             batch = {
                 key: torch.stack(
-                    [self.buffers[key][index][:max_index] for index in indices],
+                    [self.buffers[key][index][:max_length] for index in indices],
                     dim=1,
                 )
                 for key in self.buffers
@@ -122,4 +123,4 @@ class ReplayBuffer:
         batch = {
             k: t.to(device=self.device, non_blocking=True) for k, t in batch.items()
         }
-        return batch
+        return Batch(**batch)

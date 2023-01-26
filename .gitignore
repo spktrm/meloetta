@@ -9,6 +9,9 @@ __pycache__/
 # .vscode
 /.vscode
 
+# cpkts
+**/*.tar
+
 # .DS_Store
 **/*.DS_Store
 

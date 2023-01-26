@@ -54,7 +54,7 @@ def get_buffer_specs(
             "dtype": torch.int64,
         },
         "public_reserve": {
-            "size": (trajectory_length, 2, 6, 35),
+            "size": (trajectory_length, 2, 6, 37),
             "dtype": torch.int64,
         },
         "public_stealthrock": {
@@ -93,19 +93,23 @@ def get_buffer_specs(
             "size": (trajectory_length,),
             "dtype": torch.int64,
         },
+        "turns_since_last_move": {
+            "size": (trajectory_length,),
+            "dtype": torch.int64,
+        },
         "action_type_mask": {
             "size": (trajectory_length, 3),
             "dtype": torch.bool,
         },
-        "moves_mask": {
+        "move_mask": {
             "size": (trajectory_length, 4),
             "dtype": torch.bool,
         },
-        "switches_mask": {
+        "switch_mask": {
             "size": (trajectory_length, 6),
             "dtype": torch.bool,
         },
-        "flags_mask": {
+        "flag_mask": {
             "size": (trajectory_length, len(CHOICE_FLAGS)),
             "dtype": torch.bool,
         },
@@ -126,7 +130,7 @@ def get_buffer_specs(
 
         buffer_specs.update(
             {
-                "targets_mask": {
+                "target_mask": {
                     "size": (trajectory_length, 4),
                     "dtype": torch.bool,
                 },
@@ -200,7 +204,7 @@ def get_buffer_specs(
     if gen == 8:
         buffer_specs.update(
             {
-                "max_moves_mask": {
+                "max_move_mask": {
                     "size": (trajectory_length, 4),
                     "dtype": torch.bool,
                 },
@@ -245,10 +249,10 @@ def create_buffers(num_buffers: int, trajectory_length: int, gen: int, gametype:
     buffers: Dict[str, List[torch.Tensor]] = {key: [] for key in buffer_specs}
     for _ in range(num_buffers):
         for key in buffer_specs:
-            if key == "valid":
-                buffers[key].append(torch.zeros(**buffer_specs[key]).share_memory_())
+            if key.endswith("_mask"):
+                buffers[key].append(torch.ones(**buffer_specs[key]).share_memory_())
             else:
-                buffers[key].append(torch.empty(**buffer_specs[key]).share_memory_())
+                buffers[key].append(torch.zeros(**buffer_specs[key]).share_memory_())
     return buffers
 
 

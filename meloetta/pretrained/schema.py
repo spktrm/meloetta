@@ -20,6 +20,12 @@ def bin_enc(v, n):
     return np.array(data)
 
 
+def bin_enc_basepower(v, n):
+    code = f"0{n+2}b"
+    data = [v / 250] + [int(b) for b in format(int(v), code)[2:]]
+    return np.array(data)
+
+
 def one_hot_enc(v, n):
     return np.eye(n)[v]
 
@@ -77,6 +83,7 @@ def get_schema(data: dict):
         for sample in data.values():
             schema[key].add(json.dumps(get_nested(sample, key)))
 
+    schema = dict(sorted(schema.items()))
     return {key: sorted(value) for key, value in schema.items() if len(value) > 1}
 
 
@@ -92,7 +99,7 @@ class Dex(ABC):
             num = len(schema)
             value = schema.index(json.dumps(value))
             return func(value, num)
-        elif func.__name__ == "bin_enc":
+        elif "bin_enc" in func.__name__:
             value = value or 0
             num = max(list(map(lambda x: int(float(x)) if x != "null" else 0, schema)))
             num = int(np.ceil(np.log2(num)))
@@ -132,7 +139,7 @@ class Dex(ABC):
 
 class Pokedex(Dex):
     FEATURES = {
-        "id": one_hot_enc,
+        # "id": one_hot_enc,
         "baseSpecies": one_hot_enc,
         "formeid": one_hot_enc,
         "types": bow_enc,
@@ -197,7 +204,7 @@ class Movedex(Dex):
         "accuracy": lambda x: np.array([0, 1, int(x) / 100])
         if x == True
         else np.array([1, 0, 1]),
-        "basePower": bin_enc,
+        "basePower": bin_enc_basepower,
         "category": one_hot_enc,
         "critRatio": one_hot_enc,
         "flags.allyanim": single_enc,
@@ -313,7 +320,7 @@ class Abilitydex(Dex):
 
 
 def main():
-    os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
+    # os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
 
     schema = {}
     for gen in range(1, 10):
@@ -343,7 +350,7 @@ def main():
             dex: Dex
 
             dex_name = type(dex).__name__.lower()
-            samples = sorted(dex.data.values(), key=lambda x: x["num"])
+            samples = sorted(dex.data.values(), key=lambda x: x["name"])
             progress = tqdm(samples, desc=f"gen{gen}: " + dex_name)
             try:
                 for sample in progress:
@@ -360,6 +367,7 @@ def main():
                     sample["feature_vector"] = torch.from_numpy(feature_vector)
                 data = torch.stack([sample["feature_vector"] for sample in samples])
                 data = torch.cat((torch.zeros_like(data[0]).unsqueeze(0), data), dim=0)
+                names = [None] + [sample["name"] for sample in samples]
             except:
                 traceback.print_exc()
             else:
@@ -368,7 +376,7 @@ def main():
                     for index, value in enumerate(values):
                         schema[f"gen{gen}"][dex_name][key][index] = json.loads(value)
                 save_path = os.path.join(save_dir, dex_name + ".pt")
-                torch.save(data, save_path)
+                torch.save((names, data), save_path)
 
     with open("meloetta/pretrained/schema.json", "w") as f:
         json.dump(schema, f)
