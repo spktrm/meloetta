@@ -1,13 +1,15 @@
+import torch
 import asyncio
 
-from typing import Any
+from typing import Any, Sequence, Mapping, Type
 
 from meloetta.player import Player
 from meloetta.room import BattleRoom
-from meloetta.vector import VectorizedState
 from meloetta.actors.base import Actor
 from meloetta.workers.barrier import Barrier
 
+from meloetta.room import BattleRoom
+from meloetta.utils import expand_bt
 
 DRAW_BY_REPETITION_1 = 50
 DRAW_BY_REPETITION_2 = 100
@@ -28,11 +30,19 @@ class SelfPlayWorker:
         num_players: int,
         battle_format: str,
         team: str,
+        actor_fn: Type[Actor],
+        actor_args: Sequence[Any] = None,
+        actor_kwargs: Mapping[str, Any] = None,
     ):
         self.battle_format = battle_format
         self.team = team
+
         self.worker_index = worker_index
         self.num_players = num_players
+
+        self.actor_fn = actor_fn
+        self.actor_args = () if actor_args is None else actor_args
+        self.actor_kwargs = {} if actor_kwargs is None else actor_kwargs
 
     def __repr__(self) -> str:
         return f"Worker{self.worker_index}"
@@ -42,11 +52,11 @@ class SelfPlayWorker:
         Start selfplay between two asynchronous actors-
         """
 
-        async def selfplay(actor: Actor):
+        async def selfplay():
             barrier = Barrier(self.num_players)
             return await asyncio.gather(
                 *[
-                    self.actor(self.worker_index * self.num_players + i, actor, barrier)
+                    self.actor(self.worker_index * self.num_players + i, barrier)
                     for i in range(self.num_players)
                 ]
             )
@@ -54,7 +64,7 @@ class SelfPlayWorker:
         results = asyncio.run(selfplay(controller))
         return results
 
-    async def actor(self, player_index: int, actor: Actor, barrier: Barrier) -> Any:
+    async def actor(self, player_index: int, barrier: Barrier) -> Any:
         username = f"player{player_index}"
 
         player = await Player.create(username, None, "localhost:8000")
@@ -71,7 +81,7 @@ class SelfPlayWorker:
 
             turn = 0
             turns_since_last_move = 0
-            hidden_state = actor._model.core.initial_state(1)
+            actor = self.actor_fn(*self.actor_args, **self.actor_kwargs)
 
             while True:
                 message = await player.client.receive_message()
@@ -96,7 +106,7 @@ class SelfPlayWorker:
                     # inputs to neural net
                     battle = player.room.get_battle()
                     turn = battle["turn"]
-                    vstate = VectorizedState.from_battle(player.room, battle)
+                    vstate = actor.get_vectorized_state()
 
                 ended = player.room.get_js_attr("battle?.ended")
                 while (
@@ -104,15 +114,16 @@ class SelfPlayWorker:
                 ):
                     choices = player.get_choices()
                     state = {
-                        **vstate.to_dict(turns_since_last_move),
+                        **vstate,
+                        "turns_since_last_move": expand_bt(
+                            torch.tensor(turns_since_last_move)
+                        ),
                         **choices.action_masks,
                         **choices.prev_choices,
                         "targeting": choices.targeting,
                     }
 
-                    func, args, kwargs, hidden_state = actor(
-                        state, player.room, choices.choices, hidden_state=hidden_state
-                    )
+                    func, args, kwargs = actor(state, player.room, choices.choices)
                     func(*args, **kwargs)
 
                 outgoing_message = player.room.get_js_attr("outgoing_message")

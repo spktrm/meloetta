@@ -20,19 +20,17 @@ class MaxDamageActor(Actor):
         state: State,
         room: BattleRoom,
         choices: Choices,
-        **kwargs,
     ):
         with torch.no_grad():
             func, args, kwargs = self._model(state, choices)
 
-        return func, args, kwargs, None
+        return func, args, kwargs
 
     def store_reward(
         self,
         room: BattleRoom,
         pid: int,
         reward: float = None,
-        store_transition: bool = True,
     ):
         if reward > 0:
             self._queue.put(("maxdmg", 1))
