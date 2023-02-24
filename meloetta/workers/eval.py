@@ -1,12 +1,15 @@
+import torch
 import asyncio
 
-from typing import Any
+from typing import Any, Sequence, Mapping, Type
 
 from meloetta.player import Player
 from meloetta.room import BattleRoom
-from meloetta.vector import VectorizedState
 from meloetta.actors.base import Actor
 from meloetta.workers.barrier import Barrier
+
+from meloetta.room import BattleRoom
+from meloetta.utils import expand_bt
 
 
 def waiting_for_opp(room: BattleRoom):
@@ -23,6 +26,12 @@ class EvalWorker:
         opponent_username: str,
         battle_format: str,
         team: str,
+        eval_actor_fn: Type[Actor] = None,
+        eval_actor_args: Sequence[Any] = None,
+        eval_actor_kwargs: Mapping[str, Any] = None,
+        baseline_actor_fn: Type[Actor] = None,
+        baseline_actor_args: Sequence[Any] = None,
+        baseline_actor_kwargs: Mapping[str, Any] = None,
     ):
         self.battle_format = battle_format
         self.team = team
@@ -30,25 +39,40 @@ class EvalWorker:
         self.eval_username = eval_username
         self.opponent_username = opponent_username
 
+        self.eval_actor_fn = eval_actor_fn
+        self.baseline_actor_fn = baseline_actor_fn
+
+        self.eval_actor_args = () if eval_actor_args is None else eval_actor_args
+        self.eval_actor_kwargs = {} if eval_actor_kwargs is None else eval_actor_kwargs
+
+        self.baseline_actor_args = (
+            () if baseline_actor_args is None else baseline_actor_args
+        )
+        self.baseline_actor_kwargs = (
+            {} if baseline_actor_kwargs is None else baseline_actor_kwargs
+        )
+
     def __repr__(self) -> str:
         return f"EvalWorker"
 
-    def run(self, eval_actor: Actor, baseline_actor: Actor) -> Any:
+    def run(self) -> Any:
         """
         Start selfplay between two asynchronous actors-
         """
 
-        async def selfplay(eval_actor, baseline_actor):
+        async def selfplay():
             barrier = Barrier(2)
             return await asyncio.gather(
-                self.actor(0, eval_actor, barrier),
-                self.actor(1, baseline_actor, barrier),
+                self.actor(0, self.eval_actor_fn, barrier),
+                self.actor(1, self.baseline_actor_fn, barrier),
             )
 
-        results = asyncio.run(selfplay(eval_actor, baseline_actor))
+        results = asyncio.run(selfplay())
         return results
 
-    async def actor(self, player_index: int, actor: Actor, barrier: Barrier) -> Any:
+    async def actor(
+        self, player_index: int, actor_fn: Type[Actor], barrier: Barrier
+    ) -> Any:
         if player_index == 0:
             username = self.eval_username
         else:
@@ -64,15 +88,15 @@ class EvalWorker:
                 await player.client.challenge_user(
                     self.opponent_username, self.battle_format, self.team
                 )
+                actor = actor_fn(*self.eval_actor_args, **self.baseline_actor_kwargs)
             else:
                 await player.client.accept_challenge(self.battle_format, self.team)
+                actor = actor_fn(
+                    *self.baseline_actor_args, **self.baseline_actor_kwargs
+                )
 
             turn = 0
             turns_since_last_move = 0
-            try:
-                hidden_state = actor._model.core.initial_state(1)
-            except:
-                hidden_state = None
 
             while True:
                 message = await player.client.receive_message()
@@ -95,9 +119,9 @@ class EvalWorker:
 
                 if action_required:
                     # inputs to neural net
-                    battle = player.room.get_battle()
                     turn = battle["turn"]
-                    vstate = VectorizedState.from_battle(player.room, battle)
+                    battle = player.room.get_battle()
+                    vstate = actor.get_vectorized_state()
 
                 ended = player.room.get_js_attr("battle?.ended")
                 while (
@@ -105,19 +129,16 @@ class EvalWorker:
                 ):
                     choices = player.get_choices()
                     state = {
-                        **vstate.to_dict(turns_since_last_move),
+                        **vstate,
+                        "turns_since_last_move": expand_bt(
+                            torch.tensor(turns_since_last_move)
+                        ),
                         **choices.action_masks,
                         **choices.prev_choices,
                         "targeting": choices.targeting,
                     }
 
-                    func, args, kwargs, hidden_state = actor(
-                        state,
-                        player.room,
-                        choices.choices,
-                        store_transition=False,
-                        hidden_state=hidden_state,
-                    )
+                    func, args, kwargs = actor(state, player.room, choices.choices)
                     func(*args, **kwargs)
 
                 outgoing_message = player.room.get_js_attr("outgoing_message")
@@ -156,7 +177,5 @@ class EvalWorker:
 
             await player.client.leave_battle(player.room.battle_tag)
             datum = player.room.get_reward()
-            actor.store_reward(
-                player.room, datum["pid"], datum["reward"], store_transition=False
-            )
+            actor.store_reward(player.room, datum["pid"], datum["reward"])
             player.reset()
