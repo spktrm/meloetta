@@ -24,6 +24,7 @@ class PolicyHeads(nn.Module):
     def __init__(self, gen: int, gametype: str, config: config.PolicyHeadsConfig):
         super().__init__()
 
+        self.config = config
         self.gametype = gametype
         self.gen = gen
 
@@ -45,6 +46,9 @@ class PolicyHeads(nn.Module):
         encoder_output: EncoderOutput,
         state: State,
     ) -> Tuple[Indices, Logits, Policy]:
+        moves = encoder_output.moves
+        switches = encoder_output.switches
+
         (
             action_type_logits,
             action_type_policy,
@@ -64,7 +68,7 @@ class PolicyHeads(nn.Module):
         ) = self.move_head(
             action_type_index,
             at_autoregressive_embedding,
-            encoder_output.moves,
+            moves,
             state["move_mask"],
         )
 
@@ -76,7 +80,7 @@ class PolicyHeads(nn.Module):
         ) = self.switch_head(
             action_type_index,
             autoregressive_embedding,
-            encoder_output.switches,
+            switches,
             state["switch_mask"],
         )
 
@@ -95,7 +99,7 @@ class PolicyHeads(nn.Module):
             max_move_logits, max_move_policy, max_move_index = self.max_move_head(
                 action_type_index,
                 autoregressive_embedding,
-                encoder_output.moves,
+                moves,
                 state["max_move_mask"],
             )
         else:
@@ -106,8 +110,8 @@ class PolicyHeads(nn.Module):
         if self.gametype != "singles":
             target_logits, target_policy, target_index = self.target_head(
                 state["prev_choices"],
-                encoder_output.moves,
-                encoder_output.switches,
+                moves,
+                switches,
                 at_autoregressive_embedding,
             )
         else:

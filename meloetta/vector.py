@@ -1,4 +1,3 @@
-import json
 import warnings
 
 try:
@@ -436,9 +435,17 @@ class VectorizedState:
         pokemon = {p["ident"]: p for p in reversed(side["pokemon"])}
         pokemon = list(reversed(pokemon.values()))
 
-        active_pokemon = [p for p in side["active"] if p is not None]
-        active_idents = [p["ident"] for p in active_pokemon]
-        reserve_pokemon = [p for p in pokemon if p["ident"] not in active_idents]
+        active_idents = list(set([p["ident"] for p in side["active"] if p is not None]))
+        reserve_idents = list(
+            set([p["ident"] for p in pokemon if p["ident"] not in active_idents])
+        )
+
+        active_pokemon = list(
+            {p["ident"]: p for p in side["active"] if p in active_idents}.values()
+        )
+        reserve_pokemon = list(
+            {p["ident"]: p for p in side["pokemon"] if p in reserve_idents}.values()
+        )
 
         active = [
             self._vectorize_public_active_pokemon(side_id, p) for p in active_pokemon

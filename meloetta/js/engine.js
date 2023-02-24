@@ -30,35 +30,26 @@ var engine = {
         return 0;
     },
 
-    getReward: function () {
-        end_idx = this.client.battle.stepQueue.length - 1;
-        win_msg = this.client.battle.stepQueue[end_idx];
+    getPid: function () {
         sideid = this.client.side;
         if (sideid === "p1") {
             pid = 0;
         } else if (sideid === "p2") {
             pid = 1;
         }
-        datum = win_msg.split("|");
-        win = datum[1];
-        if (win !== "win") {
-            reward = 0
-        } else {
-            winner = datum[2];
-            username = this.client.battle.mySide.name;
-            this.client.winner = winner;
-            if (username === winner) {
-                reward = 1
-            } else {
-                reward = -1
-            }
-            if (win === "tie") {
-                reward = 0
-            }
+        return pid
+    },
+
+    getReward: function () {
+        sideid = this.client.side;
+        if (sideid === "p1") {
+            pid = 0;
+        } else if (sideid === "p2") {
+            pid = 1;
         }
         return {
             "pid": pid,
-            "reward": reward
+            "reward": this.client.reward
         }
     },
 

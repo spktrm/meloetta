@@ -25,7 +25,7 @@ class MaxDamageActor(Actor):
         with torch.no_grad():
             func, args, kwargs = self._model(state, choices)
 
-        return func, args, kwargs
+        return func, args, kwargs, None
 
     def store_reward(
         self,

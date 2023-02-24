@@ -14,10 +14,10 @@ from meloetta.workers import SelfPlayWorker, EvalWorker
 
 from meloetta.frameworks.random import RandomActor
 from meloetta.frameworks.max_damage import MaxDamageActor
-from meloetta.frameworks.nash_ketchum import (
-    NAshKetchumActor,
-    NAshKetchumLearner,
-    NAshKetchumConfig,
+from meloetta.frameworks.porygon import (
+    PorygonActor,
+    PorygonLearner,
+    PorygonConfig,
 )
 
 
@@ -47,34 +47,25 @@ def start_eval_monitor(queue: mp.Queue):
 
 
 def main(fpath: str = None):
-    config = NAshKetchumConfig()
+    config = PorygonConfig()
 
     if fpath is None:
         print(f"Starting run with config:\n{repr(config)}")
-        learner = NAshKetchumLearner.from_config(config)
+        learner = PorygonLearner.from_config(config)
     else:
         print(f"Loading run from: {fpath}")
-        learner = NAshKetchumLearner.from_pretrained(fpath, config)
+        learner = PorygonLearner.from_pretrained(fpath, config)
 
     wandb.init(
         project="meloetta",
         config=learner.get_config(),
     )
 
-    main_actor = NAshKetchumActor(learner.actor_model, learner.replay_buffer)
+    main_actor = PorygonActor(learner.actor_model, learner.replay_buffer)
 
     eval_queue = mp.Queue()
     random_actor = RandomActor(eval_queue)
     maxdmg_actor = MaxDamageActor(main_actor._model.gen, eval_queue)
-
-    threads: List[threading.Thread] = []
-    for i in range(1):
-        learner_thread = threading.Thread(
-            target=learner.run,
-            name=f"Learning Thread{i}",
-        )
-        threads.append(learner_thread)
-        learner_thread.start()
 
     procs: List[mp.Process] = []
 
@@ -97,6 +88,15 @@ def main(fpath: str = None):
             )
             process.start()
             procs.append(process)
+
+    threads: List[threading.Thread] = []
+    for i in range(1):
+        learner_thread = threading.Thread(
+            target=learner.run,
+            name=f"Learning Thread{i}",
+        )
+        threads.append(learner_thread)
+        learner_thread.start()
 
     for i in range(config.num_actors):
         worker = SelfPlayWorker(
@@ -136,7 +136,7 @@ def main(fpath: str = None):
 if __name__ == "__main__":
     mp.set_start_method("spawn")
 
-    fpath = "cpkts/cpkt-02500.tar"
-    main(fpath)
+    # fpath = "cpkts/cpkt-00500.tar"
+    # main(fpath)
 
-    # main()
+    main()

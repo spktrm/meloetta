@@ -13,6 +13,7 @@ class PokedexEmbedding(nn.Module):
         names, embeddings = torch.load(f"meloetta/pretrained/gen{gen}/pokedex.pt")
         embeddings = embeddings.to(dtype)
         self.names: List[str] = names
+        self.num_embeddings = embeddings.shape[0]
         self.embedding_dim = embeddings.shape[-1]
         self.emb = nn.Embedding.from_pretrained(embeddings)
 
@@ -31,6 +32,7 @@ class AbilityEmbedding(nn.Module):
         names, embeddings = torch.load(f"meloetta/pretrained/gen{gen}/abilitydex.pt")
         embeddings = embeddings.to(dtype)
         self.names: List[str] = names
+        self.num_embeddings = embeddings.shape[0]
         self.embedding_dim = embeddings.shape[-1]
         self.emb = nn.Embedding.from_pretrained(embeddings)
 
@@ -49,6 +51,7 @@ class MoveEmbedding(nn.Module):
         names, embeddings = torch.load(f"meloetta/pretrained/gen{gen}/movedex.pt")
         embeddings = embeddings.to(dtype)
         self.names: List[str] = names
+        self.num_embeddings = embeddings.shape[0]
         self.embedding_dim = embeddings.shape[-1]
         self.emb = nn.Embedding.from_pretrained(embeddings)
 
@@ -67,6 +70,7 @@ class ItemEmbedding(nn.Module):
         names, embeddings = torch.load(f"meloetta/pretrained/gen{gen}/itemdex.pt")
         embeddings = embeddings.to(dtype)
         self.names: List[str] = names
+        self.num_embeddings = embeddings.shape[0]
         self.embedding_dim = embeddings.shape[-1]
         self.emb = nn.Embedding.from_pretrained(embeddings)
 
