@@ -1,12 +1,11 @@
 import torch
-import random
 import threading
 import multiprocessing as mp
 
 from typing import Dict, List
 
 from meloetta.frameworks.nash_ketchum.model.interfaces import Batch
-from meloetta.utils import create_buffers
+from meloetta.frameworks.nash_ketchum.utils import create_buffers
 
 
 Buffers = Dict[str, List[torch.Tensor]]
