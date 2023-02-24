@@ -9,12 +9,11 @@ requirements = [
     "websockets==10.4",
     "beautifulsoup4==4.11.1",
     "detoxify==0.5.1",
-    "numpy==1.21.6",
     "pandas==1.3.5",
     "plotly==5.11.0",
     "scikit_learn==1.0.2",
-    "setuptools==65.3.0",
-    "torch==1.12.1",
+    "setuptools>=65.5.1",
+    "torch>=1.13.1",
     "tqdm==4.64.1",
 ]
 
