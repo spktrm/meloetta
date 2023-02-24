@@ -9,8 +9,14 @@ __pycache__/
 # .vscode
 /.vscode
 
-# pretrained tensors
-**/*.pt
+# .vscode
+/wandb
+
+# cpkts
+**/*.tar
+
+# .DS_Store
+**/*.DS_Store
 
 # Distribution / packaging
 .Python
