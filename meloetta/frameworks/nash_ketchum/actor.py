@@ -13,7 +13,6 @@ from meloetta.frameworks.nash_ketchum.model import (
 
 from meloetta.actors.base import Actor
 from meloetta.actors.types import State, Choices
-from meloetta.frameworks.nash_ketchum.model.interfaces import Indices
 
 
 class NAshKetchumActor(Actor):
