@@ -1,7 +1,6 @@
 import asyncio
-import threading
 
-from typing import Any, List
+from typing import Any
 
 from meloetta.player import Player
 from meloetta.room import BattleRoom
@@ -70,13 +69,18 @@ class EvalWorker:
 
             turn = 0
             turns_since_last_move = 0
+            try:
+                hidden_state = actor._model.core.initial_state(1)
+            except:
+                hidden_state = None
+
             while True:
                 message = await player.client.receive_message()
+                action_required = await player.recieve(message)
                 if "is offering a tie." in message:
                     await player.client.websocket.send(
                         player.room.battle_tag + "|" + "/offertie"
                     )
-                action_required = await player.recieve(message)
                 if "|error" in message:
                     # print(message)
                     # edge case for handling when the pokemon is trapped
@@ -107,8 +111,12 @@ class EvalWorker:
                         "targeting": choices.targeting,
                     }
 
-                    func, args, kwargs = actor(
-                        state, player.room, choices.choices, store_transition=False
+                    func, args, kwargs, hidden_state = actor(
+                        state,
+                        player.room,
+                        choices.choices,
+                        store_transition=False,
+                        hidden_state=hidden_state,
                     )
                     func(*args, **kwargs)
 

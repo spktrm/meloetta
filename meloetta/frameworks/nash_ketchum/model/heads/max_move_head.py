@@ -13,15 +13,19 @@ class MaxMoveHead(nn.Module):
         super().__init__()
 
         self.key_fc = nn.Sequential(
+            nn.Linear(config.entity_embedding_dim, config.entity_embedding_dim),
+            nn.ReLU(),
             nn.Linear(config.entity_embedding_dim, config.key_dim),
         )
         self.query_fc = nn.Sequential(
-            nn.Linear(config.state_embedding_dim, config.key_dim),
+            nn.Linear(config.autoregressive_embedding_dim, config.query_hidden_dim),
             nn.ReLU(),
-            nn.Linear(config.key_dim, config.key_dim),
+            nn.Linear(config.query_hidden_dim, config.key_dim),
         )
-        self.proj_move = nn.Linear(
-            config.entity_embedding_dim, config.state_embedding_dim
+        self.proj_move = nn.Sequential(
+            nn.Linear(config.key_dim, config.entity_embedding_dim),
+            nn.ReLU(),
+            nn.Linear(config.entity_embedding_dim, config.autoregressive_embedding_dim),
         )
 
     def forward(
@@ -48,7 +52,7 @@ class MaxMoveHead(nn.Module):
         embedding_index = torch.multinomial(max_move_policy.view(T * B, -1), 1)
         max_move_index = embedding_index.view(T, B, -1)
 
-        move_embedding = gather_along_rows(max_moves.flatten(0, -3), embedding_index, 1)
+        move_embedding = gather_along_rows(keys.flatten(0, -3), embedding_index, 1)
         move_embedding = move_embedding.view(T, B, -1)
         projected_move_embedding = self.proj_move(move_embedding)
 

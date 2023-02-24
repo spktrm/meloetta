@@ -10,25 +10,29 @@ class _Config(NamedTuple):
 class PrivateEncoderConfig(_Config):
     embedding_dim: int = 128
     entity_embedding_dim: int = 128
-    transformer_nhead: int = 2
-    transformer_dim_feedforward: int = 256
+    transformer_num_heads: int = 2
     transformer_num_layers: int = 3
+    resblocks_num_before: int = 1
+    resblocks_num_after: int = 1
+    output_dim: int = embedding_dim * 2
 
 
 class PublicEncoderConfig(_Config):
-    entity_embedding_dim: int = 128
     scalar_embedding_dim: int = 128
-    transformer_nhead: int = 2
-    transformer_dim_feedforward: int = 256
+    entity_embedding_dim: int = 128
+    transformer_num_heads: int = 2
     transformer_num_layers: int = 3
+    resblocks_num_before: int = 1
+    resblocks_num_after: int = 1
+    output_dim: int = entity_embedding_dim * 2
 
 
 class ScalarEncoderConfig(_Config):
-    embedding_dim: int = 128
+    embedding_dim: int = 32
 
 
 class WeatherEncoderConfig(_Config):
-    embedding_dim: int = 128
+    embedding_dim: int = 32
 
 
 class EncoderConfig(_Config):
@@ -37,59 +41,71 @@ class EncoderConfig(_Config):
     scalar_encoder_config: ScalarEncoderConfig = ScalarEncoderConfig()
     weather_encoder_config: WeatherEncoderConfig = WeatherEncoderConfig()
     output_dim: int = (
-        private_encoder_config.entity_embedding_dim
+        private_encoder_config.output_dim
+        + private_encoder_config.entity_embedding_dim
         + 2 * public_encoder_config.entity_embedding_dim
-        + public_encoder_config.scalar_embedding_dim
+        + public_encoder_config.entity_embedding_dim
         + weather_encoder_config.embedding_dim
         + scalar_encoder_config.embedding_dim
     )
 
 
-class ResNetCoreConfig(_Config):
-    raw_state_embedding_dim: int = EncoderConfig.output_dim
-    projected_state_embedding_dim: int = 384
-    num_resblocks: int = 2
+class CoreConfig(_Config):
+    raw_embedding_dim: int = EncoderConfig.output_dim
+    hidden_dim: int = 384
+    num_layers: int = 3
 
 
 class ValueHeadConfig(_Config):
-    state_embedding_dim: int = ResNetCoreConfig.projected_state_embedding_dim
+    state_embedding_dim: int = CoreConfig.hidden_dim
+    hidden_dim: int = 256
     num_resblocks: int = 2
 
 
 class ActionTypeHeadConfig(_Config):
-    state_embedding_dim: int = ResNetCoreConfig.projected_state_embedding_dim
+    state_embedding_dim: int = CoreConfig.hidden_dim
     num_action_types: int = 3
     context_dim: int = ScalarEncoderConfig.embedding_dim
-    residual_dim: int = 128
-    action_map_dim: int = 128
-    autoregressive_embedding_dim: int = 128
+    residual_dim: int = 256
+    action_map_dim: int = 256
+    autoregressive_embedding_dim: int = 256
 
 
 class FlagHeadConfig(_Config):
     autoregressive_embedding_dim: int = (
         ActionTypeHeadConfig.autoregressive_embedding_dim
     )
+    hidden_dim: int = 256
 
 
 class MaxMoveHeadConfig(_Config):
     entity_embedding_dim: int = PrivateEncoderConfig.entity_embedding_dim
     key_dim: int = 32
 
-    state_embedding_dim: int = ActionTypeHeadConfig.autoregressive_embedding_dim
+    autoregressive_embedding_dim: int = (
+        ActionTypeHeadConfig.autoregressive_embedding_dim
+    )
+    query_hidden_dim: int = 256
 
 
 class MoveHeadConfig(_Config):
     entity_embedding_dim: int = PrivateEncoderConfig.entity_embedding_dim
     key_dim: int = 32
 
-    state_embedding_dim: int = ActionTypeHeadConfig.autoregressive_embedding_dim
+    autoregressive_embedding_dim: int = (
+        ActionTypeHeadConfig.autoregressive_embedding_dim
+    )
+    query_hidden_dim: int = 256
 
 
 class SwitchHeadConfig(_Config):
     entity_embedding_dim: int = PrivateEncoderConfig.entity_embedding_dim
     key_dim: int = 32
 
-    state_embedding_dim: int = ActionTypeHeadConfig.autoregressive_embedding_dim
+    autoregressive_embedding_dim: int = (
+        ActionTypeHeadConfig.autoregressive_embedding_dim
+    )
+    query_hidden_dim: int = 256
 
 
 class TargetHeadConfig(_Config):
@@ -119,7 +135,7 @@ def _scale(config: _Config, factor: float):
 class NAshKetchumModelConfig(_Config):
     encoder_config: EncoderConfig = EncoderConfig()
     policy_heads_config: PolicyHeadsConfig = PolicyHeadsConfig()
-    resnet_core_config: ResNetCoreConfig = ResNetCoreConfig()
+    resnet_core_config: CoreConfig = CoreConfig()
     value_head_config: ValueHeadConfig = ValueHeadConfig()
 
     @classmethod

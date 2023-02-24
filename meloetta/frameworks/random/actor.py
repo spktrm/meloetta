@@ -19,7 +19,7 @@ class RandomActor(Actor):
     ):
         random_key = random.choice([key for key, value in choices.items() if value])
         _, (func, args, kwargs) = random.choice(list(choices[random_key].items()))
-        return func, args, kwargs
+        return func, args, kwargs, None
 
     def store_reward(
         self,

@@ -132,6 +132,9 @@ class BattleRoom:
     def set_gen(self, gen):
         return self._call("engine.setGen", gen)
 
+    def get_pid(self):
+        return self._execute("engine.getPid()")
+
     def get_reward(self):
         return self._execute("engine.getReward()")
 

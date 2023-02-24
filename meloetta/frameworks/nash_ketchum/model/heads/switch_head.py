@@ -13,15 +13,19 @@ class SwitchHead(nn.Module):
         super().__init__()
 
         self.key_fc = nn.Sequential(
+            nn.Linear(config.entity_embedding_dim, config.entity_embedding_dim),
+            nn.ReLU(),
             nn.Linear(config.entity_embedding_dim, config.key_dim),
         )
         self.query_fc = nn.Sequential(
-            nn.Linear(config.state_embedding_dim, config.key_dim),
+            nn.Linear(config.autoregressive_embedding_dim, config.query_hidden_dim),
             nn.ReLU(),
-            nn.Linear(config.key_dim, config.key_dim),
+            nn.Linear(config.query_hidden_dim, config.key_dim),
         )
-        self.proj_switch = nn.Linear(
-            config.entity_embedding_dim, config.state_embedding_dim
+        self.proj_switch = nn.Sequential(
+            nn.Linear(config.key_dim, config.entity_embedding_dim),
+            nn.ReLU(),
+            nn.Linear(config.entity_embedding_dim, config.autoregressive_embedding_dim),
         )
 
     def forward(
@@ -49,9 +53,7 @@ class SwitchHead(nn.Module):
         embedding_index = torch.multinomial(switch_policy.view(T * B, -1), 1)
         switch_index = embedding_index.view(T, B, -1)
 
-        switch_embedding = gather_along_rows(
-            switches.flatten(0, -3), embedding_index, 1
-        )
+        switch_embedding = gather_along_rows(keys.flatten(0, -3), embedding_index, 1)
         switch_embedding = switch_embedding.view(T, B, -1)
         projected_move_embedding = self.proj_switch(switch_embedding)
 

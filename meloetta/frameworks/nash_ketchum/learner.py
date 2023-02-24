@@ -1,11 +1,14 @@
+import math
+import time
 import wandb
 import traceback
 import threading
-import functools
 
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
+
+from typing import Tuple
 
 from meloetta.frameworks.nash_ketchum import utils
 from meloetta.frameworks.nash_ketchum.buffer import ReplayBuffer
@@ -37,14 +40,21 @@ class TargetNetSGD:
         self.lr = lr
         self.target_model = target_model
         self.learner_model = learner_model
+        self.param_groups = []
 
-    @torch.no_grad()
-    def step(self):
-        for param1, param2 in zip(
-            self.target_model.parameters(), self.learner_model.parameters()
+        for (name, param1), param2 in zip(
+            self.target_model.named_parameters(), self.learner_model.parameters()
         ):
-            grad = param1 - param2
-            param1.add_(grad, alpha=-self.lr)
+            if param2.requires_grad:
+                self.param_groups.append({"params": param1, "name": name})
+
+    def step(self):
+        learner_state_dict = self.learner_model.state_dict()
+        for group in self.param_groups:
+            name = group["name"]
+            param = group["params"]
+            diff = learner_state_dict[name] - param.data
+            param.data += self.lr * diff
 
 
 class NAshKetchumLearner:
@@ -165,19 +175,19 @@ class NAshKetchumLearner:
 
         if datum.get("learner_model"):
             try:
-                learner_model.load_state_dict(datum["learner_model"])
-                actor_model.load_state_dict(datum["actor_model"])
-                target_model.load_state_dict(datum["target_model"])
-                model_prev.load_state_dict(datum["model_prev"])
-                model_prev_.load_state_dict(datum["model_prev_"])
+                learner_model.load_state_dict(datum["learner_model"], strict=False)
+                actor_model.load_state_dict(datum["actor_model"], strict=False)
+                target_model.load_state_dict(datum["target_model"], strict=False)
+                model_prev.load_state_dict(datum["model_prev"], strict=False)
+                model_prev_.load_state_dict(datum["model_prev_"], strict=False)
             except Exception as e:
                 traceback.print_exc()
 
-        learner_model.to(config.learner_device)
-        actor_model.to(config.actor_device)
-        target_model.to(config.learner_device)
-        model_prev.to(config.learner_device)
-        model_prev_.to(config.learner_device)
+        learner_model = learner_model.to(config.learner_device, non_blocking=True)
+        actor_model = actor_model.to(config.actor_device, non_blocking=True)
+        target_model = target_model.to(config.learner_device, non_blocking=True)
+        model_prev = model_prev.to(config.learner_device, non_blocking=True)
+        model_prev_ = model_prev_.to(config.learner_device, non_blocking=True)
 
         learner = NAshKetchumLearner(
             learner_model,
@@ -208,12 +218,21 @@ class NAshKetchumLearner:
         return learner
 
     def collect_batch_trajectory(self):
-        return self.replay_buffer.get_batch(self.config.batch_size)
+        hidden_state = self.learner_model.core.initial_state(self.config.batch_size)
+        hidden_state = (
+            hidden_state[0].to(self.config.learner_device, non_blocking=True),
+            hidden_state[1].to(self.config.learner_device, non_blocking=True),
+        )
+        batch = None
+        while batch is None:
+            time.sleep(1)
+            batch = self.replay_buffer.get_batch(self.config.batch_size)
+        return batch, hidden_state
 
     def step(self):
-        batch = self.collect_batch_trajectory()
+        batch, hidden_state = self.collect_batch_trajectory()
         alpha, update_target_net = self._entropy_schedule(self.learner_steps)
-        self.update_paramters(batch, alpha, update_target_net)
+        self.update_paramters(batch, hidden_state, alpha, update_target_net)
         self.learner_steps += 1
         if self.learner_steps % 500 == 0:
             self.save()
@@ -221,38 +240,58 @@ class NAshKetchumLearner:
     def update_paramters(
         self,
         batch: Batch,
+        hidden_state: Tuple[torch.Tensor, torch.Tensor],
         alpha: float,
         update_target_net: bool,
         lock=threading.Lock(),
     ):
-        targets = self._get_targets(batch, alpha)
-        losses = self._backpropagate(batch, targets)
-
-        static_loss_dict = losses.to_log(batch)
-        static_loss_dict["s"] = self.learner_steps
-        wandb.log(static_loss_dict)
-
-        torch.nn.utils.clip_grad_value_(
-            self.learner_model.parameters(), self.config.clip_gradient
-        )
-
-        self.optimizer.step()
-        self.optimizer_target.step()
-        self.optimizer.zero_grad(set_to_none=True)
-
-        if update_target_net:
-            self.model_prev_.load_state_dict(self.model_prev.state_dict())
-            self.model_prev.load_state_dict(self.learner_model.state_dict())
-
         with lock:
+            self.optimizer.zero_grad(set_to_none=True)
+
+            targets = self._get_targets(batch, hidden_state, alpha)
+            losses = self._backpropagate(batch, hidden_state, targets)
+
+            static_loss_dict = losses.to_log(batch)
+            static_loss_dict["s"] = self.learner_steps
+            wandb.log(static_loss_dict)
+
+            torch.nn.utils.clip_grad_value_(
+                self.learner_model.parameters(), self.config.clip_gradient
+            )
+
+            self.optimizer.step()
+            with torch.no_grad():
+                self.optimizer_target.step()
+
+            if update_target_net:
+                self.model_prev_.load_state_dict(self.model_prev.state_dict())
+                self.model_prev.load_state_dict(self.learner_model.state_dict())
+
             self.actor_model.load_state_dict(self.learner_model.state_dict())
 
-    def _get_targets(self, batch: Batch, alpha: float) -> Targets:
+    def _get_targets(
+        self,
+        batch: Batch,
+        hidden_state: Tuple[torch.Tensor, torch.Tensor],
+        alpha: float,
+    ) -> Targets:
+        bidx = torch.arange(
+            batch.batch_size, device=next(self.learner_model.parameters()).device
+        )
+        lengths = batch.valid.sum(0)
+        final_reward = batch.rewards[lengths.squeeze() - 1, bidx]
+        assert torch.all(final_reward.sum(-1) == 0).item(), "Env should be zero-sum!"
+
+        learner: TrainingOutput
+        target: TrainingOutput
+        prev: TrainingOutput
+        prev_: TrainingOutput
+
         with torch.no_grad():
-            learner: TrainingOutput = self.learner_model.learning_forward(batch)
-            target: TrainingOutput = self.target_model.learning_forward(batch)
-            prev: TrainingOutput = self.model_prev.learning_forward(batch)
-            prev_: TrainingOutput = self.model_prev_.learning_forward(batch)
+            learner = self.learner_model.learning_forward(batch, hidden_state)
+            target = self.target_model.learning_forward(batch, hidden_state)
+            prev = self.model_prev.learning_forward(batch, hidden_state)
+            prev_ = self.model_prev_.learning_forward(batch, hidden_state)
 
         is_vector = torch.unsqueeze(torch.ones_like(batch.valid), dim=-1)
         importance_sampling_corrections = [is_vector] * 2
@@ -260,8 +299,6 @@ class NAshKetchumLearner:
         targets_dict = {
             "importance_sampling_corrections": importance_sampling_corrections
         }
-
-        action_type_index = batch.action_type_index
 
         for policy_field, pi, log_pi, prev_log_pi, prev_log_pi_ in zip(
             *zip(*learner.pi._asdict().items()),
@@ -277,27 +314,21 @@ class NAshKetchumLearner:
             log_policy_reg = log_pi - (alpha * prev_log_pi + (1 - alpha) * prev_log_pi_)
 
             v_target_list, has_played_list, v_trace_policy_target_list = [], [], []
+
             for player in range(2):
                 reward = batch.rewards[:, :, player]  # [T, B, Player]
 
                 action_index = batch.get_index_from_policy(policy_field)
                 action_oh = F.one_hot(action_index, pi.shape[-1])
 
-                if policy_field == "switch_policy":
-                    valid = action_type_index == 1
-                elif policy_field == "target_policy":
-                    valid = action_type_index == 2
-                else:
-                    valid = action_type_index == 0
-
                 v_target_, has_played, policy_target_ = v_trace(
                     target.v,
-                    batch.valid * valid,
+                    batch.valid,
                     batch.player_id,
                     pi,
                     pi,
                     log_policy_reg,
-                    _player_others(batch.player_id, batch.valid * valid, player),
+                    _player_others(batch.player_id, batch.valid, player),
                     action_oh,
                     reward,
                     player,
@@ -326,81 +357,118 @@ class NAshKetchumLearner:
     def _backpropagate(
         self,
         batch: Batch,
+        hidden_state: Tuple[torch.Tensor, torch.Tensor],
         targets: Targets,
-        minibatch_size: int = 48,
-        minitraj_size: int = 64,
     ) -> Loss:
 
         loss_dict = {key + "_loss": 0 for key in Policy._fields}
-        loss_dict["value_loss"] = 0
+        loss_dict.update({key.replace("policy", "value"): 0 for key in loss_dict})
+
+        global_action_type = batch.action_type_index
+
         total_valid = batch.valid.sum().item()
-        num_steps = 0
+        total_move_valid = (batch.valid * (global_action_type == 0)).sum().item()
+        total_switch_valid = (batch.valid * (global_action_type == 1)).sum().item()
 
-        # minibatch_size = int(round(batch.valid.sum(1).float().mean().item(), 0))
-        # minitraj_size = int(round(batch.valid.sum(0).float().mean().item(), 0))
-        # minibatch_size = 32
-        # minitraj_size = 64
+        minibatch_size = min(128, (4096 // batch.trajectory_length) + 1)
 
-        for pred, targ in zip(
-            batch.iterate(minibatch_size, minitraj_size),
-            targets.iterate(minibatch_size, minitraj_size),
-        ):
-            if not pred.valid.sum():
-                continue
+        for batch_index in range(math.ceil(batch.batch_size / minibatch_size)):
+            mini_state_h, mini_state_c = hidden_state
 
-            output = self.learner_model.forward(
-                pred._asdict(), training=True, need_log_policy=False
-            )
+            batch_start = minibatch_size * batch_index
+            batch_end = minibatch_size * (batch_index + 1)
+
+            mini_state_h = mini_state_h[:, batch_start:batch_end].contiguous()
+            mini_state_c = mini_state_c[:, batch_start:batch_end].contiguous()
 
             loss = 0
-            pred_valid = pred.valid.sum().item()
-            accumulation_step_weight = pred_valid / total_valid
 
-            for policy_field, pi, logit in zip(
-                *zip(*output.pi._asdict().items()), output.logit
+            max_length = batch.valid[:, batch_start:batch_end].sum(0).max()
+            minibatch = batch.slice(batch_start, batch_end, max_length=max_length)
+            targ = targets.slice(batch_start, batch_end, max_length=max_length)
+
+            output, (mini_state_c, mini_state_h) = self.learner_model.forward(
+                minibatch._asdict(),
+                (mini_state_c, mini_state_h),
+                training=True,
+                need_log_policy=False,
+            )
+
+            for field in (
+                "action_type",
+                "move",
+                "switch",
+                # "max_move",
+                "flag",
+                # "target",
             ):
+                pi_field = field + "_policy"
+                logit_field = field + "_logits"
+
+                pi = getattr(output.pi, pi_field)
+                logit = getattr(output.logit, logit_field)
+
                 if pi is None:
                     continue
 
-                action_type_index = pred.action_type_index
-                if policy_field == "switch_policy":
+                action_type_index = minibatch.action_type_index
+                if pi_field == "action_type_policy":
+                    valid = torch.ones_like(action_type_index)
+                elif pi_field == "switch_policy":
                     valid = action_type_index == 1
-                elif policy_field == "target_policy":
+                elif pi_field == "target_policy":
                     valid = action_type_index == 2
                 else:
                     valid = action_type_index == 0
 
                 value_loss = get_loss_v(
                     [output.v] * 2,
-                    targ.get_value_target(policy_field),
-                    targ.get_has_played(policy_field),
+                    targ.get_value_target(pi_field),
+                    targ.get_has_played(pi_field, valid),
                 )
 
                 # Uses v-trace to define q-values for Nerd
                 policy_loss = get_loss_nerd(
                     [logit] * 2,
                     [pi] * 2,
-                    targ.get_policy_target(policy_field),
-                    pred.valid * valid,
-                    pred.player_id,
-                    pred.get_mask_from_policy(policy_field),
+                    targ.get_policy_target(pi_field),
+                    minibatch.valid * valid,
+                    minibatch.player_id,
+                    minibatch.get_mask_from_policy(pi_field),
                     targ.importance_sampling_corrections,
                     clip=self.config.nerd.clip,
                     threshold=self.config.nerd.beta,
                 )
 
-                loss_field = policy_field + "_loss"
-                loss_dict[loss_field] += policy_loss.item() * accumulation_step_weight
-                loss_dict["value_loss"] += value_loss.item() * accumulation_step_weight
+                policy_loss_field = field + "_policy_loss"
+                value_loss_field = field + "_value_loss"
 
-                loss += value_loss
-                loss += policy_loss
-                num_steps += 1
+                loss_dict[policy_loss_field] += policy_loss.item()
+                loss_dict[value_loss_field] += value_loss.item()
 
-            loss *= accumulation_step_weight
+                if "action_type" in field:
+                    policy_valid = total_valid
+                elif "move" in field:
+                    policy_valid = total_move_valid
+                elif "flag" in field:
+                    policy_valid = total_move_valid
+                elif "switch" in field:
+                    policy_valid = total_switch_valid
+
+                loss += (value_loss + policy_loss) / policy_valid
+
             loss.backward()
 
-        # loss_dict = {key: value  for key, value in loss_dict.items()}
+        for key in loss_dict:
+            if "action_type" in key:
+                loss_dict[key] /= total_valid
+            elif "move" in key:
+                loss_dict[key] /= total_move_valid
+            elif "flag" in key:
+                loss_dict[key] /= total_move_valid
+            elif "switch" in key:
+                loss_dict[key] /= total_switch_valid
+
         return Loss(**loss_dict)
 
     def run(self):

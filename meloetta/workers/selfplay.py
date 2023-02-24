@@ -55,7 +55,7 @@ class SelfPlayWorker:
         return results
 
     async def actor(self, player_index: int, actor: Actor, barrier: Barrier) -> Any:
-        username = f"p{player_index}"
+        username = f"player{player_index}"
 
         player = await Player.create(username, None, "localhost:8000")
         await player.client.login()
@@ -64,13 +64,15 @@ class SelfPlayWorker:
         while True:  # 10 battles each player-player pair
             if player_index % 2 == 0:
                 await player.client.challenge_user(
-                    f"p{player_index + 1}", self.battle_format, self.team
+                    f"player{player_index + 1}", self.battle_format, self.team
                 )
             else:
                 await player.client.accept_challenge(self.battle_format, self.team)
 
             turn = 0
             turns_since_last_move = 0
+            hidden_state = actor._model.core.initial_state(1)
+
             while True:
                 message = await player.client.receive_message()
                 action_required = await player.recieve(message)
@@ -108,7 +110,9 @@ class SelfPlayWorker:
                         "targeting": choices.targeting,
                     }
 
-                    func, args, kwargs = actor(state, player.room, choices.choices)
+                    func, args, kwargs, hidden_state = actor(
+                        state, player.room, choices.choices, hidden_state=hidden_state
+                    )
                     func(*args, **kwargs)
 
                 outgoing_message = player.room.get_js_attr("outgoing_message")

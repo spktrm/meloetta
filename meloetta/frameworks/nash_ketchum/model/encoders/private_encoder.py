@@ -1,13 +1,16 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+
+from torch import nn
+from torch.nn import functional as F
 
 from meloetta.frameworks.nash_ketchum.model import config
 from meloetta.frameworks.nash_ketchum.model.utils import (
     sqrt_one_hot_matrix,
     GLU,
     TransformerEncoder,
+    ToVector,
 )
+from meloetta.frameworks.nash_ketchum.model.encoders import private_spatial
 from meloetta.embeddings import (
     AbilityEmbedding,
     PokedexEmbedding,
@@ -23,9 +26,6 @@ from meloetta.data import (
 )
 
 
-nn.MultiheadAttention
-
-
 class PrivateEncoder(nn.Module):
     def __init__(self, gen: int, n_active: int, config: config.PrivateEncoderConfig):
         super().__init__()
@@ -39,7 +39,6 @@ class PrivateEncoder(nn.Module):
         self.fainted_onehot = nn.Embedding.from_pretrained(torch.eye(3))
         self.gender_onehot = nn.Embedding.from_pretrained(torch.eye(len(GENDERS) + 1))
         self.status_onehot = nn.Embedding.from_pretrained(torch.eye(len(STATUS) + 1))
-        self.move_slot_onehot = nn.Embedding.from_pretrained(torch.eye(5))
         self.forme_embedding = nn.Embedding.from_pretrained(
             torch.eye(len(TOKENIZED_SCHEMA[f"gen{gen}"]["pokedex"]["forme"]) + 1)
         )
@@ -56,30 +55,11 @@ class PrivateEncoder(nn.Module):
         self.pp_sqrt_onehot = nn.Embedding.from_pretrained(sqrt_one_hot_matrix(64))
 
         # precomputed embeddings
-        ability_embedding = AbilityEmbedding(gen=gen)
-        self.ability_embedding = nn.Sequential(
-            ability_embedding,
-            nn.Linear(ability_embedding.embedding_dim, config.embedding_dim),
-            nn.ReLU(),
-        )
-        pokedex_embedding = PokedexEmbedding(gen=gen)
-        self.pokedex_embedding = nn.Sequential(
-            pokedex_embedding,
-            nn.Linear(pokedex_embedding.embedding_dim, config.embedding_dim),
-            nn.ReLU(),
-        )
+        self.ability_embedding = AbilityEmbedding(gen=gen)
+        self.pokedex_embedding = PokedexEmbedding(gen=gen)
         self.move_embedding = MoveEmbedding(gen=gen)
-        self.move_lin = nn.Linear(
-            self.move_embedding.embedding_dim + 5 + self.pp_sqrt_onehot.embedding_dim,
-            config.embedding_dim,
-        )
+        self.item_embedding = ItemEmbedding(gen=gen)
 
-        item_embedding = ItemEmbedding(gen=gen)
-        self.item_embedding = nn.Sequential(
-            item_embedding,
-            nn.Linear(item_embedding.embedding_dim, config.embedding_dim),
-            nn.ReLU(),
-        )
         hp_embedding_dim = self.hp_sqrt_onehot.embedding_dim + 1
         level_embedding_dim = self.level_sqrt_onehot.embedding_dim + 1
         stat_embedding_dim = (
@@ -89,19 +69,21 @@ class PrivateEncoder(nn.Module):
             + self.spd_sqrt_onehot.embedding_dim
             + self.spe_sqrt_onehot.embedding_dim
         )
+        move_embedding_dim = (
+            self.move_embedding.embedding_dim + self.pp_sqrt_onehot.embedding_dim
+        )
         entity_in = (
-            config.embedding_dim
+            self.ability_embedding.embedding_dim
+            + self.pokedex_embedding.embedding_dim
+            + self.item_embedding.embedding_dim
             + self.active_onehot.embedding_dim
             + self.fainted_onehot.embedding_dim
             + self.gender_onehot.embedding_dim
             + hp_embedding_dim
-            + config.embedding_dim
             + level_embedding_dim
-            + config.embedding_dim
             + self.forme_embedding.embedding_dim
             + stat_embedding_dim
             + self.status_onehot.embedding_dim
-            + config.embedding_dim
         )
         if gen == 9:
             self.commanding_onehot = nn.Embedding.from_pretrained(torch.eye(3))
@@ -121,33 +103,31 @@ class PrivateEncoder(nn.Module):
             self.can_gmax_onehot = nn.Embedding.from_pretrained(torch.eye(3))
             entity_in += self.can_gmax_onehot.embedding_dim
 
+        self.move_lin = nn.Linear(move_embedding_dim, config.entity_embedding_dim)
         self.entity_lin = nn.Linear(entity_in, config.entity_embedding_dim)
 
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=config.entity_embedding_dim,
-            nhead=config.transformer_nhead,
-            dim_feedforward=config.transformer_dim_feedforward,
-            dropout=0,
-            batch_first=True,
-        )
-        self.encoder = nn.TransformerEncoder(
-            encoder_layer=encoder_layer,
-            enable_nested_tensor=False,
+        self.transformer = TransformerEncoder(
+            key_size=config.entity_embedding_dim,
+            value_size=config.entity_embedding_dim,
+            num_heads=config.transformer_num_heads,
             num_layers=config.transformer_num_layers,
+            resblocks_num_before=config.resblocks_num_before,
+            resblocks_num_after=config.resblocks_num_after,
         )
-        self.active_lin_out = nn.Linear(
+        self.output = ToVector(
+            input_dim=config.entity_embedding_dim,
+            output_dim=2 * config.entity_embedding_dim,
+        )
+        self.entity_out = nn.Linear(
             config.entity_embedding_dim, config.entity_embedding_dim
         )
-        self.reserve_lin_out = nn.Linear(
-            config.entity_embedding_dim, config.entity_embedding_dim
-        )
-        self.lin_out = nn.Linear(
-            2 * config.entity_embedding_dim, config.entity_embedding_dim
-        )
-        self.glu = GLU(
+        self.moves_w_context = GLU(
             config.entity_embedding_dim,
             config.entity_embedding_dim,
-            config.embedding_dim,
+            config.entity_embedding_dim,
+        )
+        self.spatial = private_spatial.PrivateSpatialEncoder(
+            gen=gen, n_active=n_active, config=config
         )
 
     def embed_hp(self, hp: torch.Tensor, maxhp: torch.Tensor) -> torch.Tensor:
@@ -196,12 +176,13 @@ class PrivateEncoder(nn.Module):
     ) -> torch.Tensor:
         moves_emb = self.move_embedding(move_tokens)
         move_used_emb = self.embed_pp(move_used)
-        move_slot = torch.ones_like(move_used)
-        for i in range(4):
-            move_slot[..., i] = i
-        move_slot_emb = self.move_slot_onehot(move_used)
-        moves_emb = torch.cat((moves_emb, move_used_emb, move_slot_emb), dim=-1)
-        return F.relu(self.move_lin(moves_emb))
+        moves_emb = torch.cat((moves_emb, move_used_emb), dim=-1)
+        return self.move_lin(moves_emb)
+
+    def moves_given_context(self, active: torch.Tensor, moves: torch.Tensor):
+        active = active.unsqueeze(-2).repeat_interleave(4, -2)
+        moves = moves[..., : self.n_active, :, :]
+        return self.moves_w_context(moves, active)
 
     def forward(self, private_reserve: torch.Tensor):
         private_reserve_x = private_reserve + 1
@@ -240,18 +221,12 @@ class PrivateEncoder(nn.Module):
         active_emb = self.active_onehot(active)
         fainted_emb = self.fainted_onehot(fainted)
         gender_emb = self.gender_onehot(gender)
-
         hp_emb = self.embed_hp(hp, maxhp)
-
         item_emb = self.item_embedding(item)
-
         level_emb = self.embed_level(level)
-
         name_emb = self.pokedex_embedding(name)
         forme_emb = self.forme_embedding(forme)
-
         stat_emb = self.embed_stat(stat_atk, stat_def, stat_spa, stat_spd, stat_spe)
-
         status_emb = self.status_onehot(status)
         moves_emb = self.embed_moves(move_tokens, move_used)
 
@@ -267,7 +242,6 @@ class PrivateEncoder(nn.Module):
             forme_emb,
             stat_emb,
             status_emb,
-            moves_emb.sum(-2),
         ]
 
         if self.gen == 9:
@@ -287,49 +261,35 @@ class PrivateEncoder(nn.Module):
             mon_emb += [can_gmax_emb]
 
         entity_embeddings = torch.cat(mon_emb, dim=-1)
-        entity_embeddings = F.relu(self.entity_lin(entity_embeddings))
+        entity_embeddings = self.entity_lin(entity_embeddings)
+        entity_embeddings = entity_embeddings + moves_emb.sum(-2)
+
         T, B, S, *_ = entity_embeddings.shape
 
-        mask = name == 0
+        mask = (name == 0) | (fainted == 2)
+        mask = mask.bool()
         mask = mask.view(T * B, S)
 
         encoder_mask = mask.clone()
         encoder_mask[..., 0] = False
 
-        entity_embeddings = entity_embeddings.view(T * B, S, -1)
-        entity_embeddings: torch.Tensor = self.encoder(
-            entity_embeddings, src_key_padding_mask=encoder_mask
-        )
+        entity_embeddings: torch.Tensor = entity_embeddings.view(T * B, S, -1)
+        entity_embeddings = self.transformer(entity_embeddings, encoder_mask)
 
         entity_embeddings = entity_embeddings.view(T * B, S, -1)
         mask = mask.view(T * B, S, -1)
 
         entity_embeddings = entity_embeddings * ~mask
-
-        num_active_entities = (~mask)[..., : self.n_active, :].sum(-2)
-        num_active_entities = num_active_entities.clamp(min=1)
-        active_embedding = entity_embeddings[..., : self.n_active, :]
-        active_embedding = active_embedding.sum(-2)
-        active_embedding = active_embedding / num_active_entities
-        active_embedding = F.relu(self.active_lin_out(active_embedding))
-
-        num_reserve_entities = (~mask)[..., self.n_active :, :].sum(-2)
-        num_reserve_entities = num_reserve_entities.clamp(min=1)
-        reserve_embedding = entity_embeddings[..., self.n_active :, :]
-        reserve_embedding = reserve_embedding.sum(-2)
-        reserve_embedding = reserve_embedding / num_reserve_entities
-        reserve_embedding = F.relu(self.reserve_lin_out(reserve_embedding))
-
-        entity_embedding = torch.cat((active_embedding, reserve_embedding), dim=-1)
-        entity_embedding = self.lin_out(entity_embedding)
+        entity_embedding = self.output(entity_embeddings)
         entity_embedding = entity_embedding.view(T, B, -1)
+
+        spatial_embedding = self.spatial(entity_embeddings, ~mask)
+        spatial_embedding = spatial_embedding.view(T, B, -1)
 
         entity_embeddings = entity_embeddings.view(T, B, S, -1)
 
         active = entity_embeddings[..., : self.n_active, :]
-        moves = self.glu(
-            active.unsqueeze(-2).repeat_interleave(4, -2),
-            moves_emb[..., : self.n_active, :, :],
-        )
+        moves = self.moves_given_context(active, moves_emb)
+        entity_embeddings = F.relu(self.entity_out(entity_embeddings))
 
-        return entity_embedding, moves, entity_embeddings
+        return entity_embedding, spatial_embedding, moves, entity_embeddings

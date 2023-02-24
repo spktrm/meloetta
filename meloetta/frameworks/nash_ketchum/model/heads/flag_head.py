@@ -13,15 +13,16 @@ class FlagsHead(nn.Module):
         super().__init__()
 
         self.mlp = nn.Sequential(
-            nn.Linear(
-                config.autoregressive_embedding_dim, config.autoregressive_embedding_dim
-            ),
+            nn.Linear(config.autoregressive_embedding_dim, config.hidden_dim),
             nn.ReLU(),
-            nn.Linear(config.autoregressive_embedding_dim, len(CHOICE_FLAGS)),
+            nn.Linear(config.hidden_dim, len(CHOICE_FLAGS)),
         )
-        self.proj_flag = nn.Linear(
-            len(CHOICE_FLAGS), config.autoregressive_embedding_dim
+        self.proj_flag = nn.Sequential(
+            nn.Linear(len(CHOICE_FLAGS), config.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(config.hidden_dim, config.autoregressive_embedding_dim),
         )
+        self.one_hot = nn.Embedding.from_pretrained(torch.eye(len(CHOICE_FLAGS)))
 
     def forward(
         self,
@@ -36,7 +37,7 @@ class FlagsHead(nn.Module):
         flag_index = torch.multinomial(flag_policy.view(T * B, -1), 1)
         flag_index = flag_index.view(T, B, -1)
 
-        flag_one_hot = F.one_hot(flag_index.long(), len(CHOICE_FLAGS)).float()
+        flag_one_hot = self.one_hot(flag_index.long())
         projected_flag_embedding = self.proj_flag(flag_one_hot)
         projected_flag_embedding = projected_flag_embedding.view(T, B, -1)
 

@@ -1,6 +1,6 @@
 from meloetta.frameworks.nash_ketchum.model.encoder import Encoder
 from meloetta.frameworks.nash_ketchum.model.policy import PolicyHeads
-from meloetta.frameworks.nash_ketchum.model.core import ResNetCore
+from meloetta.frameworks.nash_ketchum.model.core import Core
 from meloetta.frameworks.nash_ketchum.model.value import ValueHead
 from meloetta.frameworks.nash_ketchum.model.heads.action_type_head import ActionTypeHead
 from meloetta.frameworks.nash_ketchum.model.heads.move_head import MoveHead

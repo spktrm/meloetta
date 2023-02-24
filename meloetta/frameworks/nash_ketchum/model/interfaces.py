@@ -1,7 +1,7 @@
 import math
 import torch
 
-from typing import NamedTuple, Iterator, Dict, List
+from typing import NamedTuple, Iterator, Tuple, Dict, List
 
 from meloetta.actors.types import State, Choices
 
@@ -11,10 +11,10 @@ class EncoderOutput(NamedTuple):
     moves: torch.Tensor
     switches: torch.Tensor
     public_entity_emb: torch.Tensor
-    public_scalar_emb: torch.Tensor
+    public_spatial: torch.Tensor
+    private_spatial: torch.Tensor
     weather_emb: torch.Tensor
     scalar_emb: torch.Tensor
-    state_emb: torch.Tensor
 
 
 class Indices(NamedTuple):
@@ -66,9 +66,7 @@ class EnvStep(NamedTuple):
     logits: Logits
 
     def to_store(self, state: State) -> Dict[str, torch.Tensor]:
-        to_store = {
-            k: v.squeeze() for k, v in state.items() if isinstance(v, torch.Tensor)
-        }
+        to_store = {k: v for k, v in state.items() if isinstance(v, torch.Tensor)}
         to_store.update(
             {
                 k: v.squeeze()
@@ -147,33 +145,30 @@ class Batch(NamedTuple):
     def trajectory_length(self):
         return self.valid.shape[0]
 
-    def iterate(
-        self, minibatch_size: int = 16, minitraj_size: int = 16
-    ) -> Iterator["Batch"]:
-        for batch_index in range(math.ceil(self.batch_size / minibatch_size)):
-            for traj_index in range(math.ceil(self.trajectory_length / minitraj_size)):
-                batch_start = minibatch_size * batch_index
-                batch_end = minibatch_size * (batch_index + 1)
-
-                traj_start = minitraj_size * traj_index
-                traj_end = minitraj_size * (traj_index + 1)
-
-                minibatch = {
-                    key: value[traj_start:traj_end, batch_start:batch_end].contiguous()
-                    for key, value in self._asdict().items()
-                    if value is not None
-                }
-                yield Batch(**minibatch)
+    def slice(self, start: int, end: int, max_length: int = None) -> "Batch":
+        return Batch(
+            **{
+                key: value[:max_length, start:end].contiguous()
+                for key, value in self._asdict().items()
+                if value is not None
+            }
+        )
 
 
 class Loss(NamedTuple):
-    value_loss: float
     action_type_policy_loss: float
     move_policy_loss: float
     max_move_policy_loss: float
     switch_policy_loss: float
     flag_policy_loss: float
     target_policy_loss: float
+
+    action_type_value_loss: float
+    move_value_loss: float
+    max_move_value_loss: float
+    switch_value_loss: float
+    flag_value_loss: float
+    target_value_loss: float
 
     def to_log(self, batch: Batch):
         logs = {
@@ -256,5 +251,20 @@ class Targets(NamedTuple):
     def get_policy_target(self, policy_field: str):
         return getattr(self, policy_field + "_target")
 
-    def get_has_played(self, policy_field: str):
-        return getattr(self, policy_field.replace("_policy", "_has_played"))
+    def get_has_played(self, policy_field: str, mask: torch.Tensor):
+        has_played = [
+            hp * mask
+            for hp in getattr(self, policy_field.replace("_policy", "_has_played"))
+        ]
+        return has_played
+
+    def slice(self, start: int, end: int, max_length: int = None) -> "Targets":
+        targets_dict = {}
+        for key, lst in self._asdict().items():
+            if lst is not None:
+                value1, value2 = lst
+                targets_dict[key] = [
+                    value1[:max_length, start:end].contiguous(),
+                    value2[:max_length, start:end].contiguous(),
+                ]
+        return Targets(**targets_dict)

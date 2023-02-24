@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from meloetta.frameworks.nash_ketchum.model import config
-from meloetta.frameworks.nash_ketchum.model.utils import ResBlock, GLU
+from meloetta.frameworks.nash_ketchum.model.utils import Resblock, GLU
 from meloetta.frameworks.nash_ketchum.model.utils import _legal_policy
 
 
@@ -14,7 +14,7 @@ class ActionTypeHead(nn.Module):
         self.num_action_types = config.num_action_types
         self.project = nn.Linear(config.state_embedding_dim, config.residual_dim)
         self.resblocks = nn.Sequential(
-            *[ResBlock(config.residual_dim) for _ in range(2)]
+            *[Resblock(config.residual_dim, use_layer_norm=True) for _ in range(2)]
         )
 
         self.action_fc = GLU(
@@ -33,6 +33,7 @@ class ActionTypeHead(nn.Module):
             config.autoregressive_embedding_dim,
             config.context_dim,
         )
+        self.one_hot = nn.Embedding.from_pretrained(torch.eye(3))
 
     def forward(
         self,
@@ -43,16 +44,14 @@ class ActionTypeHead(nn.Module):
         T, B, *_ = state.shape
 
         embedded_state = self.project(state)
-        embedded_state = self.resblocks(embedded_state)
+        embedded_state = F.relu(self.resblocks(embedded_state))
         action_type_logits = self.action_fc(embedded_state, scalar_context)
         action_type_policy = _legal_policy(action_type_logits, action_type_mask)
         action_type_index = torch.multinomial(action_type_policy.view(T * B, -1), 1)
         action_type_index = action_type_index.view(T, B)
 
-        action_one_hot = F.one_hot(
-            action_type_index.long(), self.num_action_types
-        ).float()
-        embedding1 = self.fc1(action_one_hot)
+        action_one_hot = self.one_hot(action_type_index.long())
+        embedding1 = F.relu(self.fc1(action_one_hot))
         embedding1 = self.fc2(embedding1)
         embedding1 = self.glu1(embedding1, scalar_context)
         embedding2 = self.glu2(state, scalar_context)

@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from meloetta.frameworks.nash_ketchum.model import config
 from meloetta.frameworks.nash_ketchum.model.utils import binary_enc_matrix
@@ -73,7 +74,11 @@ class ScalarEncoder(nn.Module):
             )
             lin_in += self.choices_done_onehot.embedding_dim
 
-        self.lin = nn.Linear(lin_in, config.embedding_dim)
+        self.lin = nn.Sequential(
+            nn.Linear(lin_in, config.embedding_dim),
+            nn.ReLU(),
+            nn.Linear(config.embedding_dim, config.embedding_dim),
+        )
 
     def forward(
         self,
@@ -88,12 +93,13 @@ class ScalarEncoder(nn.Module):
         flag_mask: torch.Tensor,
         target_mask: torch.Tensor,
     ):
-
+        turn = turn.clamp(min=0, max=200)
+        turns_since_last_move = turns_since_last_move.clamp(min=0, max=50)
         scalar_emb = [
             self.turn1_bin(turn),
             self.turn2_bin(turns_since_last_move),
-            torch.clamp(turn / 200, min=0, max=1).unsqueeze(-1),
-            torch.clamp(turns_since_last_move / 50, min=0, max=1).unsqueeze(-1),
+            (turn / 200).unsqueeze(-1),
+            (turns_since_last_move / 50).unsqueeze(-1),
             action_type_mask,
             move_mask,
             switch_mask,
@@ -120,6 +126,6 @@ class ScalarEncoder(nn.Module):
             ]
 
         scalar_emb = torch.cat(scalar_emb, dim=-1)
-        scalar_emb = self.lin(scalar_emb)
+        scalar_emb = F.relu(self.lin(scalar_emb))
 
         return scalar_emb

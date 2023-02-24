@@ -24,6 +24,14 @@ def get_buffer_specs(
     gametype: str,
     private_reserve_size: int,
 ):
+    if gametype != "singles":
+        if gametype == "doubles":
+            n_active = 2
+        else:
+            n_active = 3
+    else:
+        n_active = 1
+
     buffer_specs = {
         "private_reserve": {
             "size": (trajectory_length, 6, private_reserve_size),
@@ -50,7 +58,7 @@ def get_buffer_specs(
             "dtype": torch.int64,
         },
         "public_active": {
-            "size": (trajectory_length, 2, 2, 158),
+            "size": (trajectory_length, 2, n_active, 158),
             "dtype": torch.int64,
         },
         "public_reserve": {
@@ -123,11 +131,6 @@ def get_buffer_specs(
         },
     }
     if gametype != "singles":
-        if gametype == "doubles":
-            n_active = 2
-        else:
-            n_active = 3
-
         buffer_specs.update(
             {
                 "target_mask": {

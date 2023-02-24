@@ -1,7 +1,13 @@
 import torch
 import torch.nn as nn
 
-from meloetta.frameworks.nash_ketchum.model.interfaces import State, EncoderOutput
+from typing import Optional
+
+from meloetta.frameworks.nash_ketchum.model.interfaces import (
+    State,
+    EncoderOutput,
+    Indices,
+)
 from meloetta.frameworks.nash_ketchum.model.config import EncoderConfig
 from meloetta.frameworks.nash_ketchum.model.encoders import (
     PrivateEncoder,
@@ -64,9 +70,14 @@ class Encoder(nn.Module):
         max_move_mask = state.get("max_move_mask")
         target_mask = state.get("target_mask")
 
-        private_entity_emb, moves, switches = self.private_encoder(private_reserve)
+        (
+            private_entity_emb,
+            private_spatial,
+            moves,
+            switches,
+        ) = self.private_encoder(private_reserve)
 
-        public_entity_emb, public_scalar_emb = self.public_encoder(
+        public_entity_emb, public_spatial, = self.public_encoder(
             public_n,
             public_total_pokemon,
             public_faint_counter,
@@ -100,24 +111,13 @@ class Encoder(nn.Module):
             target_mask,
         )
 
-        state_emb = torch.cat(
-            (
-                private_entity_emb,
-                public_entity_emb,
-                public_scalar_emb,
-                weather_emb,
-                scalar_emb,
-            ),
-            dim=-1,
-        )
-
         return EncoderOutput(
-            private_entity_emb=private_entity_emb,
             moves=moves,
             switches=switches,
+            private_entity_emb=private_entity_emb,
             public_entity_emb=public_entity_emb,
-            public_scalar_emb=public_scalar_emb,
+            private_spatial=private_spatial,
+            public_spatial=public_spatial,
             weather_emb=weather_emb,
             scalar_emb=scalar_emb,
-            state_emb=state_emb,
         )
