@@ -47,7 +47,7 @@ class SelfPlayWorker:
     def __repr__(self) -> str:
         return f"Worker{self.worker_index}"
 
-    def run(self, controller: Actor) -> Any:
+    def run(self) -> Any:
         """
         Start selfplay between two asynchronous actors-
         """
@@ -61,7 +61,7 @@ class SelfPlayWorker:
                 ]
             )
 
-        results = asyncio.run(selfplay(controller))
+        results = asyncio.run(selfplay())
         return results
 
     async def actor(self, player_index: int, barrier: Barrier) -> Any:
@@ -80,7 +80,7 @@ class SelfPlayWorker:
                 await player.client.accept_challenge(self.battle_format, self.team)
 
             turn = 0
-            turns_since_last_move = 0
+            turns_since_last_move = expand_bt(torch.tensor(0))
             actor = self.actor_fn(*self.actor_args, **self.actor_kwargs)
 
             while True:
@@ -106,7 +106,7 @@ class SelfPlayWorker:
                     # inputs to neural net
                     battle = player.room.get_battle()
                     turn = battle["turn"]
-                    vstate = actor.get_vectorized_state()
+                    vstate = actor.get_vectorized_state(player.room, battle)
 
                 ended = player.room.get_js_attr("battle?.ended")
                 while (
@@ -115,9 +115,7 @@ class SelfPlayWorker:
                     choices = player.get_choices()
                     state = {
                         **vstate,
-                        "turns_since_last_move": expand_bt(
-                            torch.tensor(turns_since_last_move)
-                        ),
+                        "turns_since_last_move": turns_since_last_move,
                         **choices.action_masks,
                         **choices.prev_choices,
                         "targeting": choices.targeting,
@@ -130,7 +128,7 @@ class SelfPlayWorker:
                 if outgoing_message:
                     player.room.pop_outgoing()
                     if "move" in outgoing_message:
-                        turns_since_last_move = 0
+                        turns_since_last_move *= 0
                     else:
                         turns_since_last_move += 1
                     await player.client.websocket.send(

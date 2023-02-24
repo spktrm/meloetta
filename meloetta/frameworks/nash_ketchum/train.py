@@ -72,7 +72,7 @@ def main(fpath: str = None):
     if config.eval:
         evals = [
             ("eval0", "random", random_actor, (eval_queue,)),
-            ("eval1", "maxdmg", maxdmg_actor, (main_actor.model.gen, eval_queue)),
+            ("eval1", "maxdmg", maxdmg_actor, (config.gen, eval_queue)),
         ]
         for i, (
             eval_username,
@@ -87,10 +87,10 @@ def main(fpath: str = None):
                 team=learner.config.team,
                 eval_actor_fn=main_actor,
                 eval_actor_kwargs={
-                    "actor_model": learner.actor_model,
+                    "model": learner.actor_model,
                 },
-                baseling_actor_fn=opponent_actor,
-                baseling_actor_args=opponent_actor_args,
+                baseline_actor_fn=opponent_actor,
+                baseline_actor_args=opponent_actor_args,
             )
             process = mp.Process(
                 target=worker.run,
@@ -114,11 +114,15 @@ def main(fpath: str = None):
             num_players=2,  # 2 is players per worker
             battle_format=learner.config.battle_format,
             team=learner.config.team,
+            actor_fn=main_actor,
+            actor_kwargs={
+                "model": learner.actor_model,
+                "replay_buffer": learner.replay_buffer,
+            },
         )
 
         process = mp.Process(
             target=worker.run,
-            args=(main_actor,),
             name=repr(worker) + str(i),
         )
         process.start()

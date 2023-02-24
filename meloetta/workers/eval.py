@@ -88,7 +88,7 @@ class EvalWorker:
                 await player.client.challenge_user(
                     self.opponent_username, self.battle_format, self.team
                 )
-                actor = actor_fn(*self.eval_actor_args, **self.baseline_actor_kwargs)
+                actor = actor_fn(*self.eval_actor_args, **self.eval_actor_kwargs)
             else:
                 await player.client.accept_challenge(self.battle_format, self.team)
                 actor = actor_fn(
@@ -96,7 +96,7 @@ class EvalWorker:
                 )
 
             turn = 0
-            turns_since_last_move = 0
+            turns_since_last_move = expand_bt(torch.tensor(0))
 
             while True:
                 message = await player.client.receive_message()
@@ -119,9 +119,9 @@ class EvalWorker:
 
                 if action_required:
                     # inputs to neural net
-                    turn = battle["turn"]
                     battle = player.room.get_battle()
-                    vstate = actor.get_vectorized_state()
+                    turn = battle["turn"]
+                    vstate = actor.get_vectorized_state(player.room, battle)
 
                 ended = player.room.get_js_attr("battle?.ended")
                 while (
@@ -130,9 +130,7 @@ class EvalWorker:
                     choices = player.get_choices()
                     state = {
                         **vstate,
-                        "turns_since_last_move": expand_bt(
-                            torch.tensor(turns_since_last_move)
-                        ),
+                        "turns_since_last_move": turns_since_last_move,
                         **choices.action_masks,
                         **choices.prev_choices,
                         "targeting": choices.targeting,
@@ -145,7 +143,7 @@ class EvalWorker:
                 if outgoing_message:
                     player.room.pop_outgoing()
                     if "move" in outgoing_message:
-                        turns_since_last_move = 0
+                        turns_since_last_move *= 0
                     else:
                         turns_since_last_move += 1
                     await player.client.websocket.send(
