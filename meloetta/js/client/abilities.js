@@ -133,14 +133,7 @@ const Abilities = {
                 move?.effectType === "Move" &&
                 target.getMoveHitData(move).crit
             ) {
-                target.setBoost({ atk: 6 });
-                this.add(
-                    "-setboost",
-                    target,
-                    "atk",
-                    12,
-                    "[from] ability: Anger Point"
-                );
+                this.boost({ atk: 12 }, target, target);
             }
         },
         name: "Anger Point",
@@ -155,12 +148,12 @@ const Abilities = {
                 !effect.negateSecondary &&
                 !(effect.hasSheerForce && source.hasAbility("sheerforce"))
             ) {
-                target.abilityState.checkedAngerShell = false;
+                this.effectState.checkedAngerShell = false;
             } else {
-                target.abilityState.checkedAngerShell = true;
+                this.effectState.checkedAngerShell = true;
             }
         },
-        onTryEatItem(item, pokemon) {
+        onTryEatItem(item) {
             const healingItems = [
                 "aguavberry",
                 "enigmaberry",
@@ -173,12 +166,12 @@ const Abilities = {
                 "berryjuice",
             ];
             if (healingItems.includes(item.id)) {
-                return pokemon.abilityState.checkedAngerShell;
+                return this.effectState.checkedAngerShell;
             }
             return true;
         },
         onAfterMoveSecondary(target, source, move) {
-            target.abilityState.checkedAngerShell = true;
+            this.effectState.checkedAngerShell = true;
             if (!source || source === target || !target.hp || !move.totalDamage)
                 return;
             const lastAttackedBy = target.getLastAttackedBy();
@@ -190,7 +183,11 @@ const Abilities = {
                 target.hp <= target.maxhp / 2 &&
                 target.hp + damage > target.maxhp / 2
             ) {
-                this.boost({ atk: 1, spa: 1, spe: 1, def: -1, spd: -1 });
+                this.boost(
+                    { atk: 1, spa: 1, spe: 1, def: -1, spd: -1 },
+                    target,
+                    target
+                );
             }
         },
         name: "Anger Shell",
@@ -432,6 +429,7 @@ const Abilities = {
                 source.abilityState.battleBondTriggered = true;
             }
         },
+        isNonstandard: "Unobtainable",
         isPermanent: true,
         name: "Battle Bond",
         rating: 3.5,
@@ -444,11 +442,10 @@ const Abilities = {
         },
         onAnyModifySpD(spd, target, source, move) {
             const abilityHolder = this.effectState.target;
-            if (abilityHolder === target) return;
+            if (target.hasAbility("Beads of Ruin")) return;
             if (!move.ruinedSpD?.hasAbility("Beads of Ruin"))
                 move.ruinedSpD = abilityHolder;
-            if (move.ruinedSpD !== abilityHolder && move.ruinedSpD !== target)
-                return;
+            if (move.ruinedSpD !== abilityHolder) return;
             this.debug("Beads of Ruin SpD drop");
             return this.chainModify(0.75);
         },
@@ -475,12 +472,12 @@ const Abilities = {
                 !effect.negateSecondary &&
                 !(effect.hasSheerForce && source.hasAbility("sheerforce"))
             ) {
-                target.abilityState.checkedBerserk = false;
+                this.effectState.checkedBerserk = false;
             } else {
-                target.abilityState.checkedBerserk = true;
+                this.effectState.checkedBerserk = true;
             }
         },
-        onTryEatItem(item, pokemon) {
+        onTryEatItem(item) {
             const healingItems = [
                 "aguavberry",
                 "enigmaberry",
@@ -493,12 +490,12 @@ const Abilities = {
                 "berryjuice",
             ];
             if (healingItems.includes(item.id)) {
-                return pokemon.abilityState.checkedBerserk;
+                return this.effectState.checkedBerserk;
             }
             return true;
         },
         onAfterMoveSecondary(target, source, move) {
-            target.abilityState.checkedBerserk = true;
+            this.effectState.checkedBerserk = true;
             if (!source || source === target || !target.hp || !move.totalDamage)
                 return;
             const lastAttackedBy = target.getLastAttackedBy();
@@ -510,7 +507,7 @@ const Abilities = {
                 target.hp <= target.maxhp / 2 &&
                 target.hp + damage > target.maxhp / 2
             ) {
-                this.boost({ spa: 1 });
+                this.boost({ spa: 1 }, target, target);
             }
         },
         name: "Berserk",
@@ -518,7 +515,7 @@ const Abilities = {
         num: 201,
     },
     bigpecks: {
-        onBoost(boost, target, source, effect) {
+        onTryBoost(boost, target, source, effect) {
             if (source && target === source) return;
             if (boost.def && boost.def < 0) {
                 delete boost.def;
@@ -603,7 +600,7 @@ const Abilities = {
         num: 34,
     },
     clearbody: {
-        onBoost(boost, target, source, effect) {
+        onTryBoost(boost, target, source, effect) {
             if (source && target === source) return;
             let showMsg = false;
             let i;
@@ -688,6 +685,7 @@ const Abilities = {
             }
             return false;
         },
+        // Permanent sleep "status" implemented in the relevant sleep-checking effects
         isPermanent: true,
         name: "Comatose",
         rating: 4,
@@ -759,7 +757,7 @@ const Abilities = {
         num: 14,
     },
     contrary: {
-        onBoost(boost, target, source, effect) {
+        onChangeBoost(boost, target, source, effect) {
             if (effect && effect.id === "zpower") return;
             let i;
             for (i in boost) {
@@ -772,6 +770,7 @@ const Abilities = {
         num: 126,
     },
     corrosion: {
+        // Implemented in sim/pokemon.js:Pokemon#setStatus
         name: "Corrosion",
         rating: 2.5,
         num: 212,
@@ -930,6 +929,7 @@ const Abilities = {
     },
     dancer: {
         name: "Dancer",
+        // implemented in runMove in scripts.js
         rating: 1.5,
         num: 216,
     },
@@ -1289,6 +1289,7 @@ const Abilities = {
     },
     earlybird: {
         name: "Early Bird",
+        // Implemented in statuses.js
         rating: 1.5,
         num: 48,
     },
@@ -1436,6 +1437,7 @@ const Abilities = {
         },
         condition: {
             noCopy: true,
+            // doesn't get copied by Baton Pass
             onStart(target) {
                 this.add("-start", target, "ability: Flash Fire");
             },
@@ -1528,7 +1530,7 @@ const Abilities = {
         num: 122,
     },
     flowerveil: {
-        onAllyBoost(boost, target, source, effect) {
+        onAllyTryBoost(boost, target, source, effect) {
             if ((source && target === source) || !target.hasType("Grass"))
                 return;
             let showMsg = false;
@@ -1721,7 +1723,7 @@ const Abilities = {
         num: 119,
     },
     fullmetalbody: {
-        onBoost(boost, target, source, effect) {
+        onTryBoost(boost, target, source, effect) {
             if (source && target === source) return;
             let showMsg = false;
             let i;
@@ -1916,8 +1918,8 @@ const Abilities = {
             this.add("-activate", pokemon, "ability: Guard Dog");
             return null;
         },
-        onBoost(boost, target, source, effect) {
-            if (effect.name === "Intimidate") {
+        onTryBoost(boost, target, source, effect) {
+            if (effect.name === "Intimidate" && boost.atk) {
                 delete boost.atk;
                 this.boost({ atk: 1 }, target, target, null, false, true);
             }
@@ -1949,6 +1951,7 @@ const Abilities = {
                 target.formeChange("cramorant", move);
             }
         },
+        // The Dive part of this mechanic is implemented in Dive's `onTryMove` in moves.ts
         onSourceTryPrimaryHit(target, source, effect) {
             if (
                 effect &&
@@ -1984,27 +1987,14 @@ const Abilities = {
         onStart(pokemon) {
             if (
                 !this.field.setTerrain("electricterrain") &&
-                this.field.isTerrain("electricterrain") &&
-                pokemon.isGrounded()
-            ) {
-                this.add("-activate", pokemon, "ability: Hadron Engine");
-            }
-        },
-        onTerrainChange(pokemon) {
-            if (pokemon === this.field.weatherState.source) return;
-            if (
-                this.field.isTerrain("electricterrain") &&
-                pokemon.isGrounded()
+                this.field.isTerrain("electricterrain")
             ) {
                 this.add("-activate", pokemon, "ability: Hadron Engine");
             }
         },
         onModifySpAPriority: 5,
         onModifySpA(atk, attacker, defender, move) {
-            if (
-                this.field.isTerrain("electricterrain") &&
-                attacker.isGrounded()
-            ) {
+            if (this.field.isTerrain("electricterrain")) {
                 this.debug("Hadron Engine boost");
                 return this.chainModify([5461, 4096]);
             }
@@ -2116,6 +2106,7 @@ const Abilities = {
         num: 258,
     },
     hustle: {
+        // This should be applied directly to the stat as opposed to chaining with the others
         onModifyAtkPriority: 5,
         onModifyAtk(atk) {
             return this.modify(atk, 1.5);
@@ -2150,7 +2141,7 @@ const Abilities = {
         num: 93,
     },
     hypercutter: {
-        onBoost(boost, target, source, effect) {
+        onTryBoost(boost, target, source, effect) {
             if (source && target === source) return;
             if (boost.atk && boost.atk < 0) {
                 delete boost.atk;
@@ -2393,8 +2384,8 @@ const Abilities = {
         onTryAddVolatile(status, pokemon) {
             if (status.id === "flinch") return null;
         },
-        onBoost(boost, target, source, effect) {
-            if (effect.name === "Intimidate") {
+        onTryBoost(boost, target, source, effect) {
+            if (effect.name === "Intimidate" && boost.atk) {
                 delete boost.atk;
                 this.add(
                     "-fail",
@@ -2494,7 +2485,7 @@ const Abilities = {
         num: 154,
     },
     keeneye: {
-        onBoost(boost, target, source, effect) {
+        onTryBoost(boost, target, source, effect) {
             if (source && target === source) return;
             if (boost.accuracy && boost.accuracy < 0) {
                 delete boost.accuracy;
@@ -2519,6 +2510,7 @@ const Abilities = {
         num: 51,
     },
     klutz: {
+        // Item suppression implemented in Pokemon.ignoringItem() within sim/pokemon.js
         onStart(pokemon) {
             this.singleEvent(
                 "End",
@@ -2557,6 +2549,7 @@ const Abilities = {
         num: 102,
     },
     levitate: {
+        // airborneness implemented in sim/pokemon.js:Pokemon#isGrounded
         isBreakable: true,
         name: "Levitate",
         rating: 3.5,
@@ -2948,7 +2941,7 @@ const Abilities = {
         num: 58,
     },
     mirrorarmor: {
-        onBoost(boost, target, source, effect) {
+        onTryBoost(boost, target, source, effect) {
             if (target === source || !boost || effect.name === "Mirror Armor")
                 return;
             let b;
@@ -2958,8 +2951,10 @@ const Abilities = {
                     const negativeBoost = {};
                     negativeBoost[b] = boost[b];
                     delete boost[b];
-                    this.add("-ability", target, "Mirror Armor");
-                    this.boost(negativeBoost, source, target, null, true);
+                    if (source.hp) {
+                        this.add("-ability", target, "Mirror Armor");
+                        this.boost(negativeBoost, source, target, null, true);
+                    }
                 }
             }
         },
@@ -3059,6 +3054,7 @@ const Abilities = {
         num: 136,
     },
     multitype: {
+        // Multitype's type-changing itself is implemented in statuses.js
         isPermanent: true,
         name: "Multitype",
         rating: 4,
@@ -3189,6 +3185,7 @@ const Abilities = {
         num: 233,
     },
     neutralizinggas: {
+        // Ability suppression implemented in sim/pokemon.ts:Pokemon#ignoringAbility
         onPreStart(pokemon) {
             if (pokemon.transformed) return;
             this.add("-ability", pokemon, "Neutralizing Gas");
@@ -3303,7 +3300,7 @@ const Abilities = {
             ];
             if (
                 !(move.isZ && move.category !== "Status") &&
-                !noModifyType.includes(move.id) &&
+                !noModifyType.includes(move.id) && // TODO: Figure out actual interaction
                 !(move.name === "Tera Blast" && pokemon.terastallized)
             ) {
                 move.type = "Normal";
@@ -3349,8 +3346,8 @@ const Abilities = {
                 return null;
             }
         },
-        onBoost(boost, target, source, effect) {
-            if (effect.name === "Intimidate") {
+        onTryBoost(boost, target, source, effect) {
+            if (effect.name === "Intimidate" && boost.atk) {
                 delete boost.atk;
                 this.add(
                     "-fail",
@@ -3391,16 +3388,9 @@ const Abilities = {
     },
     orichalcumpulse: {
         onStart(pokemon) {
-            if (
-                !this.field.setWeather("sunnyday") &&
-                this.field.effectiveWeather() === "sunnyday"
-            ) {
-                this.add("-activate", pokemon, "ability: Orichalcum Pulse");
-            }
-        },
-        onWeatherChange(pokemon) {
-            if (pokemon === this.field.weatherState.source) return;
-            if (this.field.effectiveWeather() === "sunnyday") {
+            if (this.field.setWeather("sunnyday")) {
+                this.add("-activate", pokemon, "Orichalcum Pulse", "[source]");
+            } else if (this.field.isWeather("sunnyday")) {
                 this.add("-activate", pokemon, "ability: Orichalcum Pulse");
             }
         },
@@ -3479,8 +3469,8 @@ const Abilities = {
                 );
             }
         },
-        onBoost(boost, target, source, effect) {
-            if (effect.name === "Intimidate") {
+        onTryBoost(boost, target, source, effect) {
+            if (effect.name === "Intimidate" && boost.atk) {
                 delete boost.atk;
                 this.add(
                     "-fail",
@@ -3525,6 +3515,7 @@ const Abilities = {
                 move.multihitType = "parentalbond";
             }
         },
+        // Damage modifier implemented in BattleActions#modifyDamage()
         onSourceModifySecondaries(secondaries, target, source, move) {
             if (
                 move.multihitType === "parentalbond" &&
@@ -3743,6 +3734,7 @@ const Abilities = {
         num: 38,
     },
     poisontouch: {
+        // upokecenter says this is implemented as an added secondary effect
         onModifyMove(move) {
             if (!move?.flags["contact"] || move.target === "self") return;
             if (!move.secondaries) {
@@ -4354,7 +4346,7 @@ const Abilities = {
             }
             if (effect.isBerry) return this.chainModify(2);
         },
-        onBoost(boost, target, source, effect) {
+        onChangeBoost(boost, target, source, effect) {
             if (effect && effect.isBerry) {
                 let b;
                 for (b in boost) {
@@ -4420,6 +4412,7 @@ const Abilities = {
         num: 79,
     },
     rkssystem: {
+        // RKS System's type-changing itself is implemented in statuses.js
         isPermanent: true,
         name: "RKS System",
         rating: 4,
@@ -4612,8 +4605,8 @@ const Abilities = {
                 move.ignoreImmunity["Normal"] = true;
             }
         },
-        onBoost(boost, target, source, effect) {
-            if (effect.name === "Intimidate") {
+        onTryBoost(boost, target, source, effect) {
+            if (effect.name === "Intimidate" && boost.atk) {
                 delete boost.atk;
                 this.add(
                     "-fail",
@@ -4831,7 +4824,7 @@ const Abilities = {
         num: 197,
     },
     simple: {
-        onBoost(boost, target, source, effect) {
+        onChangeBoost(boost, target, source, effect) {
             if (effect && effect.id === "zpower") return;
             let i;
             for (i in boost) {
@@ -5432,11 +5425,10 @@ const Abilities = {
         },
         onAnyModifyDef(def, target, source, move) {
             const abilityHolder = this.effectState.target;
-            if (abilityHolder === target) return;
+            if (target.hasAbility("Sword of Ruin")) return;
             if (!move.ruinedDef?.hasAbility("Sword of Ruin"))
                 move.ruinedDef = abilityHolder;
-            if (move.ruinedDef !== abilityHolder && move.ruinedDef !== target)
-                return;
+            if (move.ruinedDef !== abilityHolder) return;
             this.debug("Sword of Ruin Def drop");
             return this.chainModify(0.75);
         },
@@ -5451,7 +5443,7 @@ const Abilities = {
         },
         onAnyModifyAtk(atk, source, target, move) {
             const abilityHolder = this.effectState.target;
-            if (abilityHolder === source) return;
+            if (source.hasAbility("Tablets of Ruin")) return;
             if (!move.ruinedAtk) move.ruinedAtk = abilityHolder;
             if (move.ruinedAtk !== abilityHolder) return;
             this.debug("Tablets of Ruin Atk drop");
@@ -5534,6 +5526,12 @@ const Abilities = {
         onDamagingHit(damage, target, source, move) {
             if (move.type === "Fire") {
                 this.boost({ atk: 1 });
+            }
+        },
+        onUpdate(pokemon) {
+            if (pokemon.status === "brn") {
+                this.add("-activate", pokemon, "ability: Thermal Exchange");
+                pokemon.cureStatus();
             }
         },
         onSetStatus(status, target, source, effect) {
@@ -5655,6 +5653,7 @@ const Abilities = {
         onUpdate(pokemon) {
             if (!pokemon.isStarted || this.effectState.gaveUp) return;
             const additionalBannedAbilities = [
+                // Zen Mode included here for compatability with Gen 5-6
                 "noability",
                 "flowergift",
                 "forecast",
@@ -5837,7 +5836,7 @@ const Abilities = {
         },
         onAnyModifySpA(spa, source, target, move) {
             const abilityHolder = this.effectState.target;
-            if (abilityHolder === source) return;
+            if (source.hasAbility("Vessel of Ruin")) return;
             if (!move.ruinedSpA) move.ruinedSpA = abilityHolder;
             if (move.ruinedSpA !== abilityHolder) return;
             this.debug("Vessel of Ruin SpA drop");
@@ -6062,7 +6061,7 @@ const Abilities = {
         num: 273,
     },
     whitesmoke: {
-        onBoost(boost, target, source, effect) {
+        onTryBoost(boost, target, source, effect) {
             if (source && target === source) return;
             let showMsg = false;
             let i;
@@ -6146,6 +6145,7 @@ const Abilities = {
         },
         name: "Wind Rider",
         rating: 3.5,
+        // We do not want Brambleghast to get Infiltrator in Randbats
         num: 274,
     },
     wonderguard: {
@@ -6254,13 +6254,25 @@ const Abilities = {
                 return;
             if (pokemon.species.forme !== "Hero") {
                 pokemon.formeChange("Palafin-Hero", this.effect, true);
-                this.effectState.sendHeroMessage = true;
             }
         },
+        onSwitchIn() {
+            this.effectState.switchingIn = true;
+        },
         onStart(pokemon) {
-            if (this.effectState.sendHeroMessage) {
+            if (!this.effectState.switchingIn) return;
+            this.effectState.switchingIn = false;
+            if (
+                pokemon.baseSpecies.baseSpecies !== "Palafin" ||
+                pokemon.transformed
+            )
+                return;
+            if (
+                !this.effectState.heroMessageDisplayed &&
+                pokemon.species.forme === "Hero"
+            ) {
                 this.add("-activate", pokemon, "ability: Zero to Hero");
-                this.effectState.sendHeroMessage = false;
+                this.effectState.heroMessageDisplayed = true;
             }
         },
         isPermanent: true,
@@ -6268,6 +6280,7 @@ const Abilities = {
         rating: 5,
         num: 278,
     },
+    // CAP
     mountaineer: {
         onDamage(damage, target, source, effect) {
             if (effect && effect.id === "stealthrock") {
@@ -6328,6 +6341,7 @@ const Abilities = {
     persistent: {
         isNonstandard: "CAP",
         name: "Persistent",
+        // implemented in the corresponding move
         rating: 3,
         num: -4,
     },

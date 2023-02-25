@@ -12,7 +12,6 @@ function serialize(obj) {
     return JSON.decycle(obj);
 }
 
-
 var engine = {
     start: function () {
         this.client = BattleRoom;
@@ -37,7 +36,7 @@ var engine = {
         } else if (sideid === "p2") {
             pid = 1;
         }
-        return pid
+        return pid;
     },
 
     getReward: function () {
@@ -48,9 +47,9 @@ var engine = {
             pid = 1;
         }
         return {
-            "pid": pid,
-            "reward": this.client.reward
-        }
+            pid: pid,
+            reward: this.client.reward,
+        };
     },
 
     serialize: function () {

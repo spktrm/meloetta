@@ -127,6 +127,7 @@
                             active.ability +
                             ")"
                     );
+
                     return false;
                 }
             }
@@ -329,6 +330,7 @@ var BattleTooltips = (function () {
                     serverPokemon,
                     gmaxMove
                 );
+
                 break;
             }
 
@@ -356,6 +358,7 @@ var BattleTooltips = (function () {
                                 false,
                                 index
                             );
+
                             index++;
                         }
                     }
@@ -554,6 +557,7 @@ var BattleTooltips = (function () {
                 pokemon.ability ||
                 serverPokemon.baseAbility
         );
+
         var item = this.battle.dex.items.get(serverPokemon.item);
 
         var value = new ModifiableValue(this.battle, pokemon, serverPokemon);
@@ -595,23 +599,27 @@ var BattleTooltips = (function () {
                             zMove = this.battle.dex.moves.get(
                                 BattleTooltips.zMoveTable["Fire"]
                             );
+
                             break;
                         case "raindance":
                         case "primordialsea":
                             zMove = this.battle.dex.moves.get(
                                 BattleTooltips.zMoveTable["Water"]
                             );
+
                             break;
                         case "sandstorm":
                             zMove = this.battle.dex.moves.get(
                                 BattleTooltips.zMoveTable["Rock"]
                             );
+
                             break;
                         case "hail":
                         case "snow":
                             zMove = this.battle.dex.moves.get(
                                 BattleTooltips.zMoveTable["Ice"]
                             );
+
                             break;
                     }
                 }
@@ -916,25 +924,32 @@ var BattleTooltips = (function () {
             ) {
                 text += "<small>(Type changed)</small><br />";
             }
-            text += types
-                .map(function (type) {
-                    return Dex.getTypeIcon(type);
-                })
-                .join(" ");
+            text +=
+                '<span class="textaligned-typeicons">' +
+                types
+                    .map(function (type) {
+                        return Dex.getTypeIcon(type);
+                    })
+                    .join(" ") +
+                "</span>";
             if (pokemon.terastallized) {
                 text +=
-                    " <small>(base: " +
+                    '&nbsp; &nbsp; <small>(base: <span class="textaligned-typeicons">' +
                     this.getPokemonTypes(pokemon, true)
                         .map(function (type) {
                             return Dex.getTypeIcon(type);
                         })
                         .join(" ") +
-                    ")</small>";
-            } else if (serverPokemon != null && serverPokemon.teraType) {
+                    "</span>)</small>";
+            } else if (
+                serverPokemon != null &&
+                serverPokemon.teraType &&
+                !this.battle.rules["Terastal Clause"]
+            ) {
                 text +=
-                    " <small>(Tera Type: " +
+                    '&nbsp; &nbsp; <small>(Tera Type: <span class="textaligned-typeicons">' +
                     Dex.getTypeIcon(serverPokemon.teraType) +
-                    ")</small>";
+                    "</span>)</small>";
             }
             text += "</h2>";
         }
@@ -1246,6 +1261,7 @@ var BattleTooltips = (function () {
                             100 / 28,
                             4,
                         ];
+
                     stats[statName] /= boostTable[-boostLevel];
                 }
                 stats[statName] = Math.floor(stats[statName]);
@@ -1295,6 +1311,7 @@ var BattleTooltips = (function () {
             "powerlens",
             "powerweight",
         ];
+
         if (
             (ability === "klutz" && !speedHalvingEVItems.includes(item)) ||
             this.battle.hasPseudoWeather("Magic Room") ||
@@ -1566,17 +1583,25 @@ var BattleTooltips = (function () {
         if (ability === "furcoat") {
             stats.def *= 2;
         }
-        if (this.battle.abilityActive("Vessel of Ruin", pokemon)) {
-            stats.spa = Math.floor(stats.spa * 0.75);
+        if (this.battle.abilityActive("Vessel of Ruin")) {
+            if (ability !== "vesselofruin") {
+                stats.spa = Math.floor(stats.spa * 0.75);
+            }
         }
-        if (this.battle.abilityActive("Sword of Ruin", pokemon)) {
-            stats.def = Math.floor(stats.def * 0.75);
+        if (this.battle.abilityActive("Sword of Ruin")) {
+            if (ability !== "swordofruin") {
+                stats.def = Math.floor(stats.def * 0.75);
+            }
         }
-        if (this.battle.abilityActive("Tablets of Ruin", pokemon)) {
-            stats.atk = Math.floor(stats.atk * 0.75);
+        if (this.battle.abilityActive("Tablets of Ruin")) {
+            if (ability !== "tabletsofruin") {
+                stats.atk = Math.floor(stats.atk * 0.75);
+            }
         }
-        if (this.battle.abilityActive("Beads of Ruin", pokemon)) {
-            stats.spd = Math.floor(stats.spd * 0.75);
+        if (this.battle.abilityActive("Beads of Ruin")) {
+            if (ability !== "beadsofruin") {
+                stats.spd = Math.floor(stats.spd * 0.75);
+            }
         }
         var sideConditions = this.battle.mySide.sideConditions;
         if (sideConditions["tailwind"]) {
@@ -1618,6 +1643,7 @@ var BattleTooltips = (function () {
                 throw new Error(
                     "Must pass either clientPokemon or serverPokemon"
                 );
+
             var _this$getSpeedRange = this.getSpeedRange(clientPokemon),
                 min = _this$getSpeedRange[0],
                 max = _this$getSpeedRange[1];
@@ -1787,11 +1813,13 @@ var BattleTooltips = (function () {
                     tr((70 / 255 / 10 + 1) * 100)) /
                     100
             );
+
             max = tr(
                 (tr(tr(((2 * baseSpe + maxIv) * level) / 100 + 5) * maxNature) *
                     tr((70 / 255 / 10 + 1) * 100)) /
                     100
             );
+
             if (tier.includes("No Restrictions")) max += 200;
             else if (tier.includes("Random")) max += 20;
         } else {
@@ -1800,6 +1828,7 @@ var BattleTooltips = (function () {
                 tr(((2 * baseSpe + maxIvEvOffset) * level) / 100 + 5) *
                     maxNature
             );
+
             min = isCGT
                 ? max
                 : tr(tr((2 * baseSpe * level) / 100 + 5) * minNature);
@@ -1881,13 +1910,13 @@ var BattleTooltips = (function () {
 
         if (move.id === "ragingbull") {
             switch (pokemon.getSpeciesForme()) {
-                case "Tauros-Paldea":
+                case "Tauros-Paldea-Combat":
                     moveType = "Fighting";
                     break;
-                case "Tauros-Paldea-Fire":
+                case "Tauros-Paldea-Blaze":
                     moveType = "Fire";
                     break;
-                case "Tauros-Paldea-Water":
+                case "Tauros-Paldea-Aqua":
                     moveType = "Water";
                     break;
             }
@@ -2379,9 +2408,6 @@ var BattleTooltips = (function () {
         if (move.flags["contact"]) {
             value.abilityModify(1.3, "Tough Claws");
         }
-        if (moveType === "Steel") {
-            value.abilityModify(1.5, "Steely Spirit");
-        }
         if (move.flags["sound"]) {
             value.abilityModify(1.3, "Punk Rock");
         }
@@ -2426,14 +2452,17 @@ var BattleTooltips = (function () {
                     this.battle.gen > 6 ? 1.2 : 1.3,
                     "Aerilate"
                 );
+
                 value.abilityModify(
                     this.battle.gen > 6 ? 1.2 : 1.3,
                     "Galvanize"
                 );
+
                 value.abilityModify(
                     this.battle.gen > 6 ? 1.2 : 1.3,
                     "Pixilate"
                 );
+
                 value.abilityModify(
                     this.battle.gen > 6 ? 1.2 : 1.3,
                     "Refrigerate"
@@ -2464,14 +2493,19 @@ var BattleTooltips = (function () {
                     auraBoosted = "Dark Aura";
                 } else if (allyAbility === "Aura Break") {
                     auraBroken = true;
-                } else if (allyAbility === "Battery") {
-                    if (ally !== pokemon && move.category === "Special") {
-                        value.modify(1.3, "Battery");
-                    }
-                } else if (allyAbility === "Power Spot") {
-                    if (ally !== pokemon) {
-                        value.modify(1.3, "Power Spot");
-                    }
+                } else if (
+                    allyAbility === "Battery" &&
+                    ally !== pokemon &&
+                    move.category === "Special"
+                ) {
+                    value.modify(1.3, "Battery");
+                } else if (allyAbility === "Power Spot" && ally !== pokemon) {
+                    value.modify(1.3, "Power Spot");
+                } else if (
+                    allyAbility === "Steely Spirit" &&
+                    moveType === "Steel"
+                ) {
+                    value.modify(1.5, "Steely Spirit");
                 }
             }
             for (
@@ -2481,10 +2515,10 @@ var BattleTooltips = (function () {
             ) {
                 var foe = _pokemon$side$foe$act[_i24];
                 if (!foe || foe.fainted) continue;
-                if (foe.ability === "Fairy Aura") {
-                    if (moveType === "Fairy") auraBoosted = "Fairy Aura";
-                } else if (foe.ability === "Dark Aura") {
-                    if (moveType === "Dark") auraBoosted = "Dark Aura";
+                if (foe.ability === "Fairy Aura" && moveType === "Fairy") {
+                    auraBoosted = "Fairy Aura";
+                } else if (foe.ability === "Dark Aura" && moveType === "Dark") {
+                    auraBoosted = "Dark Aura";
                 } else if (foe.ability === "Aura Break") {
                     auraBroken = true;
                 }
@@ -2567,6 +2601,7 @@ var BattleTooltips = (function () {
         var species = this.battle.dex.species.get(
             value.serverPokemon.speciesForme
         );
+
         var isTransform = value.pokemon.volatiles.transform;
         var speciesName =
             isTransform &&
@@ -2719,6 +2754,7 @@ var BattleTooltips = (function () {
             clientPokemon,
             serverPokemon
         );
+
         if (!isActive) {
             var ability = abilityData.baseAbility || abilityData.ability;
             if (ability)
@@ -2868,7 +2904,6 @@ var BattleStatGuesser = (function () {
             (this.formatid.endsWith("hackmons") && this.dex.gen !== 6) ||
             this.formatid.includes("metronomebattle") ||
             this.formatid.endsWith("norestrictions");
-
         this.supportsEVs = !this.formatid.includes("letsgo");
         this.supportsAVs =
             !this.supportsEVs && this.formatid.endsWith("norestrictions");
@@ -3419,6 +3454,7 @@ var BattleStatGuesser = (function () {
                 252,
                 plusStat === primaryStat ? 1.1 : 1.0
             );
+
             var ev = 252;
             while (
                 ev > 0 &&
@@ -3444,6 +3480,7 @@ var BattleStatGuesser = (function () {
                 252,
                 plusStat === secondaryStat ? 1.1 : 1.0
             );
+
             ev = 252;
             while (
                 ev > 0 &&
@@ -3658,6 +3695,7 @@ var BattleStatGuesser = (function () {
                     ~~((~~(2 * baseStat + iv + 100) * level) / 100 + 10) +
                     (this.supportsAVs ? ev : 0)
                 );
+
             return ~~(
                 (~~(2 * baseStat + iv + ~~(ev / 4) + 100) * level) / 100 +
                 10

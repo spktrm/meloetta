@@ -74,6 +74,7 @@ var BattleSceneStub = (function () {
     _proto.animUnsummon = function animUnsummon(pokemon, instant) {};
     _proto.animDragIn = function animDragIn(pokemon, slot) {};
     _proto.animDragOut = function animDragOut(pokemon) {};
+    _proto.resetStatbar = function resetStatbar(pokemon, startHidden) {};
     _proto.updateStatbar = function updateStatbar(
         pokemon,
         updatePrevhp,

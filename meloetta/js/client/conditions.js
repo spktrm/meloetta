@@ -46,6 +46,7 @@ const Conditions = {
                 this.add("-status", target, "brn");
             }
         },
+        // Damage reduction is handled directly in the sim/battle.js damage function
         onResidualOrder: 10,
         onResidual(pokemon) {
             this.damage(pokemon.baseMaxhp / 16);
@@ -232,6 +233,7 @@ const Conditions = {
     },
     confusion: {
         name: "confusion",
+        // this is a volatile status
         onStart(target, source, sourceEffect) {
             if (sourceEffect?.id === "lockedmove") {
                 this.add("-start", target, "confusion", "[fatigue]");
@@ -350,6 +352,7 @@ const Conditions = {
         },
     },
     lockedmove: {
+        // Outrage, Thrash, Petal Dance...
         name: "lockedmove",
         duration: 2,
         onResidual(target) {
@@ -377,6 +380,7 @@ const Conditions = {
         },
     },
     twoturnmove: {
+        // Skull Bash, SolarBeam, Sky Drop...
         name: "twoturnmove",
         duration: 2,
         onStart(attacker, defender, effect) {
@@ -475,6 +479,7 @@ const Conditions = {
         onLockMove: "recharge",
     },
     futuremove: {
+        // this is a slot condition
         name: "futuremove",
         duration: 3,
         onResidualOrder: 3,
@@ -522,6 +527,7 @@ const Conditions = {
         },
     },
     healreplacement: {
+        // this is a slot condition
         name: "healreplacement",
         onStart(target, source, sourceEffect) {
             this.effectState.sourceEffect = sourceEffect;
@@ -543,6 +549,7 @@ const Conditions = {
         },
     },
     stall: {
+        // Protect, Detect, Endure counter
         name: "stall",
         duration: 2,
         counterMax: 729,
@@ -573,6 +580,7 @@ const Conditions = {
             return this.chainModify([5325, 4096]);
         },
     },
+    // weather is implemented here since it's so important to the game
     raindance: {
         name: "RainDance",
         effectType: "Weather",
@@ -751,6 +759,8 @@ const Conditions = {
             }
             return 5;
         },
+        // This should be applied directly to the stat before any of the other modifiers are chained
+        // So we give it increased priority.
         onModifySpDPriority: 10,
         onModifySpD(spd, pokemon) {
             if (pokemon.hasType("Rock") && this.field.isWeather("sandstorm")) {
@@ -953,6 +963,8 @@ const Conditions = {
             this.add("-heal", pokemon, pokemon.getHealth, "[silent]");
         },
     },
+    // Commander needs two conditions so they are implemented here
+    // Dondozo
     commanded: {
         name: "Commanded",
         noCopy: true,
@@ -963,11 +975,13 @@ const Conditions = {
         onDragOut() {
             return false;
         },
+        // Prevents Shed Shell allowing a swap
         onTrapPokemonPriority: -11,
         onTrapPokemon(pokemon) {
             pokemon.trapped = true;
         },
     },
+    // Tatsugiri
     commanding: {
         name: "Commanding",
         noCopy: true,
@@ -978,10 +992,12 @@ const Conditions = {
         onDragOut() {
             return false;
         },
+        // Prevents Shed Shell allowing a swap
         onTrapPokemonPriority: -11,
         onTrapPokemon(pokemon) {
             pokemon.trapped = true;
         },
+        // Override No Guard
         onInvulnerabilityPriority: 2,
         onInvulnerability(target, source, move) {
             return false;
@@ -990,6 +1006,12 @@ const Conditions = {
             this.queue.cancelAction(pokemon);
         },
     },
+    // Arceus and Silvally's actual typing is implemented here.
+    // Their true typing for all their formes is Normal, and it's only
+    // Multitype and RKS System, respectively, that changes their type,
+    // but their formes are specified to be their corresponding type
+    // in the Pokedex, so that needs to be overridden.
+    // This is mainly relevant for Hackmons Cup and Balanced Hackmons.
     arceus: {
         name: "Arceus",
         onTypePriority: 1,
