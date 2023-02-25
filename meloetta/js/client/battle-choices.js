@@ -94,6 +94,7 @@
                     "adjacentAllyOrSelf",
                     "adjacentFoe",
                 ];
+
                 if (
                     choosableTargets.includes(
                         this.getChosenMove(choice, this.index()).target
@@ -360,12 +361,14 @@
                 var target = choice.targetLoc
                     ? " " + (choice.targetLoc > 0 ? "+" : "") + choice.targetLoc
                     : "";
+
                 var boost =
                     "" +
                     (choice.max ? " max" : "") +
                     (choice.mega ? " mega" : "") +
                     (choice.z ? " zmove" : "") +
                     (choice.tera ? " terastallize" : "");
+
                 return "move " + choice.move + boost + target;
             case "switch":
             case "team":
@@ -400,6 +403,7 @@
                     serverPokemon.details,
                     serverPokemon
                 );
+
                 battle.parseHealth(serverPokemon.condition, serverPokemon);
             }
         }

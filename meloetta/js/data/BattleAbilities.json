@@ -149,6 +149,7 @@
         "shortDesc": "This Pokemon cannot be struck by a critical hit."
     },
     "battlebond": {
+        "isNonstandard": "Unobtainable",
         "isPermanent": true,
         "name": "Battle Bond",
         "rating": 3.5,
@@ -160,8 +161,8 @@
         "name": "Beads of Ruin",
         "rating": 4.5,
         "num": 284,
-        "desc": "The Special Defense stat of all other active Pokemon is multiplied by 0.75.",
-        "shortDesc": "The Special Defense stat of all other active Pokemon is multiplied by 0.75."
+        "desc": "Active Pokemon without this Ability have their Special Defense multiplied by 0.75.",
+        "shortDesc": "Active Pokemon without this Ability have their Special Defense multiplied by 0.75."
     },
     "beastboost": {
         "name": "Beast Boost",
@@ -959,7 +960,7 @@
         "name": "Libero",
         "rating": 4,
         "num": 236,
-        "desc": "This Pokemon's type changes to match the type of the move it is about to use. This effect comes after all effects that change a move's type. This effect can only happen once per switch-in.",
+        "desc": "This Pokemon's type changes to match the type of the move it is about to use. This effect comes after all effects that change a move's type. This effect can only happen once per switch-in, and only if this Pokemon is not Terastallized.",
         "shortDesc": "This Pokemon's type changes to the type of the move it is using. Once per switch-in."
     },
     "lightmetal": {
@@ -1398,7 +1399,7 @@
         "name": "Protean",
         "rating": 4,
         "num": 168,
-        "desc": "This Pokemon's type changes to match the type of the move it is about to use. This effect comes after all effects that change a move's type. This effect can only happen once per switch-in.",
+        "desc": "This Pokemon's type changes to match the type of the move it is about to use. This effect comes after all effects that change a move's type. This effect can only happen once per switch-in, and only if this Pokemon is not Terastallized.",
         "shortDesc": "This Pokemon's type changes to the type of the move it is using. Once per switch-in."
     },
     "protosynthesis": {
@@ -1447,8 +1448,8 @@
         "name": "Purifying Salt",
         "rating": 4,
         "num": 272,
-        "desc": "This Pokemon cannot become affected by a non-volatile status condition or Yawn. This Pokemon receives 1/2 damage from Ghost-type moves.",
-        "shortDesc": "This Pokemon takes 1/2 damage from Ghost moves and it cannot become statused."
+        "desc": "This Pokemon cannot become affected by a non-volatile status condition or Yawn. If a Pokemon uses a Ghost-type attack against this Pokemon, that Pokemon's offensive stat is halved when calculating the damage to this Pokemon.",
+        "shortDesc": "Ghost damage to this Pokemon dealt with a halved offensive stat; can't be statused."
     },
     "quarkdrive": {
         "condition": {
@@ -1981,7 +1982,7 @@
         "rating": 3.5,
         "num": 293,
         "desc": "This Pokemon's moves have their power multiplied by 1+(X*0.1), where X is the total number of times any Pokemon has fainted on the user's side when this Ability became active, and X cannot be greater than 5.",
-        "shortDesc": "This Pokemon's moves have 0.1x more power for each fainted ally, maximum 1.5x."
+        "shortDesc": "This Pokemon's moves have 10% more power for each fainted ally, up to 5 allies."
     },
     "surgesurfer": {
         "name": "Surge Surfer",
@@ -2032,15 +2033,15 @@
         "name": "Sword of Ruin",
         "rating": 4.5,
         "num": 285,
-        "desc": "The Defense stat of all other active Pokemon is multiplied by 0.75.",
-        "shortDesc": "The Defense stat of all other active Pokemon is multiplied by 0.75."
+        "desc": "Active Pokemon without this Ability have their Defense multiplied by 0.75.",
+        "shortDesc": "Active Pokemon without this Ability have their Defense multiplied by 0.75."
     },
     "tabletsofruin": {
         "name": "Tablets of Ruin",
         "rating": 4.5,
         "num": 284,
-        "desc": "The Attack stat of all other active Pokemon is multiplied by 0.75.",
-        "shortDesc": "The Attack stat of all other active Pokemon is multiplied by 0.75."
+        "desc": "Active Pokemon without this Ability have their Attack multiplied by 0.75.",
+        "shortDesc": "Active Pokemon without this Ability have their Attack multiplied by 0.75."
     },
     "tangledfeet": {
         "onModifyAccuracyPriority": -1,
@@ -2210,8 +2211,8 @@
         "name": "Vessel of Ruin",
         "rating": 4.5,
         "num": 284,
-        "desc": "The Special Attack stat of all other active Pokemon is multiplied by 0.75.",
-        "shortDesc": "The Special Attack stat of all other active Pokemon is multiplied by 0.75."
+        "desc": "Active Pokemon without this Ability have their Special Attack multiplied by 0.75.",
+        "shortDesc": "Active Pokemon without this Ability have their Special Attack multiplied by 0.75."
     },
     "victorystar": {
         "onAnyModifyAccuracyPriority": -1,
