@@ -28,6 +28,8 @@ __export(tags_exports, {
 });
 module.exports = __toCommonJS(tags_exports);
 const Tags = {
+    // Categories
+    // ----------
     physical: {
         name: "Physical",
         desc: "Move deals damage with the Attack and Defense stats.",
@@ -43,6 +45,8 @@ const Tags = {
         desc: "Move does not deal damage.",
         moveFilter: (move) => move.category === "Status",
     },
+    // Pokemon tags
+    // ------------
     mega: {
         name: "Mega",
         speciesFilter: (species) => !!species.isMega,
@@ -64,6 +68,8 @@ const Tags = {
         name: "Paradox",
         speciesFilter: (species) => species.tags.includes("Paradox"),
     },
+    // Move tags
+    // ---------
     zmove: {
         name: "Z-Move",
         moveFilter: (move) => !!move.isZ,
@@ -143,6 +149,8 @@ const Tags = {
         name: "G-Max Move",
         moveFilter: (move) => typeof move.isMax === "string",
     },
+    // Tiers
+    // -----
     uber: {
         name: "Uber",
         speciesFilter: (species) =>
@@ -216,6 +224,8 @@ const Tags = {
         name: "AG",
         speciesFilter: (species) => species.tier === "AG",
     },
+    // Doubles tiers
+    // -------------
     duber: {
         name: "DUber",
         speciesFilter: (species) =>
@@ -239,6 +249,8 @@ const Tags = {
         name: "DNU",
         speciesFilter: (species) => species.doublesTier === "(DUU)",
     },
+    // Nat Dex tiers
+    // -------------
     ndag: {
         name: "ND AG",
         speciesFilter: (species) => species.natDexTier === "AG",
@@ -269,6 +281,7 @@ const Tags = {
         name: "ND RU",
         speciesFilter: (species) => species.natDexTier === "RU",
     },
+    // Legality tags
     past: {
         name: "Past",
         genericFilter: (thing) => thing.isNonstandard === "Past",
@@ -298,6 +311,8 @@ const Tags = {
         genericFilter: (thing) =>
             !!thing.isNonstandard && thing.isNonstandard !== "Unobtainable",
     },
+    // filter columns
+    // --------------
     introducedgen: {
         name: "Introduced Gen",
         genericNumCol: (thing) => thing.gen,

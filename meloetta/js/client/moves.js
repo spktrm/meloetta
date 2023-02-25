@@ -782,6 +782,7 @@ const Moves = {
         volatileStatus: "attract",
         condition: {
             noCopy: true,
+            // doesn't get copied by Baton Pass
             onStart(pokemon, source, effect) {
                 if (
                     !(pokemon.gender === "M" && source.gender === "F") &&
@@ -840,6 +841,12 @@ const Moves = {
             onEnd(pokemon) {
                 this.add("-end", pokemon, "Attract", "[silent]");
             },
+        },
+        onTryImmunity(target, source) {
+            return (
+                (target.gender === "M" && source.gender === "F") ||
+                (target.gender === "F" && source.gender === "M")
+            );
         },
         secondary: null,
         target: "normal",
@@ -1228,8 +1235,8 @@ const Moves = {
         pp: 40,
         priority: 0,
         flags: {},
-        onHit(target) {
-            if (!this.canSwitch(target.side)) {
+        onTryHit(target) {
+            if (!this.canSwitch(target.side) || target.volatiles["commanded"]) {
                 this.attrLastMove("[still]");
                 this.add("-fail", target);
                 return this.NOT_FAIL;
@@ -1271,6 +1278,7 @@ const Moves = {
                 }
             },
         },
+        // FIXME: onMoveAborted(pokemon) {pokemon.removeVolatile('beakblast')},
         onAfterMove(pokemon) {
             pokemon.removeVolatile("beakblast");
         },
@@ -2392,6 +2400,7 @@ const Moves = {
             },
         },
         secondary: {},
+        // allows sheer force to trigger
         target: "normal",
         type: "Dark",
     },
@@ -2572,6 +2581,8 @@ const Moves = {
         pp: 10,
         priority: 0,
         flags: {},
+        // TODO show prepare message before the "POKEMON used MOVE!" message
+        // This happens even before sleep shows its "POKEMON is fast asleep." message
         weather: "snow",
         selfSwitch: true,
         secondary: null,
@@ -2730,7 +2741,9 @@ const Moves = {
             },
         },
         isZ: "kommoniumz",
-        secondary: {},
+        secondary: {
+            // Sheer Force negates the selfBoost even though it is not secondary
+        },
         target: "allAdjacentFoes",
         type: "Dragon",
         contestType: "Cool",
@@ -3953,7 +3966,9 @@ const Moves = {
                 def: 2,
             },
         },
-        secondary: {},
+        secondary: {
+            // Sheer Force negates the self even though it is not secondary
+        },
         target: "allAdjacentFoes",
         type: "Rock",
         contestType: "Beautiful",
@@ -4023,6 +4038,7 @@ const Moves = {
         condition: {
             duration: 5,
             noCopy: true,
+            // doesn't get copied by Baton Pass
             onStart(pokemon, source, effect) {
                 if (
                     this.queue.willMove(pokemon) ||
@@ -5129,6 +5145,7 @@ const Moves = {
                     pokemon
                 );
             },
+            // Item suppression implemented in Pokemon.ignoringItem() within sim/pokemon.js
             onResidualOrder: 21,
             onEnd(pokemon) {
                 this.add("-end", pokemon, "Embargo");
@@ -5170,6 +5187,7 @@ const Moves = {
         condition: {
             duration: 3,
             noCopy: true,
+            // doesn't get copied by Z-Baton Pass
             onStart(target) {
                 const noEncore = [
                     "assist",
@@ -5334,6 +5352,7 @@ const Moves = {
         onTryHit(target, source) {
             if (target === source || target.volatiles["dynamax"]) return false;
             const additionalBannedSourceAbilities = [
+                // Zen Mode included here for compatability with Gen 5-6
                 "flowergift",
                 "forecast",
                 "hungerswitch",
@@ -5685,6 +5704,7 @@ const Moves = {
         priority: 2,
         flags: { mirror: 1 },
         breaksProtect: true,
+        // Breaking protection implemented in scripts.js
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -6456,17 +6476,6 @@ const Moves = {
             if (!this.runEvent("ChargeMove", attacker, defender, move)) {
                 return;
             }
-            if (this.gameType === "doubles" || this.gameType === "multi") {
-                const animatedTarget = attacker.getMoveTargets(
-                    this.dex.getActiveMove("aerialace"),
-                    defender
-                ).targets[0];
-                if (animatedTarget) {
-                    this.hint(
-                        `${move.name}'s animation targeted ${animatedTarget.name}`
-                    );
-                }
-            }
             attacker.addVolatile("twoturnmove", defender);
             return null;
         },
@@ -7083,6 +7092,7 @@ const Moves = {
             }
         },
         condition: {
+            // Ability suppression implemented in Pokemon.ignoringAbility() within sim/pokemon.ts
             onStart(pokemon) {
                 if (pokemon.hasItem("Ability Shield")) return false;
                 this.add("-endability", pokemon);
@@ -8640,6 +8650,7 @@ const Moves = {
                     }
                 }
             },
+            // groundedness implemented in battle.engine.js:BattlePokemon#isGrounded
             onBeforeMovePriority: 6,
             onBeforeMove(pokemon, target, move) {
                 if (move.flags["gravity"] && !move.isZ) {
@@ -10558,6 +10569,7 @@ const Moves = {
             onTrapPokemon(pokemon) {
                 pokemon.tryTrap();
             },
+            // groundedness implemented in battle.engine.js:BattlePokemon#isGrounded
             onDragOut(pokemon) {
                 this.add("-activate", pokemon, "move: Ingrain");
                 return null;
@@ -11449,6 +11461,7 @@ const Moves = {
         },
         condition: {
             noCopy: true,
+            // doesn't get copied by Baton Pass
             duration: 2,
             onSourceInvulnerabilityPriority: 1,
             onSourceInvulnerability(target, source, move) {
@@ -11876,6 +11889,7 @@ const Moves = {
             onFieldRestart(target, source) {
                 this.field.removePseudoWeather("magicroom");
             },
+            // Item suppression implemented in Pokemon.ignoringItem() within sim/pokemon.js
             onFieldResidualOrder: 27,
             onFieldResidualSubOrder: 6,
             onFieldEnd() {
@@ -13431,7 +13445,7 @@ const Moves = {
         sideCondition: "mist",
         condition: {
             duration: 5,
-            onBoost(boost, target, source, effect) {
+            onTryBoost(boost, target, source, effect) {
                 if (
                     effect.effectType === "Move" &&
                     effect.infiltrates &&
@@ -14502,7 +14516,7 @@ const Moves = {
         name: "Order Up",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, pulse: 1, mirror: 1 },
+        flags: { protect: 1 },
         onUseMoveMessage(source, target, move) {
             move.orderUpBoost = true;
         },
@@ -16279,13 +16293,13 @@ const Moves = {
         },
         onModifyType(move, pokemon) {
             switch (pokemon.species.name) {
-                case "Tauros-Paldea":
+                case "Tauros-Paldea-Combat":
                     move.type = "Fighting";
                     break;
-                case "Tauros-Paldea-Fire":
+                case "Tauros-Paldea-Blaze":
                     move.type = "Fire";
                     break;
-                case "Tauros-Paldea-Water":
+                case "Tauros-Paldea-Aqua":
                     move.type = "Water";
                     break;
             }
@@ -16851,9 +16865,13 @@ const Moves = {
             }
         },
         slotCondition: "revivalblessing",
+        // No this not a real switchout move
+        // This is needed to trigger a switch protocol to choose a fainted party member
+        // Feel free to refactor
         selfSwitch: true,
         condition: {
             duration: 1,
+            // reviving implemented in side.ts, kind of
         },
         secondary: null,
         target: "self",
@@ -17075,6 +17093,7 @@ const Moves = {
         onTryHit(target, source) {
             if (target.ability === source.ability) return false;
             const additionalBannedTargetAbilities = [
+                // Zen Mode included here for compatability with Gen 5-6
                 "flowergift",
                 "forecast",
                 "hungerswitch",
@@ -17455,13 +17474,9 @@ const Moves = {
         priority: 0,
         flags: { protect: 1, mirror: 1 },
         condition: {
-            onStart(pokemon, source) {
-                this.add(
-                    "-start",
-                    pokemon,
-                    "move: Salt Cure",
-                    "[of] " + source
-                );
+            noCopy: true,
+            onStart(pokemon) {
+                this.add("-start", pokemon, "Salt Cure");
             },
             onResidualOrder: 13,
             onResidual(pokemon) {
@@ -17471,7 +17486,7 @@ const Moves = {
                 );
             },
             onEnd(pokemon) {
-                this.add("-end", pokemon, "move: Salt Cure");
+                this.add("-end", pokemon, "Salt Cure");
             },
         },
         secondary: {
@@ -19088,6 +19103,7 @@ const Moves = {
                     this.add("-start", pokemon, "Smack Down");
                 }
             },
+            // groundedness implemented in battle.engine.js:BattlePokemon#isGrounded
         },
         secondary: null,
         target: "normal",
@@ -19570,6 +19586,7 @@ const Moves = {
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1, bypasssub: 1 },
         stealsBoosts: true,
+        // Boost stealing implemented in scripts.js
         secondary: null,
         target: "normal",
         type: "Ghost",
@@ -19660,6 +19677,7 @@ const Moves = {
         flags: { reflectable: 1, nonsky: 1 },
         sideCondition: "spikes",
         condition: {
+            // this is a side condition
             onSideStart(side) {
                 this.add("-sidestart", side, "Spikes");
                 this.effectState.layers = 1;
@@ -20002,6 +20020,7 @@ const Moves = {
         flags: { reflectable: 1 },
         sideCondition: "stealthrock",
         condition: {
+            // this is a side condition
             onSideStart(side) {
                 this.add("-sidestart", side, "move: Stealth Rock");
             },
@@ -20315,6 +20334,7 @@ const Moves = {
             },
         },
         secondary: {},
+        // allows sheer force to trigger
         target: "normal",
         type: "Rock",
     },
@@ -22071,6 +22091,7 @@ const Moves = {
         pp: 10,
         priority: 0,
         flags: { protect: 1, reflectable: 1, mirror: 1 },
+        // No Guard-like effect for Poison-type users implemented in Scripts#tryMoveHit
         status: "tox",
         secondary: null,
         target: "normal",
@@ -22089,6 +22110,7 @@ const Moves = {
         flags: { reflectable: 1, nonsky: 1 },
         sideCondition: "toxicspikes",
         condition: {
+            // this is a side condition
             onSideStart(side) {
                 this.add("-sidestart", side, "move: Toxic Spikes");
                 this.effectState.layers = 1;
@@ -22367,6 +22389,7 @@ const Moves = {
             onFieldRestart(target, source) {
                 this.field.removePseudoWeather("trickroom");
             },
+            // Speed modification is changed in Pokemon.getActionSpeed() in sim/pokemon.js
             onFieldResidualOrder: 27,
             onFieldResidualSubOrder: 1,
             onFieldEnd() {
@@ -23474,6 +23497,7 @@ const Moves = {
             onFieldRestart(target, source) {
                 this.field.removePseudoWeather("wonderroom");
             },
+            // Swapping defenses partially implemented in sim/pokemon.js:Pokemon#calculateStat and Pokemon#getStat
             onFieldResidualOrder: 27,
             onFieldResidualSubOrder: 5,
             onFieldEnd() {
@@ -23639,6 +23663,7 @@ const Moves = {
         },
         condition: {
             noCopy: true,
+            // doesn't get copied by Baton Pass
             duration: 2,
             onStart(target, source) {
                 this.add("-start", target, "move: Yawn", "[of] " + source);

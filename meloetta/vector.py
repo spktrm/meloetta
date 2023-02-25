@@ -248,7 +248,7 @@ class State(NamedTuple):
     turn: torch.Tensor
     log: List[str]
 
-    def to_dict(self, turns_since_last_move: int):
+    def to_dict(self):
         return {
             "player_id": self.player_id,
             "private_reserve": self.private_side.reserve,
@@ -261,7 +261,6 @@ class State(NamedTuple):
             "weather_min_time_left": self.weather_min_time_left,
             "pseudo_weather": self.pseudo_weather,
             "turn": self.turn,
-            "turns_since_last_move": expand_bt(torch.tensor(turns_since_last_move)),
         }
 
 
@@ -279,11 +278,11 @@ class VectorizedState:
         self.moves = {}
 
     @classmethod
-    def from_battle(self, room: BattleRoom, battle: Battle):
+    def from_battle(self, room: BattleRoom, battle: Battle) -> State:
         vstate = VectorizedState(room, battle)
         return vstate.vectorize()
 
-    def vectorize(self):
+    def vectorize(self) -> State:
         public_sides = self._vectorize_public_sides()
         private_side = self._vectorize_private_side()
 
