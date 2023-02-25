@@ -108,6 +108,8 @@ from meloetta.workers import EvalWorker
 from meloetta.frameworks.random import RandomActor
 ...
 worker = EvalWorker(
+    eval_username="eval",
+    opponent_username="random",
     battle_format="gen9randombattle",
     team="null",
     eval_actor_fn=YOUR_ACTOR_CLASS,

@@ -22,6 +22,8 @@ def waiting_for_opp(room: BattleRoom):
 class EvalWorker:
     def __init__(
         self,
+        eval_username: str,
+        opponent_username: str,
         battle_format: str,
         team: str,
         eval_actor_fn: Type[Actor] = None,
@@ -33,6 +35,9 @@ class EvalWorker:
     ):
         self.battle_format = battle_format
         self.team = team
+
+        self.eval_username = eval_username
+        self.opponent_username = opponent_username
 
         self.eval_actor_fn = eval_actor_fn
         self.baseline_actor_fn = baseline_actor_fn
@@ -68,6 +73,11 @@ class EvalWorker:
     async def actor(
         self, player_index: int, actor_fn: Type[Actor], barrier: Barrier
     ) -> Any:
+        if player_index == 0:
+            username = self.eval_username
+        else:
+            username = self.opponent_username
+
         player = await Player.create(username, None, "localhost:8000")
         await player.client.login()
         await barrier.wait()
@@ -75,13 +85,11 @@ class EvalWorker:
         while True:  # 10 battles each player-player pair
             await asyncio.sleep(2)
             if player_index == 0:
-                username = self.eval_actor_args[0]
                 await player.client.challenge_user(
                     self.opponent_username, self.battle_format, self.team
                 )
                 actor = actor_fn(*self.eval_actor_args, **self.eval_actor_kwargs)
             else:
-                username = self.baseline_actor_args[0]
                 await player.client.accept_challenge(self.battle_format, self.team)
                 actor = actor_fn(
                     *self.baseline_actor_args, **self.baseline_actor_kwargs
@@ -166,6 +174,5 @@ class EvalWorker:
                     break
 
             await player.client.leave_battle(player.room.battle_tag)
-            datum = player.room.get_reward()
-            actor.store_reward(player.room, datum["pid"], datum["reward"])
+            actor.post_match(player.room)
             player.reset()
