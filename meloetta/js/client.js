@@ -158,7 +158,7 @@ BattleRoom = {
 
             try {
                 requestData = JSON.parse(data);
-            } catch (err) { }
+            } catch (err) {}
             return this.receiveRequest(requestData, choiceText);
         }
 
@@ -191,14 +191,14 @@ BattleRoom = {
                             pokemon.side.n === 0
                                 ? BattleLog.escapeHTML(pokemon.name)
                                 : "The opposing " +
-                                (this.battle.ignoreOpponent ||
-                                    this.battle.ignoreNicks
-                                    ? pokemon.speciesForme
-                                    : BattleLog.escapeHTML(pokemon.name));
+                                  (this.battle.ignoreOpponent ||
+                                  this.battle.ignoreNicks
+                                      ? pokemon.speciesForme
+                                      : BattleLog.escapeHTML(pokemon.name));
                         this.battle.stepQueue.push(
                             "|message|" +
-                            pokeName +
-                            " is trapped and cannot switch!"
+                                pokeName +
+                                " is trapped and cannot switch!"
                         );
                         break;
                     case "cant":
@@ -226,15 +226,12 @@ BattleRoom = {
                 if (outcome === "win") {
                     if (username == winner) {
                         this.reward = 1;
-                    }
-                    else {
+                    } else {
                         this.reward = -1;
                     }
-                }
-                else if (outcome === "tie") {
+                } else if (outcome === "tie") {
                     this.reward = 0;
-                }
-                else {
+                } else {
                     this.reward = 0;
                 }
                 this.battle.stepQueue.push(logLine);
@@ -261,23 +258,23 @@ BattleRoom = {
             $messages.hide();
             $button.html(
                 "<small>(" +
-                $messages.length +
-                " line" +
-                ($messages.length > 1 ? "s" : "") +
-                "from " +
-                user +
-                ")</small>"
+                    $messages.length +
+                    " line" +
+                    ($messages.length > 1 ? "s" : "") +
+                    "from " +
+                    user +
+                    ")</small>"
             );
             $button.parent().show();
         } else {
             $button.html(
                 "<small>(Hide " +
-                $messages.length +
-                " line" +
-                ($messages.length > 1 ? "s" : "") +
-                " from " +
-                user +
-                ")</small>"
+                    $messages.length +
+                    " line" +
+                    ($messages.length > 1 ? "s" : "") +
+                    " from " +
+                    user +
+                    ")</small>"
             );
             $button.parent().removeClass("revealed");
             $messages.show();
@@ -291,10 +288,10 @@ BattleRoom = {
         if (mode)
             this.$el.prepend(
                 '<style class="hcmode-style">' +
-                id +
-                ".battle .turn," +
-                id +
-                ".battle-history{display:none !important;}</style>"
+                    id +
+                    ".battle .turn," +
+                    id +
+                    ".battle-history{display:none !important;}</style>"
             );
         if (this.choice && this.choice.waiting) {
             this.updateControlsForPlayer();
@@ -324,21 +321,21 @@ BattleRoom = {
                     // paused
                     this.controls.html(
                         '<p><button class="button" name="resume"><i class="fa fa-play"></i><br />Play</button> <button class="button" name="rewindTurn"><i class="fa fa-step-backward"></i><br />Last turn</button><button class="button" name="skipTurn"><i class="fa fa-step-forward"></i><br />Skip turn</button> <button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />First turn</button><button class="button" name="goToEnd"><i class="fa fa-fast-forward"></i><br />Skip to end</button></p>' +
-                        switchSidesButton
+                            switchSidesButton
                     );
                 } else {
                     // playing
                     this.controls.html(
                         '<p><button class="button" name="pause"><i class="fa fa-pause"></i><br />Pause</button> <button class="button" name="rewindTurn"><i class="fa fa-step-backward"></i><br />Last turn</button><button class="button" name="skipTurn"><i class="fa fa-step-forward"></i><br />Skip turn</button> <button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />First turn</button><button class="button" name="goToEnd"><i class="fa fa-fast-forward"></i><br />Skip to end</button></p>' +
-                        switchSidesButton
+                            switchSidesButton
                     );
                 }
             } else {
                 // is a player
                 this.controls.html(
                     "<p>" +
-                    this.getTimerHTML() +
-                    '<button class="button" name="skipTurn"><i class="fa fa-step-forward"></i><br />Skip turn</button> <button class="button" name="goToEnd"><i class="fa fa-fast-forward"></i><br />Skip to end</button></p>'
+                        this.getTimerHTML() +
+                        '<button class="button" name="skipTurn"><i class="fa fa-step-forward"></i><br />Skip turn</button> <button class="button" name="goToEnd"><i class="fa fa-fast-forward"></i><br />Skip to end</button></p>'
                 );
             }
             return;
@@ -355,16 +352,16 @@ BattleRoom = {
                 // this.closeNotification("choice");
                 this.controls.html(
                     '<div class="controls"><p>' +
-                    // replayDownloadButton +
-                    '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p><p><button class="button" name="closeAndMainMenu"><strong>Main menu</strong><br /><small>(closes this battle)</small></button> <button class="button" name="closeAndRematch"><strong>Rematch</strong><br /><small>(closes this battle)</small></button></p></div>'
+                        // replayDownloadButton +
+                        '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p><p><button class="button" name="closeAndMainMenu"><strong>Main menu</strong><br /><small>(closes this battle)</small></button> <button class="button" name="closeAndRematch"><strong>Rematch</strong><br /><small>(closes this battle)</small></button></p></div>'
                 );
             } else {
                 this.controls.html(
                     '<div class="controls"><p>' +
-                    // replayDownloadButton +
-                    '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p>' +
-                    switchSidesButton +
-                    "</div>"
+                        // replayDownloadButton +
+                        '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p>' +
+                        switchSidesButton +
+                        "</div>"
                 );
             }
         } else if (this.side) {
@@ -389,15 +386,15 @@ BattleRoom = {
                 // paused
                 this.controls.html(
                     '<p><button class="button" name="resume"><i class="fa fa-play"></i><br />Play</button> <button class="button" name="rewindTurn"><i class="fa fa-step-backward"></i><br />Last turn</button><button class="button disabled" disabled><i class="fa fa-step-forward"></i><br />Skip turn</button> <button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />First turn</button><button class="button disabled" disabled><i class="fa fa-fast-forward"></i><br />Skip to end</button></p>' +
-                    switchSidesButton +
-                    "<p><em>Waiting for players...</em></p>"
+                        switchSidesButton +
+                        "<p><em>Waiting for players...</em></p>"
                 );
             } else {
                 // playing
                 this.controls.html(
                     '<p><button class="button" name="pause"><i class="fa fa-pause"></i><br />Pause</button> <button class="button" name="rewindTurn"><i class="fa fa-step-backward"></i><br />Last turn</button><button class="button disabled" disabled><i class="fa fa-step-forward"></i><br />Skip turn</button> <button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />First turn</button><button class="button disabled" disabled><i class="fa fa-fast-forward"></i><br />Skip to end</button></p>' +
-                    switchSidesButton +
-                    "<p><em>Waiting for players...</em></p>"
+                        switchSidesButton +
+                        "<p><em>Waiting for players...</em></p>"
                 );
             }
         }
@@ -556,9 +553,9 @@ BattleRoom = {
         var time = "Timer";
         var timerTicking =
             this.battle.kickingInactive &&
-                this.request &&
-                !this.request.wait &&
-                !(this.choice && this.choice.waiting)
+            this.request &&
+            !this.request.wait &&
+            !(this.choice && this.choice.waiting)
                 ? " timerbutton-on"
                 : "";
 
@@ -659,7 +656,7 @@ BattleRoom = {
                 (switchables[this.choice.choices.length].fainted ||
                     switchables[this.choice.choices.length].commanding) &&
                 this.choice.choices.length + 1 <
-                this.battle.nearSide.active.length
+                    this.battle.nearSide.active.length
             ) {
                 this.choice.choices.push("pass");
             }
@@ -776,8 +773,8 @@ BattleRoom = {
                         'px"></span></span>' +
                         (pokemon.status
                             ? '<span class="status ' +
-                            pokemon.status +
-                            '"></span>'
+                              pokemon.status +
+                              '"></span>'
                             : "") +
                         "</button> ";
                 }
@@ -826,8 +823,8 @@ BattleRoom = {
                         'px"></span></span>' +
                         (pokemon.status
                             ? '<span class="status ' +
-                            pokemon.status +
-                            '"></span>'
+                              pokemon.status +
+                              '"></span>'
                             : "") +
                         "</button> ";
                 }
@@ -835,17 +832,17 @@ BattleRoom = {
 
             this.controls.html(
                 '<div class="controls">' +
-                '<div class="whatdo">' +
-                requestTitle +
-                this.getTimerHTML() +
-                "</div>" +
-                '<div class="switchmenu" style="display:block">' +
-                targetMenus[0] +
-                '<div style="clear:both"></div> </div>' +
-                '<div class="switchmenu" style="display:block">' +
-                targetMenus[1] +
-                "</div>" +
-                "</div>"
+                    '<div class="whatdo">' +
+                    requestTitle +
+                    this.getTimerHTML() +
+                    "</div>" +
+                    '<div class="switchmenu" style="display:block">' +
+                    targetMenus[0] +
+                    '<div style="clear:both"></div> </div>' +
+                    '<div class="switchmenu" style="display:block">' +
+                    targetMenus[1] +
+                    "</div>" +
+                    "</div>"
             );
         } else {
             // Move chooser
@@ -854,8 +851,8 @@ BattleRoom = {
                 (hpRatio < 0.2
                     ? "critical"
                     : hpRatio < 0.5
-                        ? "weak"
-                        : "healthy") +
+                    ? "weak"
+                    : "healthy") +
                 '">HP ' +
                 switchables[pos].hp +
                 "/" +
@@ -960,8 +957,8 @@ BattleRoom = {
                                 typeValueTracker,
                                 specialMove.isMax
                                     ? gigantamax ||
-                                    switchables[pos].gigantamax ||
-                                    true
+                                          switchables[pos].gigantamax ||
+                                          true
                                     : undefined
                             )[0];
                             if (
@@ -1079,14 +1076,14 @@ BattleRoom = {
                 "</div>";
             this.controls.html(
                 '<div class="controls">' +
-                '<div class="whatdo">' +
-                requestTitle +
-                this.getTimerHTML() +
-                "</div>" +
-                moveControls +
-                shiftControls +
-                switchControls +
-                "</div>"
+                    '<div class="whatdo">' +
+                    requestTitle +
+                    this.getTimerHTML() +
+                    "</div>" +
+                    moveControls +
+                    shiftControls +
+                    switchControls +
+                    "</div>"
             );
         }
     },
@@ -1108,10 +1105,10 @@ BattleRoom = {
                     (pokemon.fainted
                         ? ",fainted"
                         : trapped
-                            ? ",trapped"
-                            : i < this.battle.nearSide.active.length
-                                ? ",active"
-                                : "") +
+                        ? ",trapped"
+                        : i < this.battle.nearSide.active.length
+                        ? ",active"
+                        : "") +
                     '" data-tooltip="' +
                     BattleLog.escapeHTML(tooltipArgs) +
                     '"><span class="picon" style="' +
@@ -1120,15 +1117,15 @@ BattleRoom = {
                     BattleLog.escapeHTML(pokemon.name) +
                     (pokemon.hp
                         ? '<span class="' +
-                        pokemon.getHPColorClass() +
-                        '"><span style="width:' +
-                        (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
-                        'px"></span></span>' +
-                        (pokemon.status
-                            ? '<span class="status ' +
-                            pokemon.status +
-                            '"></span>'
-                            : "")
+                          pokemon.getHPColorClass() +
+                          '"><span style="width:' +
+                          (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
+                          'px"></span></span>' +
+                          (pokemon.status
+                              ? '<span class="status ' +
+                                pokemon.status +
+                                '"></span>'
+                              : "")
                         : "") +
                     "</button> ";
             } else {
@@ -1175,15 +1172,15 @@ BattleRoom = {
                 BattleLog.escapeHTML(pokemon.name) +
                 (pokemon.hp
                     ? '<span class="' +
-                    pokemon.getHPColorClass() +
-                    '"><span style="width:' +
-                    (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
-                    'px"></span></span>' +
-                    (pokemon.status
-                        ? '<span class="status ' +
-                        pokemon.status +
-                        '"></span>'
-                        : "")
+                      pokemon.getHPColorClass() +
+                      '"><span style="width:' +
+                      (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
+                      'px"></span></span>' +
+                      (pokemon.status
+                          ? '<span class="status ' +
+                            pokemon.status +
+                            '"></span>'
+                          : "")
                     : "") +
                 "</button> ";
         }
@@ -1243,16 +1240,16 @@ BattleRoom = {
                         BattleLog.escapeHTML(pokemon.name) +
                         (!pokemon.fainted
                             ? '<span class="' +
-                            pokemon.getHPColorClass() +
-                            '"><span style="width:' +
-                            (Math.round((pokemon.hp * 92) / pokemon.maxhp) ||
-                                1) +
-                            'px"></span></span>' +
-                            (pokemon.status
-                                ? '<span class="status ' +
-                                pokemon.status +
-                                '"></span>'
-                                : "")
+                              pokemon.getHPColorClass() +
+                              '"><span style="width:' +
+                              (Math.round((pokemon.hp * 92) / pokemon.maxhp) ||
+                                  1) +
+                              'px"></span></span>' +
+                              (pokemon.status
+                                  ? '<span class="status ' +
+                                    pokemon.status +
+                                    '"></span>'
+                                  : "")
                             : "") +
                         "</button> ";
                 } else if (!pokemon) {
@@ -1274,8 +1271,8 @@ BattleRoom = {
                         'px"></span></span>' +
                         (pokemon.status
                             ? '<span class="status ' +
-                            pokemon.status +
-                            '"></span>'
+                              pokemon.status +
+                              '"></span>'
                             : "") +
                         "</button> ";
                 }
@@ -1283,12 +1280,12 @@ BattleRoom = {
             controls += "</div>";
             this.controls.html(
                 '<div class="controls">' +
-                '<div class="whatdo">' +
-                requestTitle +
-                this.getTimerHTML() +
-                "</div>" +
-                controls +
-                "</div>"
+                    '<div class="whatdo">' +
+                    requestTitle +
+                    this.getTimerHTML() +
+                    "</div>" +
+                    controls +
+                    "</div>"
             );
         } else {
             if (isReviving) {
@@ -1314,8 +1311,8 @@ BattleRoom = {
                             (pokemon.reviving
                                 ? ",active"
                                 : !pokemon.fainted
-                                    ? ",notfainted"
-                                    : "") +
+                                ? ",notfainted"
+                                : "") +
                             '" data-tooltip="' +
                             BattleLog.escapeHTML(tooltipArgs) +
                             '">';
@@ -1339,8 +1336,8 @@ BattleRoom = {
                             (pokemon.fainted
                                 ? ",fainted"
                                 : i < this.battle.pokemonControlled
-                                    ? ",active"
-                                    : "") +
+                                ? ",active"
+                                : "") +
                             '" data-tooltip="' +
                             BattleLog.escapeHTML(tooltipArgs) +
                             '">';
@@ -1360,15 +1357,15 @@ BattleRoom = {
                     BattleLog.escapeHTML(pokemon.name) +
                     (!pokemon.fainted
                         ? '<span class="' +
-                        pokemon.getHPColorClass() +
-                        '"><span style="width:' +
-                        (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
-                        'px"></span></span>' +
-                        (pokemon.status
-                            ? '<span class="status ' +
-                            pokemon.status +
-                            '"></span>'
-                            : "")
+                          pokemon.getHPColorClass() +
+                          '"><span style="width:' +
+                          (Math.round((pokemon.hp * 92) / pokemon.maxhp) || 1) +
+                          'px"></span></span>' +
+                          (pokemon.status
+                              ? '<span class="status ' +
+                                pokemon.status +
+                                '"></span>'
+                              : "")
                         : "") +
                     "</button> ";
             }
@@ -1384,12 +1381,12 @@ BattleRoom = {
                 "</div>";
             this.controls.html(
                 '<div class="controls">' +
-                '<div class="whatdo">' +
-                requestTitle +
-                this.getTimerHTML() +
-                "</div>" +
-                controls +
-                "</div>"
+                    '<div class="whatdo">' +
+                    requestTitle +
+                    this.getTimerHTML() +
+                    "</div>" +
+                    controls +
+                    "</div>"
             );
             this.selectSwitch();
         }
@@ -1449,12 +1446,12 @@ BattleRoom = {
             "</div>";
         this.controls.html(
             '<div class="controls">' +
-            '<div class="whatdo">' +
-            requestTitle +
-            this.getTimerHTML() +
-            "</div>" +
-            controls +
-            "</div>"
+                '<div class="whatdo">' +
+                requestTitle +
+                this.getTimerHTML() +
+                "</div>" +
+                controls +
+                "</div>"
         );
         this.selectSwitch();
     },
@@ -1492,8 +1489,8 @@ BattleRoom = {
                 this.battle.gameType === "doubles"
                     ? 2
                     : this.battle.gameType === "triples"
-                        ? 3
-                        : 1;
+                    ? 3
+                    : 1;
             for (var i = 0; i < leadCount; i++) {
                 leads.push(
                     myPokemon[this.choice.teamPreview[i] - 1].speciesForme
@@ -1659,7 +1656,7 @@ BattleRoom = {
         this.finalDecision =
             this.finalDecisionMove =
             this.finalDecisionSwitch =
-            false;
+                false;
         this.request = request;
         if (request.side) {
             this.updateSideLocation(request.side);
@@ -1860,12 +1857,12 @@ BattleRoom = {
 
             this.choice.choices.push(
                 "move " +
-                pos +
-                (isMega ? " mega" : "") +
-                (isZMove ? " zmove" : "") +
-                (isUltraBurst ? " ultra" : "") +
-                (isDynamax ? " dynamax" : "") +
-                (isTerastal ? " terastallize" : "")
+                    pos +
+                    (isMega ? " mega" : "") +
+                    (isZMove ? " zmove" : "") +
+                    (isUltraBurst ? " ultra" : "") +
+                    (isDynamax ? " dynamax" : "") +
+                    (isTerastal ? " terastallize" : "")
             );
             if (nearActive.length > 1 && target in choosableTargets) {
                 this.choice.type = "movetarget";
