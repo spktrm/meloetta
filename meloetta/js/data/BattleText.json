@@ -692,7 +692,8 @@
         "descGen1": "For 0 to 7 turns, one of the target's known moves that has at least 1 PP remaining becomes disabled, at random. Fails if one of the target's moves is already disabled, or if none of the target's moves have PP remaining. If any Pokemon uses Haze, this effect ends. Whether or not this move was successful, it counts as a hit for the purposes of the opponent's use of Rage.",
         "shortDescGen1": "For 0-7 turns, disables one of the target's moves.",
         "start": "  [POKEMON]'s [MOVE] was disabled!",
-        "end": "  [POKEMON]'s move is no longer disabled!"
+        "end": "  [POKEMON]'s move is no longer disabled!",
+        "cant": "[POKEMON]'s [MOVE] is disabled!"
     },
     "dive": {
         "descGen4": "This attack charges on the first turn and executes on the second. On the first turn, the user avoids all attacks other than Surf and Whirlpool, which have doubled power when used against it, and is also unaffected by weather. If the user is holding a Power Herb, the move completes in one turn.",
@@ -1312,8 +1313,8 @@
     "mirrormove": {
         "descGen4": "The user uses the last move that successfully targeted the user. The copied move is used with no specific target. Fails if no move has targeted the user, if the move was called by another move, if the move is Encore, or if the move cannot be copied by this move.",
         "descGen3": "The user uses the last move that successfully targeted the user. The copied move is used with no specific target. Fails if no move has targeted the user, if the move missed, failed, or had no effect on the user, or if the move cannot be copied by this move.",
-        "descGen2": "The user uses the last move used by the target. Fails if the target has not made a move, or if the last move used was Metronome, Mimic, Mirror Move, Sketch, Sleep Talk, Transform, or any move the user knows.",
-        "descGen1": "The user uses the last move used by the target. Fails if the target has not made a move, or if the last move used was Mirror Move."
+        "descGen2": "The user uses the last move used by the target. Fails if the target has not made a move since the user switched in, or if the last move used was Metronome, Mimic, Mirror Move, Sketch, Sleep Talk, Transform, or any move the user knows.",
+        "descGen1": "The user uses the last move used by the target. Fails if the target has not made a move since the user switched in, or if the last move used was Mirror Move."
     },
     "mist": {
         "descGen2": "While the user remains active, it is protected from having its stat stages lowered by other Pokemon. Fails if the user already has the effect. Baton Pass can be used to transfer this effect to an ally.",
@@ -1597,6 +1598,7 @@
         "descGen6": "If this move is successful, the user is locked into this move and cannot make another move until it misses, 5 turns have passed, or the attack cannot be used. Power doubles with each successful hit of this move and doubles again if Defense Curl was used previously by the user. If this move is called by Sleep Talk, the move is used for one turn."
     },
     "roost": {
+        "descGen8": "The user restores 1/2 of its maximum HP, rounded half up. Until the end of the turn, Flying-type users lose their Flying type and pure Flying-type users become Normal type. Does nothing if the user's HP is full.",
         "descGen4": "The user restores 1/2 of its maximum HP, rounded down. Until the end of the turn, Flying-type users lose their Flying type and pure Flying-type users become typeless. Does nothing if the user's HP is full.",
         "start": "  ([POKEMON] loses Flying type this turn.)"
     },

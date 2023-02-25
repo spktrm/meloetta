@@ -392,6 +392,9 @@ var BattlePokemonIconIndexes = {
     taurospaldea: 1020 + 224,
     taurospaldeafire: 1020 + 225,
     taurospaldeawater: 1020 + 226,
+    taurospaldeacombat: 1020 + 224,
+    taurospaldeablaze: 1020 + 225,
+    taurospaldeaaqua: 1020 + 226,
     wooperpaldea: 1020 + 227,
     oinkolognef: 1020 + 228,
     palafinhero: 1020 + 229,
@@ -1379,6 +1382,7 @@ var Species = function Species(id, name, data) {
     this.isMega = !!(
         this.forme && ["-mega", "-megax", "-megay"].includes(this.formeid)
     );
+
     this.cannotDynamax = !!data.cannotDynamax;
     this.canGigantamax = !!data.canGigantamax;
     this.isPrimal = !!(this.forme && this.formeid === "-primal");

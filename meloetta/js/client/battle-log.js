@@ -128,6 +128,7 @@
                 divClass = _this$parseChatMessag[0];
                 divHTML = _this$parseChatMessag[1];
                 noNotify = _this$parseChatMessag[2];
+
                 if (!noNotify && isHighlighted) {
                     var notifyTitle =
                         "Mentioned by " + name + " in " + battle.roomid;
@@ -182,9 +183,11 @@
                 }
                 this.joinLeave.element.innerHTML =
                     "<small>" + BattleLog.escapeHTML(buf) + "</small>";
+
                 (preempt ? this.preemptElem : this.innerElem).appendChild(
                     this.joinLeave.element
                 );
+
                 return;
             }
 
@@ -210,9 +213,11 @@
                     " renamed from " +
                     BattleLog.escapeHTML(this.lastRename.from) +
                     ".</small>";
+
                 (preempt ? this.preemptElem : this.innerElem).appendChild(
                     this.lastRename.element
                 );
+
                 return;
             }
 
@@ -245,6 +250,7 @@
                         BattleLog.escapeHTML(args[1]).replace(/\|/g, "<br />") +
                         "</div>"
                 );
+
                 return;
 
             case "pm":
@@ -267,6 +273,7 @@
                         BattleLog.escapeHTML(args[1]) +
                         '"><b>Register</b></button></div>'
                 );
+
                 return;
 
             case "unlink": {
@@ -334,9 +341,11 @@
                 this.message(
                     "<strong>Warning:</strong> " + BattleLog.escapeHTML(args[1])
                 );
+
                 this.message(
                     'Bug? Report it to <a href="http://www.smogon.com/forums/showthread.php?t=3453192">the replay viewer\'s Smogon thread</a>'
                 );
+
                 if (this.scene) this.scene.wait(1000);
                 return;
 
@@ -347,6 +356,7 @@
                         BattleLog.escapeHTML(args[1]) +
                         "</em></small>"
                 );
+
                 break;
 
             case "rule":
@@ -360,6 +370,7 @@
                         BattleLog.escapeHTML(ruleArgs[1] || "") +
                         "</small>"
                 );
+
                 break;
 
             case "rated":
@@ -369,6 +380,7 @@
                         (BattleLog.escapeHTML(args[1]) || "Rated battle") +
                         "</strong>"
                 );
+
                 break;
 
             case "tier":
@@ -378,6 +390,7 @@
                         BattleLog.escapeHTML(args[1]) +
                         "</strong>"
                 );
+
                 break;
 
             case "turn":
@@ -416,6 +429,7 @@
                         "chat message-error",
                         "Unrecognized: |" + BattleLog.escapeHTML(args.join("|"))
                     );
+
                     return;
                 }
                 if (!line) return;
@@ -451,6 +465,7 @@
                 /\|\|([^\|]*)\|\|([^\|]*)\|\|/,
                 '<abbr title="$1">$2</abbr>'
             );
+
             if (line.startsWith("  "))
                 line = "<small>" + line.trim() + "</small>";
             return line;
@@ -812,6 +827,7 @@
         }
         var colorStyle =
             ' style="color:' + BattleLog.usernameColor(toID(name)) + '"';
+
         var clickableName =
             "<small>" +
             BattleLog.escapeHTML(group) +
@@ -923,6 +939,7 @@
                     "chat message-error",
                     "[outdated code no longer supported]",
                 ];
+
             case "text":
                 return ["chat", BattleLog.parseMessage(target)];
             case "error":
@@ -1197,6 +1214,7 @@
                         "https://www.youtube.com/embed/" +
                             videoId +
                             (time ? "?start=" + time : ""),
+
                         "frameborder",
                         "0",
                         "allow",
@@ -1232,6 +1250,7 @@
                             "class",
                             "picon" + (className ? " " + className : "")
                         );
+
                         setAttrib(
                             "style",
                             Dex.getPokemonIcon(iconValue) +
@@ -1242,6 +1261,7 @@
                             "class",
                             "itemicon" + (className ? " " + className : "")
                         );
+
                         setAttrib(
                             "style",
                             Dex.getItemIcon(iconValue) +
@@ -1397,6 +1417,7 @@
             '" class="subtle" target="_blank">' +
             BattleLog.escapeHTML(battle.p2.name) +
             "</a></h1>\n";
+
         buf +=
             '<script type="text/plain" class="battle-log-data">' +
             battle.stepQueue.join("\n").replace(/\//g, "\\/") +
