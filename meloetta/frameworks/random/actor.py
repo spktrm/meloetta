@@ -7,7 +7,7 @@ from meloetta.actors.types import State, Choices
 
 
 class RandomActor(Actor):
-    def __init__(self, queue: mp.Queue):
+    def __init__(self, queue: mp.Queue = None):
         self.queue = queue
 
     def choose_action(
@@ -20,13 +20,12 @@ class RandomActor(Actor):
         _, (func, args, kwargs) = random.choice(list(choices[random_key].items()))
         return func, args, kwargs
 
-    def store_reward(
-        self,
-        room: BattleRoom,
-        pid: int,
-        reward: float = None,
-    ):
-        if reward > 0:
-            self.queue.put(("random", 1))
-        elif reward < 0:
-            self.queue.put(("random", 0))
+    def post_match(self, room: BattleRoom):
+        if self.queue is not None:
+            datum = room.get_reward()
+            reward = datum["reward"]
+
+            if reward > 0:
+                self.queue.put(("random", 1))
+            elif reward < 0:
+                self.queue.put(("random", 0))

@@ -53,12 +53,10 @@ class NAshKetchumActor(Actor):
         to_store = env_step.to_store(state)
         self.replay_buffer.store_sample(room.battle_tag, to_store)
 
-    def store_reward(
-        self,
-        room: BattleRoom,
-        pid: int,
-        reward: float = None,
-    ):
+    def post_match(self, room: BattleRoom):
         if self.storing_transition:
-            self.replay_buffer.append_reward(room.battle_tag, pid, reward)
+            datum = room.get_reward()
+            self.replay_buffer.append_reward(
+                room.battle_tag, datum["pid"], datum["reward"]
+            )
             self.replay_buffer.register_done(room.battle_tag)

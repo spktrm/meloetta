@@ -9,11 +9,11 @@ from meloetta.frameworks.max_damage.model import MaxDamageModel
 
 
 class MaxDamageActor(Actor):
-    def __init__(self, gen: int, queue: mp.Queue):
+    def __init__(self, gen: int = 9, queue: mp.Queue = None):
         self.model = MaxDamageModel(gen=gen)
         self.model.eval()
 
-        self._queue = queue
+        self.queue = queue
 
     def choose_action(
         self,
@@ -26,13 +26,12 @@ class MaxDamageActor(Actor):
 
         return func, args, kwargs
 
-    def store_reward(
-        self,
-        room: BattleRoom,
-        pid: int,
-        reward: float = None,
-    ):
-        if reward > 0:
-            self._queue.put(("maxdmg", 1))
-        elif reward < 0:
-            self._queue.put(("maxdmg", 0))
+    def post_match(self, room: BattleRoom):
+        if self.queue is not None:
+            datum = room.get_reward()
+            reward = datum["reward"]
+
+            if reward > 0:
+                self.queue.put(("maxdmg", 1))
+            elif reward < 0:
+                self.queue.put(("maxdmg", 0))
