@@ -23,7 +23,7 @@ class Actor(ABC):
     def choose_action(self):
         raise NotImplementedError
 
-    def store_reward(self, room: BattleRoom, pid: int, reward: float = None):
+    def post_match(self, room: BattleRoom):
         pass
 
     def get_vectorized_state(
