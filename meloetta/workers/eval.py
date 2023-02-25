@@ -174,6 +174,5 @@ class EvalWorker:
                     break
 
             await player.client.leave_battle(player.room.battle_tag)
-            datum = player.room.get_reward()
-            actor.store_reward(player.room, datum["pid"], datum["reward"])
+            actor.post_match(player.room)
             player.reset()
