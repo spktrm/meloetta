@@ -12,15 +12,15 @@ Meloetta is a Pokémon Battle Client for interacting with Pokémon Showdown writ
 
 The client works by reading messages from an asyncio stream and forwarding these to the javascript client battle object with PyMiniRacer. This concept was taken from [metagrok](https://github.com/yuzeh/metagrok).
 
-As is, the necessary javascript source files come with the pip install. Whenever Pokemon Showdown Client releases an update, the client code can also be automatically updated from the source.
+Also, I have taken asyncio code from [pmariglia](https://github.com/pmariglia/showdown).
 
-I have taken asyncio code directly from [pmariglia](https://github.com/pmariglia/showdown).
+As is, the necessary javascript source files come with the pip install. Whenever Pokemon Showdown Client releases an update, the client code can also be automatically updated from the source.
 
 # Quickstart
 
 Make sure you have a localhost Pokemon Showdown Server running.
 
-Then, see the code in [test.py](https://github.com/spktrm/meloetta/blob/main/test.py)
+Then, see the code in [test.py](https://github.com/spktrm/meloetta/blob/main/meloetta/frameworks/nash_ketchum/train.py)
 
 # Manual Sync (Optional)
 
@@ -39,11 +39,13 @@ node pokemon-showdown-client/build-tools/build-learnsets
 
 Then finally run `extract.py` from the main directory. This will copy over the necessary source files.
 
+# Defining Actors
+
 # Example Output
 
-Below is an example of the state of the game that is collected. 
+Below is an example of the state of the game that is collected.
 
-**NOTE:** there are `{ "$ref": "$" }` scattered throughout the dictionary object. These are circular references found in the javascript code. I have logic that recontstructs the ciruclar references, but it impossible to show here
+**NOTE:** there are `{ "$ref": "$" }` scattered throughout the dictionary object. These are circular references found in the javascript object. I have logic that recontstructs the ciruclar references, but it impossible to show here
 
 ## State
 ```json
