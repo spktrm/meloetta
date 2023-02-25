@@ -31,7 +31,10 @@ const Items = {
     abilityshield: {
         name: "Ability Shield",
         spritenum: 0,
+        // TODO
         ignoreKlutz: true,
+        // Neutralizing Gas protection implemented in Pokemon.ignoringAbility() within sim/pokemon.ts
+        // and in Neutralizing Gas itself within data/abilities.ts
         onSetAbility(ability, target, source, effect) {
             if (
                 effect &&
@@ -43,6 +46,7 @@ const Items = {
             this.add("-block", target, "item: Ability Shield");
             return null;
         },
+        // Mold Breaker protection implemented in Battle.suppressingAbility() within sim/battle.ts
         num: 1881,
         gen: 9,
     },
@@ -96,6 +100,7 @@ const Items = {
     adamantcrystal: {
         name: "Adamant Crystal",
         spritenum: 4,
+        // TODO
         onBasePowerPriority: 15,
         onBasePower(basePower, user, target, move) {
             if (
@@ -146,24 +151,8 @@ const Items = {
         fling: {
             basePower: 30,
         },
-        onBoostPriority: 1,
-        onBoost(boost, target) {
-            target.itemState.lastAtk = target.boosts["atk"];
-        },
         onAfterBoost(boost, target, source, effect) {
-            const noAtkChange =
-                boost.atk < 0 &&
-                target.boosts["atk"] === -6 &&
-                target.itemState.lastAtk === -6;
-            const noContraryAtkChange =
-                boost.atk > 0 &&
-                target.boosts["atk"] === 6 &&
-                target.itemState.lastAtk === 6;
-            if (
-                target.boosts["spe"] === 6 ||
-                noAtkChange ||
-                noContraryAtkChange
-            ) {
+            if (target.boosts["spe"] === 6 || boost.atk === 0) {
                 return;
             }
             if (effect.name === "Intimidate") {
@@ -250,6 +239,7 @@ const Items = {
                 this.add("-item", target, "Air Balloon");
             }
         },
+        // airborneness implemented in sim/pokemon.js:Pokemon#isGrounded
         onDamagingHit(damage, target, source, move) {
             this.add("-enditem", target, "Air Balloon");
             target.item = "";
@@ -429,6 +419,7 @@ const Items = {
     auspiciousarmor: {
         name: "Auspicious Armor",
         spritenum: 0,
+        // TODO
         num: 2344,
         gen: 9,
     },
@@ -566,6 +557,7 @@ const Items = {
         fling: {
             basePower: 30,
         },
+        // implemented in statuses
         num: 544,
         gen: 5,
     },
@@ -686,12 +678,14 @@ const Items = {
         fling: {
             basePower: 80,
         },
+        // Item activation located in scripts.js
         num: 1121,
         gen: 8,
     },
     boosterenergy: {
         name: "Booster Energy",
         spritenum: 0,
+        // TODO
         onUpdate(pokemon) {
             if (pokemon.transformed) return;
             if (this.queue.peek(true)?.choice === "runSwitch") return;
@@ -1134,7 +1128,8 @@ const Items = {
     clearamulet: {
         name: "Clear Amulet",
         spritenum: 0,
-        onBoost(boost, target, source, effect) {
+        // TODO
+        onTryBoost(boost, target, source, effect) {
             if (source && target === source) return;
             let showMsg = false;
             let i;
@@ -1254,6 +1249,7 @@ const Items = {
             basePower: 10,
         },
         spritenum: 0,
+        // TODO
         onModifySecondaries(secondaries) {
             this.debug("Covert Cloak prevent secondary");
             return secondaries.filter(
@@ -2590,12 +2586,14 @@ const Items = {
         fling: {
             basePower: 90,
         },
+        // implemented in statuses
         num: 286,
         gen: 4,
     },
     griseouscore: {
         name: "Griseous Core",
         spritenum: 180,
+        // TODO
         onBasePowerPriority: 15,
         onBasePower(basePower, user, target, move) {
             if (
@@ -2775,6 +2773,7 @@ const Items = {
         },
         num: 1120,
         gen: 8,
+        // Hazard Immunity implemented in moves.ts
     },
     helixfossil: {
         name: "Helix Fossil",
@@ -2996,6 +2995,7 @@ const Items = {
                 return;
             if (move.type === "Ground" && target.hasType("Flying")) return 0;
         },
+        // airborneness negation implemented in sim/pokemon.js:Pokemon#isGrounded
         onModifySpe(spe) {
             return this.chainModify(0.5);
         },
@@ -3469,12 +3469,15 @@ const Items = {
         fling: {
             basePower: 30,
         },
+        // implemented in the corresponding thing
         num: 269,
         gen: 4,
     },
     loadeddice: {
         name: "Loaded Dice",
         spritenum: 0,
+        // TODO
+        // partially implemented in sim/battle-actions.ts:BattleActions#hitStepMoveHitLoop
         onModifyMove(move) {
             if (move.multiaccuracy) {
                 delete move.multiaccuracy;
@@ -3608,6 +3611,7 @@ const Items = {
     lustrousglobe: {
         name: "Lustrous Globe",
         spritenum: 265,
+        // TODO
         onBasePowerPriority: 15,
         onBasePower(basePower, user, target, move) {
             if (
@@ -3771,6 +3775,7 @@ const Items = {
     maliciousarmor: {
         name: "Malicious Armor",
         spritenum: 0,
+        // TODO
         num: 1861,
         gen: 9,
     },
@@ -4186,6 +4191,7 @@ const Items = {
             basePower: 10,
         },
         spritenum: 0,
+        // TODO
         onFoeAfterBoost(boost, target, source, effect) {
             if (
                 effect?.name === "Opportunist" ||
@@ -4909,6 +4915,7 @@ const Items = {
         fling: {
             basePower: 30,
         },
+        // protective effect handled in Battle#checkMoveMakesContact
         num: 880,
         gen: 7,
     },
@@ -4995,6 +5002,7 @@ const Items = {
     punchingglove: {
         name: "Punching Glove",
         spritenum: 0,
+        // TODO
         onBasePowerPriority: 23,
         onBasePower(basePower, attacker, defender, move) {
             if (move.flags["punch"]) {
@@ -6224,6 +6232,7 @@ const Items = {
     strangeball: {
         name: "Strange Ball",
         spritenum: 303,
+        // TODO
         num: 1785,
         gen: 8,
         isPokeball: true,
@@ -7498,6 +7507,7 @@ const Items = {
         fling: {
             basePower: 60,
         },
+        // Partially implemented in Pokemon.effectiveWeather() in sim/pokemon.ts
         onStart(pokemon) {
             if (!pokemon.ignoringItem()) return;
             if (
@@ -7887,6 +7897,7 @@ const Items = {
         num: 276,
         gen: 4,
     },
+    // Gen 2 items
     berserkgene: {
         name: "Berserk Gene",
         spritenum: 388,
@@ -8170,6 +8181,7 @@ const Items = {
         gen: 2,
         isNonstandard: "Past",
     },
+    // CAP items
     crucibellite: {
         name: "Crucibellite",
         spritenum: 577,

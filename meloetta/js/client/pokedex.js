@@ -593,14 +593,18 @@ const Pokedex = {
             "Pikachu-Kalos",
             "Pikachu-Alola",
             "Pikachu-Partner",
+            // Gen 7 formes
             "Pikachu-Starter",
+            // forme 8 in LGPE
             "Pikachu-World",
+            // Gen 8 forme (indexed as Pikachu 9 in datamine)
             "Pikachu-Rock-Star",
             "Pikachu-Belle",
             "Pikachu-Pop-Star",
             "Pikachu-PhD",
             "Pikachu-Libre",
             "Pikachu-Cosplay",
+            // formes 1-6 from Gen 6
         ],
         canGigantamax: "G-Max Volt Crash",
     },
@@ -2847,23 +2851,23 @@ const Pokedex = {
         weightkg: 88.4,
         color: "Brown",
         otherFormes: [
-            "Tauros-Paldea",
-            "Tauros-Paldea-Fire",
-            "Tauros-Paldea-Water",
+            "Tauros-Paldea-Combat",
+            "Tauros-Paldea-Blaze",
+            "Tauros-Paldea-Aqua",
         ],
         formeOrder: [
             "Tauros",
-            "Tauros-Paldea",
-            "Tauros-Paldea-Fire",
-            "Tauros-Paldea-Water",
+            "Tauros-Paldea-Combat",
+            "Tauros-Paldea-Blaze",
+            "Tauros-Paldea-Aqua",
         ],
         eggGroups: ["Field"],
     },
-    taurospaldea: {
+    taurospaldeacombat: {
         num: 128,
-        name: "Tauros-Paldea",
+        name: "Tauros-Paldea-Combat",
         baseSpecies: "Tauros",
-        forme: "Paldea",
+        forme: "Paldea-Combat",
         types: ["Fighting"],
         gender: "M",
         baseStats: { hp: 75, atk: 110, def: 105, spa: 30, spd: 70, spe: 100 },
@@ -2873,11 +2877,11 @@ const Pokedex = {
         color: "Black",
         eggGroups: ["Field"],
     },
-    taurospaldeafire: {
+    taurospaldeablaze: {
         num: 128,
-        name: "Tauros-Paldea-Fire",
+        name: "Tauros-Paldea-Blaze",
         baseSpecies: "Tauros",
-        forme: "Paldea-Fire",
+        forme: "Paldea-Blaze",
         types: ["Fighting", "Fire"],
         gender: "M",
         baseStats: { hp: 75, atk: 110, def: 105, spa: 30, spd: 70, spe: 100 },
@@ -2887,11 +2891,11 @@ const Pokedex = {
         color: "Black",
         eggGroups: ["Field"],
     },
-    taurospaldeawater: {
+    taurospaldeaaqua: {
         num: 128,
-        name: "Tauros-Paldea-Water",
+        name: "Tauros-Paldea-Aqua",
         baseSpecies: "Tauros",
-        forme: "Paldea-Water",
+        forme: "Paldea-Aqua",
         types: ["Fighting", "Water"],
         gender: "M",
         baseStats: { hp: 75, atk: 110, def: 105, spa: 30, spd: 70, spe: 100 },
@@ -12059,6 +12063,7 @@ const Pokedex = {
         evoLevel: 36,
         eggGroups: ["Water 1"],
         otherFormes: ["Greninja-Ash"],
+        // non-activated Greninja-Ash is forme 1, but PS does not currently distinguish it
         formeOrder: ["Greninja", "Greninja", "Greninja-Ash"],
     },
     greninjaash: {
@@ -12153,6 +12158,7 @@ const Pokedex = {
         color: "Black",
         evos: ["Spewpa"],
         eggGroups: ["Bug"],
+        // TODO: Scatterbug technically has the same number of formes as Vivillon
     },
     spewpa: {
         num: 665,
@@ -12167,11 +12173,13 @@ const Pokedex = {
         evoLevel: 9,
         evos: ["Vivillon", "Vivillon-Fancy"],
         eggGroups: ["Bug"],
+        // TODO: Spewpa technically has the same number of formes as Vivillon
     },
     vivillon: {
         num: 666,
         name: "Vivillon",
         baseForme: "Meadow",
+        // TODO: actual base forme is Icy Snow, not Meadow
         types: ["Bug", "Flying"],
         baseStats: { hp: 80, atk: 52, def: 50, spa: 90, spd: 50, spe: 89 },
         abilities: { 0: "Shield Dust", 1: "Compound Eyes", H: "Friend Guard" },
@@ -12209,6 +12217,7 @@ const Pokedex = {
             "Vivillon-Garden",
             "Vivillon-Elegant",
             "Vivillon",
+            // Meadow
             "Vivillon-Modern",
             "Vivillon-Marine",
             "Vivillon-Archipelago",
@@ -13162,6 +13171,7 @@ const Pokedex = {
         num: 716,
         name: "Xerneas",
         baseForme: "Active",
+        // Neutral is technically the base, but it can't be used in battle
         types: ["Fairy"],
         gender: "N",
         baseStats: { hp: 126, atk: 131, def: 95, spa: 131, spd: 98, spe: 99 },
@@ -13215,6 +13225,7 @@ const Pokedex = {
         tags: ["Restricted Legendary"],
         eggGroups: ["Undiscovered"],
         otherFormes: ["Zygarde-10%", "Zygarde-Complete"],
+        // forme 2 = 10% with Power Constructor ,forme 3 = 50% with Power Construct
         formeOrder: [
             "Zygarde",
             "Zygarde-10%",
@@ -13758,6 +13769,7 @@ const Pokedex = {
         evos: ["Lycanroc", "Lycanroc-Midnight", "Lycanroc-Dusk"],
         eggGroups: ["Field"],
         formeOrder: ["Rockruff", "Rockruff"],
+        // TODO: Rockruff-Dusk
     },
     lycanroc: {
         num: 745,
@@ -14561,6 +14573,7 @@ const Pokedex = {
             "Minior-Violet",
         ],
         formeOrder: [
+            // All of the colored Minior Meteor formes (unsupported by PS) are numbers 0-6
             "Minior-Meteor",
             "Minior-Meteor",
             "Minior-Meteor",
@@ -17853,7 +17866,7 @@ const Pokedex = {
         num: 955,
         name: "Flittle",
         types: ["Psychic"],
-        baseStats: { hp: 30, atk: 35, def: 30, spa: 55, spd: 40, spe: 75 },
+        baseStats: { hp: 30, atk: 35, def: 30, spa: 55, spd: 30, spe: 75 },
         abilities: { 0: "Anticipation", 1: "Frisk", H: "Speed Boost" },
         heightm: 0.2,
         weightkg: 1.5,
@@ -18729,7 +18742,7 @@ const Pokedex = {
         weightkg: 7,
         color: "Gray",
         evos: ["Tactite"],
-        eggGroups: ["Undiscovered"],
+        eggGroups: ["Mineral"],
         gen: 4,
     },
     tactite: {
@@ -18745,7 +18758,7 @@ const Pokedex = {
         prevo: "Rebble",
         evoLevel: 28,
         evos: ["Stratagem"],
-        eggGroups: ["Undiscovered"],
+        eggGroups: ["Mineral"],
         gen: 4,
     },
     stratagem: {
@@ -18760,7 +18773,7 @@ const Pokedex = {
         color: "Gray",
         prevo: "Tactite",
         evoType: "trade",
-        eggGroups: ["Undiscovered"],
+        eggGroups: ["Mineral"],
         gen: 4,
     },
     privatyke: {
@@ -19600,6 +19613,7 @@ const Pokedex = {
         eggGroups: ["Field"],
         gen: 8,
     },
+    // NOTE: PokeStar "formes" are not actually formes and thus do not have a formeOrder
     pokestarsmeargle: {
         num: -5e3,
         name: "Pokestar Smeargle",

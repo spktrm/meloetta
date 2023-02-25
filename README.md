@@ -12,15 +12,15 @@ Meloetta is a Pokémon Battle Client for interacting with Pokémon Showdown writ
 
 The client works by reading messages from an asyncio stream and forwarding these to the javascript client battle object with PyMiniRacer. This concept was taken from [metagrok](https://github.com/yuzeh/metagrok).
 
-As is, the necessary javascript source files come with the pip install. Whenever Pokemon Showdown Client releases an update, the client code can also be automatically updated from the source.
+Also, I have taken asyncio code from [pmariglia](https://github.com/pmariglia/showdown).
 
-I have taken asyncio code directly from [pmariglia](https://github.com/pmariglia/showdown).
+As is, the necessary javascript source files come with the pip install. Whenever Pokemon Showdown Client releases an update, the client code can also be automatically updated from the source.
 
 # Quickstart
 
 Make sure you have a localhost Pokemon Showdown Server running.
 
-Then, see the code in [test.py](https://github.com/spktrm/meloetta/blob/main/test.py)
+Then, see the code in [test.py](https://github.com/spktrm/meloetta/blob/main/meloetta/frameworks/nash_ketchum/train.py)
 
 # Manual Sync (Optional)
 
@@ -39,11 +39,90 @@ node pokemon-showdown-client/build-tools/build-learnsets
 
 Then finally run `extract.py` from the main directory. This will copy over the necessary source files.
 
+# Defining Actors
+
+Actors are classes to are used to interact with the state of the game. They usually parameterize some vectorized representation of the game and produce a policy distribution over discrete actions and/or some estimation of the value of the state of the game.
+
+## Inheritance
+
+All actors in herit from the base Actor class
+
+```python
+from meloetta.actors.base import Actor
+```
+
+## `choose_action`
+
+All actors must define function `choose_action`. This function takes in 3 variables:
+- `state`: A dictionary mapping of strings to torch tensors. A vectorized representation of the game before passing through the neural network
+- `room`: A python object that is used to interface with the headless javascript client. This is important for accessing other hidden javascript variables from the client by using the `room.get_js_attr` function and also accessing `room.battle_tag`
+- `choices`: A dictionary mapping choice indices to functions that are applied to the `room` object. These functions are equivalent to those that are executed in the pokemon showdown client in the browser when selecting a move/switch. **Note**: Some values in this dictionary can be None i.e. less than 6 pokemon or less than 4 moves.
+
+This function must return a tuple of `func`, `args`, `kwargs`. This tuple is simply one of the values from provided `choices` dictionary and is equivalent to. In the [random actor](https://github.com/spktrm/meloetta/blob/main/meloetta/frameworks/random/train.py) implementation, this function is as expected:
+
+```python
+def choose_action(
+    self,
+    state: State,
+    room: BattleRoom,
+    choices: Choices,
+):
+    random_key = random.choice([key for key, value in choices.items() if value])
+    _, (func, args, kwargs) = random.choice(list(choices[random_key].items()))
+    return func, args, kwargs
+```
+
+## Optional: `post_match`
+
+There is an optional `post_match` function to define, which is called after each match. It takes a singular argument, `room`. This can be used to append the reward via `room.get_reward()` to the end of trajectory for insertion into your replay buffer of choice
+
+# Self-Play
+
+One of the most important aspects to finding an optimal policy through reinforcement learning is through self-play.
+
+To use your agents in self play, do so as follows:
+
+```python
+from meloetta.workers import SelfPlayWorker
+...
+worker = SelfPlayWorker(
+    worker_index=0,
+    num_players=2,  # 2 is players per worker
+    battle_format="gen9randombattle",
+    team="null",
+    actor_fn=YOUR_ACTOR_CLASS,
+    actor_args=(), # Optional args to be called when instantiating your actor
+    actor_kwargs={}, # Optional kwargs to be called when instantiating your actor
+)
+worker.run()
+```
+
+# Evaluation
+
+You can evaluate your agent against the two baseline actors provided, random and max damage.
+
+This is down as follows:
+
+```python
+from meloetta.workers import EvalWorker
+from meloetta.frameworks.random import RandomActor
+...
+worker = EvalWorker(
+    battle_format="gen9randombattle",
+    team="null",
+    eval_actor_fn=YOUR_ACTOR_CLASS,
+    eval_actor_args=(), # Optional args to be called when instantiating your actor
+    eval_actor_kwargs={}, # Optional kwargs to be called when instantiating your actor
+    baseline_actor_fn=RandomActor,
+)
+worker.run()
+```
+
 # Example Output
 
-Below is an example of the state of the game that is collected. 
+Below is an example of the state of the game that is collected.
 
-**NOTE:** there are `{ "$ref": "$" }` scattered throughout the dictionary object. These are circular references found in the javascript code. I have logic that recontstructs the ciruclar references, but it impossible to show here
+**NOTE:** there are `{ "$ref": "$" }` scattered throughout the dictionary object. These are circular references found in the javascript object. I have logic that recontstructs the ciruclar references, but it impossible to show here
 
 ## State
 ```json

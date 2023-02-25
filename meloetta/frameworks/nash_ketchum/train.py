@@ -61,29 +61,39 @@ def main(fpath: str = None):
         config=learner.get_config(),
     )
 
-    main_actor = NAshKetchumActor(learner.actor_model, learner.replay_buffer)
-
     eval_queue = mp.Queue()
-    random_actor = RandomActor(eval_queue)
-    maxdmg_actor = MaxDamageActor(main_actor._model.gen, eval_queue)
+
+    main_actor = NAshKetchumActor
+    random_actor = RandomActor
+    maxdmg_actor = MaxDamageActor
 
     procs: List[mp.Process] = []
 
     if config.eval:
         evals = [
-            ("eval0", "random", random_actor),
-            ("eval1", "maxdmg", maxdmg_actor),
+            ("eval0", "random", random_actor, (eval_queue,)),
+            ("eval1", "maxdmg", maxdmg_actor, (config.gen, eval_queue)),
         ]
-        for i, (eval_username, opponent_username, opponent_actor) in enumerate(evals):
+        for i, (
+            eval_username,
+            opponent_username,
+            opponent_actor,
+            opponent_actor_args,
+        ) in enumerate(evals):
             worker = EvalWorker(
                 eval_username=eval_username,
                 opponent_username=opponent_username,
                 battle_format=learner.config.battle_format,
                 team=learner.config.team,
+                eval_actor_fn=main_actor,
+                eval_actor_kwargs={
+                    "model": learner.actor_model,
+                },
+                baseline_actor_fn=opponent_actor,
+                baseline_actor_args=opponent_actor_args,
             )
             process = mp.Process(
                 target=worker.run,
-                args=(main_actor, opponent_actor),
                 name=repr(worker) + str(i),
             )
             process.start()
@@ -104,11 +114,15 @@ def main(fpath: str = None):
             num_players=2,  # 2 is players per worker
             battle_format=learner.config.battle_format,
             team=learner.config.team,
+            actor_fn=main_actor,
+            actor_kwargs={
+                "model": learner.actor_model,
+                "replay_buffer": learner.replay_buffer,
+            },
         )
 
         process = mp.Process(
             target=worker.run,
-            args=(main_actor,),
             name=repr(worker) + str(i),
         )
         process.start()

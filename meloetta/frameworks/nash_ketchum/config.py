@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Any, Sequence
 
 from meloetta.frameworks.nash_ketchum.model import config
+from meloetta.frameworks.nash_ketchum import utils
 
 
 def is_jsonable(x):
@@ -67,6 +68,8 @@ class NAshKetchumConfig:
     # battle_format = "gen8doublesou"
     # battle_format: str = "gen3randombattle"
     # battle_format = "gen9doublesou"
+
+    gen, format = utils.get_gen_and_gametype(battle_format)
 
     team: str = "null"
     # team = "charizard||heavydutyboots|blaze|furyswipes,scaleshot,toxic,roost||85,,85,85,85,85||,0,,,,||88|"

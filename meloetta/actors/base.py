@@ -1,8 +1,15 @@
+import torch
 import traceback
 
 from abc import ABC, abstractmethod
 
-from typing import Any
+from typing import Any, Dict
+
+from meloetta.vector import VectorizedState
+from meloetta.room import BattleRoom
+
+
+Battle = Dict[str, Dict[str, Dict[str, Any]]]
 
 
 class Actor(ABC):
@@ -16,7 +23,10 @@ class Actor(ABC):
     def choose_action(self):
         raise NotImplementedError
 
-    def store_reward(
-        self, room, pid, reward: float = None, store_transition: bool = True
-    ):
+    def post_match(self, room: BattleRoom):
         pass
+
+    def get_vectorized_state(
+        self, room: BattleRoom, battle: Battle
+    ) -> Dict[str, torch.Tensor]:
+        return VectorizedState.from_battle(room, battle).to_dict()
