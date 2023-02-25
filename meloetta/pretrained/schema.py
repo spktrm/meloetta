@@ -320,7 +320,7 @@ class Abilitydex(Dex):
 
 
 def main():
-    # os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
+    os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
 
     schema = {}
     for gen in range(1, 10):
