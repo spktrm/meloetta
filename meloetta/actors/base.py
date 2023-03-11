@@ -17,6 +17,8 @@ class Actor(ABC):
         try:
             return self.choose_action(*args, **kwargs)
         except Exception as e:
+            room = args[1]
+            print(room.battle_tag)
             print(traceback.format_exc())
 
     @abstractmethod

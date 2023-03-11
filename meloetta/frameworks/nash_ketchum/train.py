@@ -150,7 +150,7 @@ def main(fpath: str = None):
 if __name__ == "__main__":
     mp.set_start_method("spawn")
 
-    # fpath = "cpkts/cpkt-09000.tar"
-    # main(fpath)
+    fpath = "cpkts/cpkt-02000.tar"
+    main(fpath)
 
     main()

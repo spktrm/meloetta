@@ -30,12 +30,13 @@ class PolicyHeads(nn.Module):
 
         self.action_type_head = ActionTypeHead(config.action_type_head_config)
         self.move_head = MoveHead(config.move_head_config)
+        self.switch_head = SwitchHead(config.switch_head_config)
 
         if gen == 8:
             self.max_move_head = MaxMoveHead(config.move_head_config)
 
-        self.switch_head = SwitchHead(config.switch_head_config)
-        self.flag_head = FlagsHead(config.flag_head_config)
+        if gen >= 6:
+            self.flag_head = FlagsHead(config.flag_head_config)
 
         # if gametype != "singles":
         #     self.target_head = PolicyHead(config.target_head_config)
@@ -56,7 +57,6 @@ class PolicyHeads(nn.Module):
             at_autoregressive_embedding,
         ) = self.action_type_head(
             state_emb,
-            encoder_output.scalar_emb,
             state["action_type_mask"],
         )
 
@@ -84,16 +84,21 @@ class PolicyHeads(nn.Module):
             state["switch_mask"],
         )
 
-        (
-            flag_logits,
-            flag_policy,
-            flag_index,
-            autoregressive_embedding,
-        ) = self.flag_head(
-            action_type_index,
-            autoregressive_embedding,
-            state["flag_mask"],
-        )
+        if self.gen >= 6:
+            (
+                flag_logits,
+                flag_policy,
+                flag_index,
+                autoregressive_embedding,
+            ) = self.flag_head(
+                action_type_index,
+                autoregressive_embedding,
+                state["flag_mask"],
+            )
+        else:
+            flag_logits = None
+            flag_policy = None
+            flag_index = None
 
         if self.gen == 8:
             max_move_logits, max_move_policy, max_move_index = self.max_move_head(
