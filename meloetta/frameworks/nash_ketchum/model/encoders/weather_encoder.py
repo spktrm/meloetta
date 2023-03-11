@@ -60,6 +60,6 @@ class WeatherEncoder(nn.Module):
             ),
             dim=-1,
         )
-        weather_emb = F.relu(self.lin(weather_emb))
+        weather_emb = self.lin(weather_emb)
 
         return weather_emb

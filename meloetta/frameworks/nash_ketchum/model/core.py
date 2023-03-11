@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
-
-from torch.distributions.one_hot_categorical import OneHotCategoricalStraightThrough
+import torch.nn.functional as F
 
 from typing import Tuple, List
 
 from meloetta.frameworks.nash_ketchum.model.interfaces import EncoderOutput
 
 from meloetta.frameworks.nash_ketchum.model import config
+from meloetta.frameworks.nash_ketchum.model.utils import Resblock
 
 
 def script_lnlstm(
@@ -136,11 +136,16 @@ class Core(nn.Module):
         super().__init__()
         self.config = config
 
-        self.lstm = script_lnlstm(
-            config.raw_embedding_dim,
-            config.hidden_dim,
-            num_layers=config.num_layers,
+        self.project_in = nn.Linear(config.raw_embedding_dim, config.hidden_dim)
+        self.lstm = nn.Sequential(
+            *[Resblock(config.hidden_dim, use_layer_norm=True) for _ in range(4)]
         )
+
+        # self.lstm = script_lnlstm(
+        #     config.raw_embedding_dim,
+        #     config.hidden_dim,
+        #     num_layers=config.num_layers,
+        # )
 
     def initial_state(self, batch_size: int) -> Tuple[torch.Tensor, torch.Tensor]:
         return tuple(
@@ -165,6 +170,8 @@ class Core(nn.Module):
             dim=-1,
         )
 
-        state_embedding, hidden_state = self.lstm(state_embedding, hidden_state)
+        state_embedding = self.project_in(state_embedding)
+        # state_embedding, hidden_state = self.lstm(state_embedding, hidden_state)
+        state_embedding = self.lstm(state_embedding)
 
         return state_embedding, hidden_state

@@ -240,6 +240,14 @@ class NAshKetchumModel(nn.Module):
         else:
             max_move_log_policy = None
 
+        if self.gen >= 6:
+            flag_log_policy = _log_policy(
+                logits.flag_logits,
+                state["flag_mask"],
+            )
+        else:
+            flag_log_policy = None
+
         return LogPolicy(
             action_type_log_policy=_log_policy(
                 logits.action_type_logits,
@@ -249,15 +257,12 @@ class NAshKetchumModel(nn.Module):
                 logits.move_logits,
                 state["move_mask"],
             ),
-            max_move_log_policy=max_move_log_policy,
             switch_log_policy=_log_policy(
                 logits.switch_logits,
                 state["switch_mask"],
             ),
-            flag_log_policy=_log_policy(
-                logits.flag_logits,
-                state["flag_mask"],
-            ),
+            max_move_log_policy=max_move_log_policy,
+            flag_log_policy=flag_log_policy,
             target_log_policy=target_log_policy,
         )
 
@@ -294,6 +299,8 @@ class NAshKetchumModel(nn.Module):
                         data = choices["max_moves"]
                     elif flag_index == 4:
                         data = choices["tera_moves"]
+                    else:
+                        data = choices["moves"]
                 else:
                     data = None
 

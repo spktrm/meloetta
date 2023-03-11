@@ -1,3 +1,4 @@
+import json
 import warnings
 
 try:
@@ -270,6 +271,15 @@ Battle = Dict[str, Dict[str, Dict[str, Any]]]
 LAST_MOVES = set()
 
 
+def hashify_pokemon(pokemon: Dict[str, Any]):
+    info = pokemon["name"]
+    info += pokemon["ident"]
+    info += pokemon["speciesForme"]
+    info += pokemon["details"]
+    info += pokemon["searchid"]
+    return hash(info)
+
+
 class VectorizedState:
     def __init__(self, room: BattleRoom, battle: Battle):
         self.room = room
@@ -431,20 +441,27 @@ class VectorizedState:
         # that are affected by -replace
         # There could be up to 5 extra mons generated from zoroark alone
         # TODO: account for zororak duplicates somehow...
+        # active_pokemon = {}
+        # for pokemon in reversed(side["active"]):
+        #     if pokemon is not None:
+        #         active_pokemon[hashify_pokemon(pokemon)] = pokemon
+
+        # reserve_pokemon = {}
+        # for pokemon in reversed(side["pokemon"]):
+        #     if pokemon is not None:
+        #         pokemon_hash = hashify_pokemon(pokemon)
+        #         if pokemon_hash not in active_pokemon:
+        #             reserve_pokemon[pokemon_hash] = pokemon
+
+        # active_pokemon = list(active_pokemon.values())
+        # reserve_pokemon = list(reserve_pokemon.values())[:6]
+
         pokemon = {p["ident"]: p for p in reversed(side["pokemon"])}
         pokemon = list(reversed(pokemon.values()))
 
-        active_idents = list(set([p["ident"] for p in side["active"] if p is not None]))
-        reserve_idents = list(
-            set([p["ident"] for p in pokemon if p["ident"] not in active_idents])
-        )
-
-        active_pokemon = list(
-            {p["ident"]: p for p in side["active"] if p in active_idents}.values()
-        )
-        reserve_pokemon = list(
-            {p["ident"]: p for p in side["pokemon"] if p in reserve_idents}.values()
-        )
+        active_pokemon = [p for p in side["active"] if p is not None]
+        active_idents = [p["ident"] for p in active_pokemon]
+        reserve_pokemon = [p for p in pokemon if p["ident"] not in active_idents]
 
         active = [
             self._vectorize_public_active_pokemon(side_id, p) for p in active_pokemon

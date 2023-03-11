@@ -156,19 +156,19 @@ class Batch(NamedTuple):
 
 
 class Loss(NamedTuple):
-    action_type_policy_loss: float
-    move_policy_loss: float
-    max_move_policy_loss: float
-    switch_policy_loss: float
-    flag_policy_loss: float
-    target_policy_loss: float
+    action_type_policy_loss: float = 0
+    move_policy_loss: float = 0
+    max_move_policy_loss: float = 0
+    switch_policy_loss: float = 0
+    flag_policy_loss: float = 0
+    target_policy_loss: float = 0
 
-    action_type_value_loss: float
-    move_value_loss: float
-    max_move_value_loss: float
-    switch_value_loss: float
-    flag_value_loss: float
-    target_value_loss: float
+    action_type_value_loss: float = 0
+    move_value_loss: float = 0
+    max_move_value_loss: float = 0
+    switch_value_loss: float = 0
+    flag_value_loss: float = 0
+    target_value_loss: float = 0
 
     def to_log(self, batch: Batch):
         logs = {

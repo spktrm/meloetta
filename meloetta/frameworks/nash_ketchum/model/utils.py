@@ -95,11 +95,13 @@ class Resblock(nn.Module):
     ) -> None:
         super().__init__()
 
-        hiddens = [nn.ReLU(), nn.Linear(hidden_size, hidden_size)]
-        if use_layer_norm:
-            hiddens = [nn.LayerNorm(hidden_size)] + hiddens
-        layer = lambda: nn.Sequential(*hiddens)
-        self.layers = nn.ModuleList([layer() for _ in range(num_layers)])
+        layers = []
+        for _ in range(num_layers):
+            hiddens = [nn.ReLU(), nn.Linear(hidden_size, hidden_size)]
+            if use_layer_norm:
+                hiddens = [nn.LayerNorm(hidden_size)] + hiddens
+            layers.append(nn.Sequential(*hiddens))
+        self.layers = nn.ModuleList(layers)
 
     def forward(self, x: torch.Tensor):
         shortcut = x

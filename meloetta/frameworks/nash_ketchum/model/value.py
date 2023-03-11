@@ -22,6 +22,6 @@ class ValueHead(nn.Module):
     def forward(self, x: torch.Tensor):
         x = self.lin_in(x)
         for resblock in self.resblock_stack:
-            x = F.relu(resblock(x))
+            x = resblock(x)
         x = self.lin_out(x)
         return x

@@ -38,9 +38,9 @@ class NAshKetchumConfig:
     """Learning pararms"""
 
     # The batch size to use when learning/improving parameters.
-    batch_size: int = 32
+    batch_size: int = 16
     # The learning rate for `params`.
-    learning_rate: float = 5e-5
+    learning_rate: float = 3e-5
     # The config related to the ADAM optimizer used for updating `params`.
     adam: AdamConfig = AdamConfig()
     # All gradients values are clipped to [-clip_gradient, clip_gradient].
@@ -50,8 +50,14 @@ class NAshKetchumConfig:
 
     # RNaD algorithm configuration.
     # Entropy schedule configuration. See EntropySchedule class documentation.
-    entropy_schedule_repeats: Sequence[int] = (1,)
-    entropy_schedule_size: Sequence[int] = (50,)
+    entropy_schedule_repeats: Sequence[int] = (
+        # 20,
+        1,
+    )
+    entropy_schedule_size: Sequence[int] = (
+        50,
+        # 100,
+    )
     # The weight of the reward regularisation term in RNaD.
     eta_reward_transform: float = 0.2
     gamma: float = 1.0
