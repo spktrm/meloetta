@@ -74,7 +74,7 @@ for gen in TOKENIZED_SCHEMA:
     for dex_type in schema[gen]:
         for key, values in sorted(schema[gen][dex_type].items()):
             TOKENIZED_SCHEMA[gen][dex_type][key] = {
-                str(values): index for index, values in enumerate(values)
+                str(value): index for index, value in enumerate(values)
             }
 
 

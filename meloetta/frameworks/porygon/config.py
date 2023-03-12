@@ -70,9 +70,9 @@ class PorygonConfig:
     # team = "ceruledge||lifeorb|weakarmor|bitterblade,closecombat,shadowsneak,swordsdance||85,85,85,85,85,85||||82|,,,,,fighting]grafaiai||leftovers|prankster|encore,gunkshot,knockoff,partingshot||85,85,85,85,85,85||||86|,,,,,dark]greedent||sitrusberry|cheekpouch|bodyslam,psychicfangs,swordsdance,firefang||85,85,85,85,85,85||||88|,,,,,psychic]quaquaval||lifeorb|moxie|aquastep,closecombat,swordsdance,icespinner||85,85,85,85,85,85||||80|,,,,,fighting]flapple||lifeorb|hustle|gravapple,outrage,dragondance,suckerpunch||85,85,85,85,85,85||||84|,,,,,grass]pachirisu||assaultvest|voltabsorb|nuzzle,superfang,thunderbolt,uturn||85,85,85,85,85,85||||94|,,,,,flying"
 
     actor_device: str = "cpu"
-    learner_device: str = "cuda"
+    learner_device: str = "cpu"
 
-    debug_mode = False
+    debug_mode = True
 
     # This config will spawn 20 workers with 2 players each
     # for a total of 40 players, playing 20 games.
