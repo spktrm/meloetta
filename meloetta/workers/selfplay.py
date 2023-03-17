@@ -81,7 +81,9 @@ class SelfPlayWorker:
 
             turn = 0
             turns_since_last_move = expand_bt(torch.tensor(0))
-            actor = self.actor_fn(*self.actor_args, **self.actor_kwargs)
+            actor = self.actor_fn(
+                *self.actor_args, **self.actor_kwargs, username=username
+            )
 
             while True:
                 message = await player.client.receive_message()
