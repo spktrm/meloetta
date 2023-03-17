@@ -136,16 +136,16 @@ class Core(nn.Module):
         super().__init__()
         self.config = config
 
-        # self.project_in = nn.Linear(config.raw_embedding_dim, config.hidden_dim)
-        # self.resblock_stack = nn.Sequential(
-        #     *[Resblock(config.hidden_dim, use_layer_norm=True) for _ in range(4)]
-        # )
-
-        self.rnn = script_lnlstm(
-            config.raw_embedding_dim,
-            config.hidden_dim,
-            num_layers=config.num_layers,
+        self.project_in = nn.Linear(config.raw_embedding_dim, config.hidden_dim)
+        self.resblock_stack = nn.Sequential(
+            *[Resblock(config.hidden_dim, use_layer_norm=True) for _ in range(4)]
         )
+
+        # self.rnn = script_lnlstm(
+        #     config.raw_embedding_dim,
+        #     config.hidden_dim,
+        #     num_layers=config.num_layers,
+        # )
 
         # self.rnn = nn.GRU(
         #     input_size=config.raw_embedding_dim,
@@ -168,17 +168,15 @@ class Core(nn.Module):
     ):
         state_embedding = torch.cat(
             (
-                encoder_output.private_entity_emb,
-                encoder_output.public_entity_emb,
-                encoder_output.public_scalar_emb,
+                encoder_output.side_embedding,
                 encoder_output.weather_emb,
                 encoder_output.scalar_emb,
             ),
             dim=-1,
         )
 
-        # state_embedding = self.project_in(state_embedding)
-        # state_embedding = self.resblock_stack(state_embedding)
-        state_embedding, hidden_state = self.rnn(state_embedding, hidden_state)
+        state_embedding = self.project_in(state_embedding)
+        state_embedding = self.resblock_stack(state_embedding)
+        # state_embedding, hidden_state = self.rnn(state_embedding, hidden_state)
 
         return state_embedding, hidden_state

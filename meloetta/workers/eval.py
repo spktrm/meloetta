@@ -32,6 +32,7 @@ class EvalWorker:
         baseline_actor_fn: Type[Actor] = None,
         baseline_actor_args: Sequence[Any] = None,
         baseline_actor_kwargs: Mapping[str, Any] = None,
+        sleep: float = None,
     ):
         self.battle_format = battle_format
         self.team = team
@@ -51,6 +52,7 @@ class EvalWorker:
         self.baseline_actor_kwargs = (
             {} if baseline_actor_kwargs is None else baseline_actor_kwargs
         )
+        self.sleep = sleep
 
     def __repr__(self) -> str:
         return f"EvalWorker"
@@ -83,7 +85,9 @@ class EvalWorker:
         await barrier.wait()
 
         while True:  # 10 battles each player-player pair
-            await asyncio.sleep(2)
+            if self.sleep:
+                await asyncio.sleep(2)
+
             if player_index == 0:
                 await player.client.challenge_user(
                     self.opponent_username, self.battle_format, self.team

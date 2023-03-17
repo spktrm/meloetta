@@ -252,17 +252,15 @@ class PorygonModel(nn.Module):
             flag_log_policy = None
 
         return LogPolicy(
-            action_type_log_policy=_log_policy(
-                logits.action_type_logits,
-                state["action_type_mask"],
-            ),
-            move_log_policy=_log_policy(
-                logits.move_logits,
-                state["move_mask"],
-            ),
-            switch_log_policy=_log_policy(
-                logits.switch_logits,
-                state["switch_mask"],
+            action_log_policy=_log_policy(
+                logits.action_logits,
+                torch.cat(
+                    (
+                        state["move_mask"],
+                        state["switch_mask"],
+                    ),
+                    dim=-1,
+                ),
             ),
             max_move_log_policy=max_move_log_policy,
             flag_log_policy=flag_log_policy,
@@ -275,10 +273,11 @@ class PorygonModel(nn.Module):
         indices: Indices,
         choices: Optional[Dict[str, Any]] = None,
     ):
-        action_type_index = indices.action_type_index
-        move_index = indices.move_index
+        action_type_index = indices.action_index >= 4
+        move_index = indices.action_index
+        switch_index = indices.action_index - 4
+
         max_move_index = indices.max_move_index
-        switch_index = indices.switch_index
         flag_index = indices.flag_index
         target_index = indices.target_index
 

@@ -35,15 +35,17 @@ class WeatherEncoder(nn.Module):
     def forward(
         self,
         weather: torch.Tensor,
-        time_left: torch.Tensor,
-        min_time_left: torch.Tensor,
-        pseudo_weather: torch.Tensor,
+        pseudoweather: torch.Tensor,
     ):
-        weather_onehot = self.weather_onehot(weather + 1)
+        weather_token = weather[..., 0]
+        time_left = weather[..., 1]
+        min_time_left = weather[..., 2]
+
+        weather_onehot = self.weather_onehot(weather_token + 1)
         time_left_onehot = self.time_left_onehot(time_left)
         min_time_left_onehot = self.min_time_left_onehot(min_time_left)
 
-        pseudo_weather_x = pseudo_weather + 1
+        pseudo_weather_x = pseudoweather + 1
         pw_min_time_left = pseudo_weather_x[..., 0]
         pw_max_time_left = pseudo_weather_x[..., 1]
 
@@ -61,5 +63,4 @@ class WeatherEncoder(nn.Module):
             dim=-1,
         )
         weather_emb = self.lin(weather_raw)
-
-        return weather_emb, weather_raw
+        return weather_emb

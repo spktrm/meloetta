@@ -70,35 +70,50 @@ with open("meloetta/pretrained/schema.json", "r") as f:
 
 TOKENIZED_SCHEMA = deepcopy(schema)
 
+
+def to_id(value: Any):
+    if isinstance(value, str):
+        return "".join([c for c in value if c.isalnum()]).lower()
+    else:
+        return str(value)
+
+
 for gen in TOKENIZED_SCHEMA:
     for dex_type in schema[gen]:
         for key, values in sorted(schema[gen][dex_type].items()):
             TOKENIZED_SCHEMA[gen][dex_type][key] = {
-                str(value): index for index, value in enumerate(values)
+                to_id(value): index
+                for index, value in enumerate(values)
+                if to_id(value)
             }
 
 
 def get_type_token(gen: int, value: Any):
+    value = to_id(value)
     lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["movedex"]["type"]
     return lookup.get(value, -1)
 
 
 def get_species_token(gen: int, key: int, value: Any):
+    value = to_id(value)
     lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["pokedex"][key]
     return lookup.get(value, -1)
 
 
 def get_move_token(gen: int, key: int, value: Any):
+    value = to_id(value)
     lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["movedex"][key]
     return lookup.get(value, -1)
 
 
 def get_ability_token(gen: int, key: int, value: Any):
+    value = to_id(value)
     lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["abilitydex"][key]
     return lookup.get(value, -1)
 
 
 def get_item_token(gen: int, key: int, value: Any):
+    value = to_id(value)
     lookup = TOKENIZED_SCHEMA[f"gen{gen}"]["itemdex"][key]
     return lookup.get(value, -1)
 
@@ -129,11 +144,11 @@ TERRAIN = WSNC["terrain"]
 PSEUDOWEATHERS = {v: i for i, v in enumerate(PSEUDOWEATHERS + TERRAIN)}
 
 ITEM_EFFECTS = WSNC["item_effects"]
-ITEM_EFFECTS = {v: i for i, v in enumerate(ITEM_EFFECTS)}
+ITEM_EFFECTS = {v: i for i, v in enumerate(ITEM_EFFECTS) if v}
 
 
 SIDE_CONDITIONS = WSNC["side_conditions"]
-SIDE_CONDITIONS = {v: i for i, v in enumerate(SIDE_CONDITIONS)}
+SIDE_CONDITIONS = {v: i for i, v in enumerate(SIDE_CONDITIONS) if v}
 
 
 def get_item_effect_token(name: str):
@@ -185,23 +200,17 @@ def get_choice_token(name: str):
 
 
 _STATE_FIELDS = {
-    "player_id",
-    "private_reserve",
-    "public_n",
-    "public_total_pokemon",
-    "public_faint_counter",
-    "public_side_conditions",
-    "public_wisher",
-    "public_active",
-    "public_reserve",
-    "public_stealthrock",
-    "public_spikes",
-    "public_toxicspikes",
-    "public_stickyweb",
+    "sides",
+    "boosts",
+    "volatiles",
+    "side_conditions",
+    "pseudoweathers",
     "weather",
-    "weather_time_left",
-    "weather_min_time_left",
-    "pseudo_weather",
+    "wisher",
+    "turn",
+    "n",
+    "total_pokemon",
+    "faint_counter",
     "turn",
     "prev_choices",
     "choices_done",

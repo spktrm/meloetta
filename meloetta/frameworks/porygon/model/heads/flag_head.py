@@ -26,7 +26,7 @@ class FlagsHead(nn.Module):
 
     def forward(
         self,
-        action_type_index: torch.Tensor,
+        action_index: torch.Tensor,
         autoregressive_embedding: torch.Tensor,
         flag_mask: torch.Tensor,
     ):
@@ -41,7 +41,7 @@ class FlagsHead(nn.Module):
         projected_flag_embedding = self.proj_flag(flag_one_hot)
         projected_flag_embedding = projected_flag_embedding.view(T, B, -1)
 
-        valid_indices = action_type_index == 0
+        valid_indices = action_index < 4
         valid_indices = valid_indices.view(T, B, 1)
 
         return (

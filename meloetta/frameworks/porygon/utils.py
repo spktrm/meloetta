@@ -48,72 +48,48 @@ def get_buffer_specs(
         n_active = 1
 
     buffer_specs = {
-        "private_reserve": {
-            "size": (trajectory_length, 6, private_reserve_size),
+        "sides": {
+            "size": (trajectory_length, 3, 12, 32),
             "dtype": torch.int64,
         },
-        "public_n": {
-            "size": (trajectory_length, 2),
+        "boosts": {
+            "size": (trajectory_length, 2, 8),
             "dtype": torch.int64,
         },
-        "public_total_pokemon": {
-            "size": (trajectory_length, 2),
+        "volatiles": {
+            "size": (trajectory_length, 2, 113),
             "dtype": torch.int64,
         },
-        "public_faint_counter": {
-            "size": (trajectory_length, 2),
+        "side_conditions": {
+            "size": (trajectory_length, 2, 58),
             "dtype": torch.int64,
         },
-        "public_side_conditions": {
-            "size": (trajectory_length, 2, 18, 3),
-            "dtype": torch.int64,
-        },
-        "public_wisher": {
-            "size": (trajectory_length, 2),
-            "dtype": torch.int64,
-        },
-        "public_active": {
-            "size": (trajectory_length, 2, n_active, 158),
-            "dtype": torch.int64,
-        },
-        "public_reserve": {
-            "size": (trajectory_length, 2, 6, 37),
-            "dtype": torch.int64,
-        },
-        "public_stealthrock": {
-            "size": (trajectory_length, 2),
-            "dtype": torch.int64,
-        },
-        "public_spikes": {
-            "size": (trajectory_length, 2),
-            "dtype": torch.int64,
-        },
-        "public_toxicspikes": {
-            "size": (trajectory_length, 2),
-            "dtype": torch.int64,
-        },
-        "public_stickyweb": {
-            "size": (trajectory_length, 2),
+        "pseudoweathers": {
+            "size": (trajectory_length, 12, 2),
             "dtype": torch.int64,
         },
         "weather": {
-            "size": (trajectory_length,),
+            "size": (trajectory_length, 3),
             "dtype": torch.int64,
         },
-        "weather_time_left": {
-            "size": (trajectory_length,),
-            "dtype": torch.int64,
-        },
-        "weather_min_time_left": {
-            "size": (trajectory_length,),
-            "dtype": torch.int64,
-        },
-        "pseudo_weather": {
-            "size": (trajectory_length, 12, 2),
+        "wisher": {
+            "size": (trajectory_length, 2),
             "dtype": torch.int64,
         },
         "turn": {
             "size": (trajectory_length,),
+            "dtype": torch.int64,
+        },
+        "n": {
+            "size": (trajectory_length, 2),
+            "dtype": torch.int64,
+        },
+        "total_pokemon": {
+            "size": (trajectory_length, 2),
+            "dtype": torch.int64,
+        },
+        "faint_counter": {
+            "size": (trajectory_length, 2),
             "dtype": torch.int64,
         },
         "turns_since_last_move": {
@@ -178,16 +154,8 @@ def get_buffer_specs(
     # add policy...
     buffer_specs.update(
         {
-            "action_type_policy": {
-                "size": (trajectory_length, 3),
-                "dtype": torch.float32,
-            },
-            "move_policy": {
-                "size": (trajectory_length, 4),
-                "dtype": torch.float32,
-            },
-            "switch_policy": {
-                "size": (trajectory_length, 6),
+            "action_policy": {
+                "size": (trajectory_length, 10),
                 "dtype": torch.float32,
             },
             "flag_policy": {
@@ -200,15 +168,7 @@ def get_buffer_specs(
     # ...and indices
     buffer_specs.update(
         {
-            "action_type_index": {
-                "size": (trajectory_length,),
-                "dtype": torch.int64,
-            },
-            "move_index": {
-                "size": (trajectory_length,),
-                "dtype": torch.int64,
-            },
-            "switch_index": {
+            "action_index": {
                 "size": (trajectory_length,),
                 "dtype": torch.int64,
             },

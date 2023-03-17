@@ -2,7 +2,6 @@ from meloetta.frameworks.porygon.model.encoder import Encoder
 from meloetta.frameworks.porygon.model.policy import PolicyHeads
 from meloetta.frameworks.porygon.model.core import Core
 from meloetta.frameworks.porygon.model.value import ValueHead
-from meloetta.frameworks.porygon.model.heads.action_type_head import ActionTypeHead
 from meloetta.frameworks.porygon.model.heads.move_head import MoveHead
 from meloetta.frameworks.porygon.model.heads.max_move_head import MaxMoveHead
 from meloetta.frameworks.porygon.model.heads.switch_head import SwitchHead
