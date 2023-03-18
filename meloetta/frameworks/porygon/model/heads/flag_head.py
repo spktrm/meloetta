@@ -14,11 +14,13 @@ class FlagsHead(nn.Module):
 
         self.mlp = nn.Sequential(
             nn.Linear(config.autoregressive_embedding_dim, config.hidden_dim),
+            nn.LayerNorm(config.hidden_dim),
             nn.ReLU(),
             nn.Linear(config.hidden_dim, len(CHOICE_FLAGS)),
         )
         self.proj_flag = nn.Sequential(
             nn.Linear(len(CHOICE_FLAGS), config.hidden_dim),
+            nn.LayerNorm(config.hidden_dim),
             nn.ReLU(),
             nn.Linear(config.hidden_dim, config.autoregressive_embedding_dim),
         )

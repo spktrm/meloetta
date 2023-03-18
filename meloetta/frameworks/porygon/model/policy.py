@@ -31,11 +31,27 @@ class PolicyHeads(nn.Module):
         self.gametype = gametype
         self.gen = gen
 
-        self.move_head = MoveHead(config.move_head_config)
-        self.switch_head = SwitchHead(config.switch_head_config)
-
+        self.move_keys = nn.Sequential(
+            nn.Linear(config.entity_embedding_dim, config.entity_embedding_dim),
+            nn.LayerNorm(config.entity_embedding_dim),
+            nn.ReLU(),
+            nn.Linear(config.entity_embedding_dim, config.key_dim),
+        )
+        self.key_fc = nn.Sequential(
+            nn.Linear(config.entity_embedding_dim, config.entity_embedding_dim),
+            nn.LayerNorm(config.entity_embedding_dim),
+            nn.ReLU(),
+            nn.Linear(config.entity_embedding_dim, config.key_dim),
+        )
+        self.query_fc = nn.Sequential(
+            nn.Linear(config.autoregressive_embedding_dim, config.query_hidden_dim),
+            nn.LayerNorm(config.query_hidden_dim),
+            nn.ReLU(),
+            nn.Linear(config.query_hidden_dim, config.key_dim),
+        )
         self.proj_key = nn.Sequential(
             nn.Linear(config.key_dim, config.entity_embedding_dim),
+            nn.LayerNorm(config.entity_embedding_dim),
             nn.ReLU(),
             nn.Linear(config.entity_embedding_dim, config.autoregressive_embedding_dim),
         )
@@ -64,21 +80,29 @@ class PolicyHeads(nn.Module):
         move_mask = state["move_mask"]
         switch_mask = state["switch_mask"]
 
-        move_logits, move_keys = self.move_head(state_emb, moves)
-        switch_logits, switch_keys = self.switch_head(state_emb, switches)
-        policy_keys = torch.cat((move_keys.squeeze(2), switch_keys), dim=-2)
-        policy_mask = torch.cat((move_mask, switch_mask), dim=-1)
-        policy_logits = torch.cat((move_logits, switch_logits), dim=-1)
+        T, B, *_ = moves.shape
 
-        action_policy = _legal_policy(policy_logits, policy_mask)
-        embedding_index = torch.multinomial(action_policy.view(T * B, -1), 1)
+        pre_keys = torch.cat((moves.squeeze(2), switches), dim=-2)
+        post_keys = self.key_fc(pre_keys)
+
+        query = self.query_fc(state_emb)
+        query = query.view(T, B, 1, -1)
+
+        logits = query @ post_keys.transpose(-2, -1)
+        logits_scaled = logits / (logits.shape[-1] ** 0.5)
+        logits = logits_scaled.view(T, B, -1)
+
+        mask = torch.cat((move_mask, switch_mask), dim=-1)
+
+        policy = _legal_policy(logits, mask)
+        embedding_index = torch.multinomial(policy.view(T * B, -1), 1)
         action_index = embedding_index.view(T, B, -1)
 
-        switch_embedding = gather_along_rows(
-            policy_keys.flatten(0, -3), embedding_index, 1
+        action_embedding = gather_along_rows(
+            post_keys.flatten(0, -3), embedding_index, 1
         )
-        switch_embedding = switch_embedding.view(T, B, -1)
-        autoregressive_embedding = self.proj_key(switch_embedding)
+        action_embedding = action_embedding.view(T, B, -1)
+        autoregressive_embedding = state_emb + self.proj_key(action_embedding)
 
         if self.gen >= 6:
             (
@@ -127,13 +151,13 @@ class PolicyHeads(nn.Module):
             target_index=target_index,
         )
         logits = Logits(
-            action_logits=policy_logits,
+            action_logits=logits,
             max_move_logits=max_move_logits,
             flag_logits=flag_logits,
             target_logits=target_logits,
         )
         policy = Policy(
-            action_policy=action_policy,
+            action_policy=policy,
             max_move_policy=max_move_policy,
             flag_policy=flag_policy,
             target_policy=target_policy,

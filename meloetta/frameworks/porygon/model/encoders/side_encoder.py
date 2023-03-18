@@ -299,33 +299,33 @@ class SideEncoder(nn.Module):
             nn.Linear(config.output_dim, config.output_dim),
         )
 
-        self.side_convs = nn.ModuleList(
-            [
-                nn.Sequential(
-                    nn.Conv1d(9, 16, 3, 2, 1),
-                    nn.ReLU(),
-                    nn.Conv1d(16, 16, 1, 1),
-                ),
-                nn.Sequential(
-                    nn.Conv1d(16, 16, 3, 2, 1),
-                    nn.ReLU(),
-                    nn.Conv1d(16, 16, 1, 1),
-                ),
-                nn.Sequential(
-                    nn.Conv1d(16, 32, 3, 2, 1),
-                    nn.ReLU(),
-                    nn.Conv1d(32, 32, 1, 1),
-                ),
-            ]
-        )
-        self.side_conv1_pt = nn.ModuleList(
-            [
-                nn.Conv1d(9, 16, 3, 2, 1),
-                nn.Conv1d(16, 16, 3, 2, 1),
-                nn.Conv1d(16, 32, 3, 2, 1),
-            ]
-        )
-        self.side_lin = nn.Linear(1024, 768)
+        # self.side_convs = nn.ModuleList(
+        #     [
+        #         nn.Sequential(
+        #             nn.Conv1d(9, 16, 3, 2, 1),
+        #             nn.ReLU(),
+        #             nn.Conv1d(16, 16, 1, 1),
+        #         ),
+        #         nn.Sequential(
+        #             nn.Conv1d(16, 16, 3, 2, 1),
+        #             nn.ReLU(),
+        #             nn.Conv1d(16, 16, 1, 1),
+        #         ),
+        #         nn.Sequential(
+        #             nn.Conv1d(16, 32, 3, 2, 1),
+        #             nn.ReLU(),
+        #             nn.Conv1d(32, 32, 1, 1),
+        #         ),
+        #     ]
+        # )
+        # self.side_conv1_pt = nn.ModuleList(
+        #     [
+        #         nn.Conv1d(9, 16, 3, 2, 1),
+        #         nn.Conv1d(16, 16, 3, 2, 1),
+        #         nn.Conv1d(16, 32, 3, 2, 1),
+        #     ]
+        # )
+        # self.side_lin = nn.Linear(4 * config.entity_embedding_dim, 4 * config.entity_embedding_dim)
 
         self.active_moves = nn.Sequential(
             nn.Linear(2 * config.entity_embedding_dim, config.entity_embedding_dim),
@@ -375,14 +375,14 @@ class SideEncoder(nn.Module):
         )
         return self.sc_mlp(side_condition_embed)
 
-    def side_resnet(self, se: torch.Tensor):
-        T, B = se.shape[:2]
-        se = se.flatten(0, 1)
-        for conv, pt in zip(self.side_convs, self.side_conv1_pt):
-            se = F.relu(conv(se) + pt(se))
-        se = se.flatten(1)
-        se = se.view(T, B, *se.shape[1:])
-        return self.side_lin(se)
+    # def side_resnet(self, se: torch.Tensor):
+    #     T, B = se.shape[:2]
+    #     se = se.flatten(0, 1)
+    #     for conv, pt in zip(self.side_convs, self.side_conv1_pt):
+    #         se = F.relu(conv(se) + pt(se))
+    #     se = se.flatten(1)
+    #     se = se.view(T, B, *se.shape[1:])
+    #     return self.side_lin(se)
 
     def moves_given_context(self, active: torch.Tensor, moves: torch.Tensor):
         active = active.unsqueeze(-2).repeat_interleave(4, -2)
@@ -438,8 +438,8 @@ class SideEncoder(nn.Module):
             self.encode_volatiles(volatiles),
             self.encode_side_conditions(side_conditions),
         ]
-        side_embeddings = torch.cat(side_embeddings, dim=2)
-        side_embedding = self.side_resnet(side_embeddings)
+        # side_embeddings = torch.cat(side_embeddings, dim=2)
+        # side_embedding = self.side_resnet(side_embeddings)
 
         entity_embeddings = entity_embeddings.view(T, B, N, S, -1)
 
@@ -454,7 +454,7 @@ class SideEncoder(nn.Module):
         public_entity = None
 
         return SideEncoderOutput(
-            side_embedding=side_embedding,
+            side_embedding=side_embeddings,
             private_entity=private_player,
             public_entity=public_entity,
             moves=moves,

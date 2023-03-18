@@ -40,12 +40,15 @@ def compute_policy_gradient_loss(
     logits: torch.Tensor,
     actions: torch.Tensor,
     advantages: torch.Tensor,
+    policy_mask: torch.Tensor,
     valid: torch.Tensor,
 ) -> torch.Tensor:
     logits = torch.flatten(logits, 0, 1)
+    policy_mask = torch.flatten(policy_mask, 0, 1)
+    masked_logits = torch.masked_fill(logits, ~policy_mask, float("-inf"))
     actions = torch.flatten(actions, 0, 1)
     cross_entropy = F.cross_entropy(
-        logits,
+        masked_logits,
         target=actions,
         reduction="none",
     )
@@ -240,17 +243,6 @@ class PorygonLearner:
 
         bootstrap_value = learner.v.squeeze(-1)[-1]
 
-        batch = Batch(*[t[1:] if t is not None else None for t in batch])
-
-        learner = TrainingOutput(
-            pi=Policy(*[t[:-1] if t is not None else None for t in learner.pi]),
-            logit=Logits(*[t[:-1] if t is not None else None for t in learner.logit]),
-            log_pi=LogPolicy(
-                *[t[:-1] if t is not None else None for t in learner.log_pi]
-            ),
-            v=learner.v[:-1],
-        )
-
         dones = torch.cat(
             (batch.valid[1:], torch.zeros_like(batch.valid[0, None])), dim=0
         )
@@ -277,7 +269,7 @@ class PorygonLearner:
                 actions=batch.get_index_from_policy(pi_field),
                 discounts=discounts,
                 rewards=batch.rewards,
-                values=learner.v.squeeze(-1) * batch.valid,
+                values=learner.v.squeeze(-1),
                 bootstrap_value=bootstrap_value,
             )
 
@@ -352,7 +344,7 @@ class PorygonLearner:
 
             max_length = batch.valid[:, batch_start:batch_end].sum(0).max()
             minibatch = batch.slice(batch_start, batch_end, max_length=max_length)
-            targ = targets.slice(batch_start, batch_end, max_length=max_length - 1)
+            targ = targets.slice(batch_start, batch_end, max_length=max_length)
 
             output, _, encoder_output = self.learner_model.forward(
                 minibatch._asdict(),
@@ -368,19 +360,6 @@ class PorygonLearner:
             # pred_opp_loss = pred_opp_loss * minibatch.valid
             # pred_opp_loss = pred_opp_loss.sum() / total_valid
             # loss += pred_opp_loss
-
-            minibatch = Batch(*[t[1:] if t is not None else None for t in minibatch])
-
-            output = TrainingOutput(
-                pi=Policy(*[t[:-1] if t is not None else None for t in output.pi]),
-                logit=Logits(
-                    *[t[:-1] if t is not None else None for t in output.logit]
-                ),
-                log_pi=LogPolicy(
-                    *[t[:-1] if t is not None else None for t in output.log_pi]
-                ),
-                v=output.v[:-1],
-            )
 
             for field in fields:
                 pi_field = field + "_policy"
@@ -416,6 +395,7 @@ class PorygonLearner:
                     getattr(output.logit, logit_field),
                     getattr(minibatch, index_field),
                     vtrace_returns.pg_advantages,
+                    policy_mask,
                     valid,
                 )
 

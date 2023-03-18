@@ -81,15 +81,15 @@ class PorygonModel(nn.Module):
             state,
         )
         return self._postprocess(
-            state,
-            encoder_output,
-            hidden_state,
-            indices,
-            logits,
-            policy,
-            value,
-            choices,
-            need_log_policy,
+            state=state,
+            encoder_output=encoder_output,
+            hidden_state=hidden_state,
+            indices=indices,
+            logits=logits,
+            policy=policy,
+            value=value,
+            choices=choices,
+            need_log_policy=need_log_policy,
         )
 
     def learning_forward(

@@ -423,6 +423,9 @@ class Player:
         return cls
 
     async def recieve(self, data: str):
+        return self._recieve(data)
+
+    def _recieve(self, data: str):
         if data.startswith(">"):
             try:
                 nlIndex = data.index("\n")

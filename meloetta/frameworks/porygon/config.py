@@ -47,7 +47,7 @@ class PorygonConfig:
     clip_gradient: float = 10_000
     clip_gradient_norm: float = 40
 
-    gamma: float = 0.995
+    gamma: float = 1
     c_vtrace: float = 1.0
 
     trajectory_length: int = 512

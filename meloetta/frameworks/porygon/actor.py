@@ -116,7 +116,7 @@ class PorygonActor(Actor):
 
     def _populate_buffer(self) -> int:
         for step_index, (env_output, model_output) in enumerate(
-            zip(self.env_outputs[1:], self.model_outputs)
+            zip(self.env_outputs, self.model_outputs)
         ):
             to_store = {**env_output, **model_output}
 

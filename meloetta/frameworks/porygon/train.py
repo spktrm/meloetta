@@ -89,7 +89,7 @@ def main(fpath: str = None):
                 eval_actor_fn=main_actor,
                 eval_actor_kwargs={
                     "model": learner.actor_model,
-                    "replay_buffer": learner.replay_buffer,
+                    # "replay_buffer": learner.replay_buffer,
                 },
                 baseline_actor_fn=opponent_actor,
                 baseline_actor_args=opponent_actor_args,
@@ -152,7 +152,7 @@ def main(fpath: str = None):
 if __name__ == "__main__":
     mp.set_start_method("spawn")
 
-    # fpath = "cpkts/cpkt-04000.tar"
+    # fpath = "cpkts/cpkt-03000.tar"
     # main(fpath)
 
     main()

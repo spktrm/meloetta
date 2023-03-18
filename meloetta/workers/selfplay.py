@@ -93,7 +93,6 @@ class SelfPlayWorker:
                         player.room.battle_tag + "|" + "/offertie"
                     )
                 if "|error" in message:
-                    # print(message)
                     # edge case for handling when the pokemon is trapped
                     if "Can't switch: The active Pokémon is trapped" in message:
                         message = await player.client.receive_message()
@@ -102,6 +101,9 @@ class SelfPlayWorker:
 
                     # for some reason, disabled max moves are being selected
                     elif "Can't move" in message:
+                        print(message)
+
+                    else:
                         print(message)
 
                 if action_required:
