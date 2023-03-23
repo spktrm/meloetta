@@ -124,6 +124,7 @@ class PorygonLearner:
         learner_model = PorygonModel(
             gen=gen, gametype=gametype, config=config.model_config
         )
+        # opt_learner_model = torch.compile(learner_model)
         learner_model.train()
 
         print(f"learnabled params: {learner_model.get_learnable_params():,}")
@@ -234,14 +235,13 @@ class PorygonLearner:
             batch.batch_size, device=next(self.learner_model.parameters()).device
         )
         lengths = batch.valid.sum(0)
-        final_reward = batch.rewards[lengths.squeeze() - 1, bidx]
 
         learner: TrainingOutput
 
         with torch.no_grad():
             learner, _, _ = self.learner_model(batch._asdict(), hidden_state)
 
-        bootstrap_value = learner.v.squeeze(-1)[-1]
+        bootstrap_value = learner.v.squeeze(-1)[lengths.squeeze() - 1, bidx]
 
         dones = torch.cat(
             (batch.valid[1:], torch.zeros_like(batch.valid[0, None])), dim=0
@@ -326,7 +326,7 @@ class PorygonLearner:
             total_flag_valid = total_flag_valid.sum().clamp(min=1).item()
 
         # minibatch_size = batch.batch_size
-        minibatch_size = 8
+        minibatch_size = 16
 
         for batch_index in range(math.ceil(batch.batch_size / minibatch_size)):
             batch_start = minibatch_size * batch_index
@@ -352,15 +352,6 @@ class PorygonLearner:
                 need_log_policy=True,
             )
 
-            # pred_opp_loss = 1 - F.cosine_similarity(
-            #     encoder_output.public_entity,
-            #     encoder_output.private_entity.detach(),
-            #     dim=-1,
-            # ).squeeze(-1)
-            # pred_opp_loss = pred_opp_loss * minibatch.valid
-            # pred_opp_loss = pred_opp_loss.sum() / total_valid
-            # loss += pred_opp_loss
-
             for field in fields:
                 pi_field = field + "_policy"
                 log_pi_field = field + "_log_policy"
@@ -383,23 +374,34 @@ class PorygonLearner:
                     policy_mask = minibatch.get_mask_from_policy(pi_field)
                     valid = minibatch.valid * (minibatch.action_index < 4)
 
-                valid *= policy_mask.sum(-1) > 1
                 vtrace_returns = getattr(targ, vtrace_field)
+                kl_mask = vtrace_returns.kl_loss.detach() < 0.3
+
+                valid *= policy_mask.sum(-1) > 1
 
                 value_loss = 0.5 * compute_baseline_loss(
-                    vtrace_returns.vs - output.v.squeeze(-1), valid
+                    vtrace_returns.vs - output.v.squeeze(-1), valid  # * kl_mask
                 )
+
+                # policy_cloning_loss = (
+                #     5e-2 * (vtrace_returns.kl_loss * kl_mask * valid).sum()
+                # )
+                # value_cloning_loss = 5e-3 * torch.dist(
+                #     minibatch.value * kl_mask * valid,
+                #     output.v.squeeze(-1) * kl_mask * valid,
+                #     p=2,
+                # )
 
                 # Uses v-trace to define q-values for Nerd
                 policy_loss = compute_policy_gradient_loss(
                     getattr(output.logit, logit_field),
                     getattr(minibatch, index_field),
-                    vtrace_returns.pg_advantages,
+                    vtrace_returns.pg_advantages,  # * kl_mask,
                     policy_mask,
                     valid,
                 )
 
-                entropy_loss = 1e-4 * compute_entropy_loss(
+                entropy_loss = 1e-2 * compute_entropy_loss(
                     getattr(output.pi, pi_field),
                     getattr(output.log_pi, log_pi_field),
                     valid,
@@ -419,7 +421,13 @@ class PorygonLearner:
                 elif "flag" in field:
                     policy_valid = total_flag_valid
 
-                loss += (value_loss + policy_loss + entropy_loss) / policy_valid
+                loss += (
+                    value_loss
+                    + policy_loss
+                    + entropy_loss
+                    # + policy_cloning_loss
+                    # + value_cloning_loss
+                ) / policy_valid
 
             loss.backward()
 

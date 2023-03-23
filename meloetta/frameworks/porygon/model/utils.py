@@ -322,7 +322,7 @@ class AttentionPool(nn.Module):
         return y
 
 
-class PrivateToVector(nn.Module):
+class ToVector(nn.Module):
     """Per-unit processing then average over the units dimension."""
 
     def __init__(self, input_dim: int, output_dim: int, hidden_dim: int = None):
@@ -339,53 +339,12 @@ class PrivateToVector(nn.Module):
         x = self.ln1(x)
         x = F.relu(x)
         x = self.lin1(x)
-        x = x * mask
-        active_mask = mask[..., :1, :].sum(1).clamp(min=1)
-        reserve_mask = mask[..., 1:, :].sum(1).clamp(min=1)
-        x = torch.cat(
-            (
-                x[..., :1, :].sum(1) / active_mask,
-                x[..., 1:, :].sum(1) / reserve_mask,
-            ),
-            dim=-1,
-        )
-        x = self.ln2(x)
-        x = F.relu(x)
-        x = self.lin2(x)
-        return x
-
-
-class PublicToVector(nn.Module):
-    """Per-unit processing then average over the units dimension."""
-
-    def __init__(self, input_dim: int, output_dim: int, hidden_dim: int = None):
-        super().__init__()
-        if hidden_dim is None:
-            hidden_dim = 4 * input_dim
-
-        self.ln1 = nn.LayerNorm(input_dim)
-        self.ln2 = nn.LayerNorm(hidden_dim)
-        self.lin1 = nn.Linear(input_dim, input_dim)
-        self.lin2 = nn.Linear(hidden_dim, output_dim)
-
-    def forward(self, x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-        x = self.ln1(x)
-        x = F.relu(x)
-        x = self.lin1(x)
-        x = x * mask
-
-        p1_active_mask = mask[..., :1, :].sum(1).clamp(min=1)
-        p1_reserve_mask = mask[..., 1:7, :].sum(1).clamp(min=1)
-
-        p2_active_mask = mask[..., 7:8, :].sum(1).clamp(min=1)
-        p2_reserve_mask = mask[..., 8:, :].sum(1).clamp(min=1)
+        # x = x * mask
 
         x = torch.cat(
             (
-                x[..., :1, :].sum(1) / p1_active_mask,
-                x[..., 1:7, :].sum(1) / p1_reserve_mask,
-                x[..., 7:8, :].sum(1) / p2_active_mask,
-                x[..., 8:, :].sum(1) / p2_reserve_mask,
+                x[..., :1, :].max(1).values,
+                x[..., 1:, :].max(1).values,
             ),
             dim=-1,
         )

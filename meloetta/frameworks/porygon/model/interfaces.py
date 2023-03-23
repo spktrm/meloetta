@@ -64,6 +64,7 @@ class ModelOutput(NamedTuple):
     indices: Indices
     policy: Policy
     logits: Logits
+    value: torch.Tensor
 
     def to_store(self, state: State) -> Dict[str, torch.Tensor]:
         to_store = {k: v for k, v in state.items() if isinstance(v, torch.Tensor)}
@@ -116,6 +117,7 @@ class Batch(NamedTuple):
     action_index: torch.Tensor = None
     max_move_index: torch.Tensor = None
     flag_index: torch.Tensor = None
+    value: torch.Tensor = None
     valid: torch.Tensor = None
 
     def get_index_from_policy(self, policy_field: str):
@@ -186,6 +188,7 @@ VTraceFromLogitsReturns = collections.namedtuple(
         "log_rhos",
         "behavior_action_log_probs",
         "target_action_log_probs",
+        "kl_loss",
     ],
 )
 

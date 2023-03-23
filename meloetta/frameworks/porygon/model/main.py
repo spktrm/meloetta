@@ -206,6 +206,7 @@ class PorygonModel(nn.Module):
             env_step = ModelOutput(
                 indices=indices,
                 policy=policy,
+                value=value,
                 logits=logits,
             )
             output = (env_step, post_process, hidden_state)

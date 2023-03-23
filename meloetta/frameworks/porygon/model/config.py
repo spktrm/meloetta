@@ -12,43 +12,39 @@ class SideEncoderConfig(_Config):
 
     transformer_input_size: int = entity_embedding_dim
     transformer_num_heads: int = 2
-    transformer_num_layers: int = 3
+    transformer_num_layers: int = 1
     resblocks_num_before: int = 1
     resblocks_num_after: int = 1
-    resblocks_hidden_size: int = 128
+    resblocks_hidden_size: int = 256
 
     output_dim: int = 256
 
 
 class ScalarEncoderConfig(_Config):
-    embedding_dim: int = 128
+    embedding_dim: int = 2 * SideEncoderConfig.output_dim
 
 
 class WeatherEncoderConfig(_Config):
-    embedding_dim: int = 128
+    embedding_dim: int = 2 * SideEncoderConfig.output_dim
 
 
 class EncoderConfig(_Config):
     side_encoder_config: SideEncoderConfig = SideEncoderConfig()
     scalar_encoder_config: ScalarEncoderConfig = ScalarEncoderConfig()
     weather_encoder_config: WeatherEncoderConfig = WeatherEncoderConfig()
-    output_dim: int = (
-        4 * side_encoder_config.output_dim
-        + weather_encoder_config.embedding_dim
-        + scalar_encoder_config.embedding_dim
-    )
+    output_dim: int = 2 * side_encoder_config.output_dim
 
 
 class CoreConfig(_Config):
     raw_embedding_dim: int = EncoderConfig.output_dim
     hidden_dim: int = 512
-    num_layers: int = 3
+    num_layers: int = 1
 
 
 class ValueHeadConfig(_Config):
     state_embedding_dim: int = CoreConfig.hidden_dim
-    hidden_dim: int = 512
-    num_resblocks: int = 4
+    hidden_dim: int = 256
+    num_resblocks: int = 3
 
 
 class FlagHeadConfig(_Config):
@@ -58,7 +54,7 @@ class FlagHeadConfig(_Config):
 
 class MaxMoveHeadConfig(_Config):
     entity_embedding_dim: int = SideEncoderConfig.entity_embedding_dim
-    key_dim: int = 32
+    key_dim: int = 64
 
     autoregressive_embedding_dim: int = CoreConfig.hidden_dim
     query_hidden_dim: int = 256
@@ -66,7 +62,7 @@ class MaxMoveHeadConfig(_Config):
 
 class MoveHeadConfig(_Config):
     entity_embedding_dim: int = SideEncoderConfig.entity_embedding_dim
-    key_dim: int = 32
+    key_dim: int = 64
 
     autoregressive_embedding_dim: int = CoreConfig.hidden_dim
     query_hidden_dim: int = 256
@@ -74,7 +70,7 @@ class MoveHeadConfig(_Config):
 
 class SwitchHeadConfig(_Config):
     entity_embedding_dim: int = SideEncoderConfig.entity_embedding_dim
-    key_dim: int = 32
+    key_dim: int = 64
 
     autoregressive_embedding_dim: int = CoreConfig.hidden_dim
     query_hidden_dim: int = 256
@@ -92,7 +88,7 @@ class PolicyHeadsConfig(_Config):
     target_head_config: TargetHeadConfig = TargetHeadConfig()
 
     entity_embedding_dim: int = SideEncoderConfig.entity_embedding_dim
-    key_dim: int = 32
+    key_dim: int = MoveHeadConfig.key_dim
 
     autoregressive_embedding_dim: int = CoreConfig.hidden_dim
     query_hidden_dim: int = 32

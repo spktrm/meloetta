@@ -10,7 +10,7 @@ from meloetta.frameworks.porygon.model.utils import (
     sqrt_one_hot_matrix,
     power_one_hot_matrix,
     TransformerEncoder,
-    PrivateToVector,
+    ToVector,
 )
 from meloetta.frameworks.porygon.model.interfaces import SideEncoderOutput
 from meloetta.embeddings import (
@@ -113,9 +113,6 @@ class PrivatePokemonEmbedding(nn.Module):
             nn.ReLU(),
             nn.LayerNorm(output_dim),
             nn.Linear(output_dim, output_dim),
-            nn.ReLU(),
-            nn.LayerNorm(output_dim),
-            nn.Linear(output_dim, output_dim),
         )
 
     def embed_moves(
@@ -203,8 +200,7 @@ class PrivatePokemonEmbedding(nn.Module):
         )
 
         moves_emb = self.move_embedding(self.move_embedding_ae(moves))
-        num_moves = (moves > 0).sum(-1, keepdim=True)
-        moveset_emb = (moves_emb.sum(-2) / num_moves.clamp(min=1)) * (num_moves > 0)
+        moveset_emb = moves_emb.max(-2).values
 
         last_move_emb = self.last_move_embedding(self.move_embedding_ae(last_move))
 
@@ -213,7 +209,7 @@ class PrivatePokemonEmbedding(nn.Module):
             + forme_emb
             + stat_emb
             + active_emb
-            # + fainted_emb
+            + fainted_emb
             + gender_emb
             + level_emb
             + ability_emb
@@ -231,7 +227,7 @@ class PrivatePokemonEmbedding(nn.Module):
 
         mask = (name == 0) | (fainted == 2)
 
-        pokemon_emb = self.encoder(pokemon_emb) + pokemon_emb
+        pokemon_emb = self.encoder(pokemon_emb)
 
         return pokemon_emb, mask, moves_emb
 
@@ -248,17 +244,17 @@ class SideEncoder(nn.Module):
             gen=gen, output_dim=config.entity_embedding_dim  # , frozen=True
         )
 
-        self.transformer = TransformerEncoder(
-            model_size=config.entity_embedding_dim,
-            key_size=128,
-            value_size=128,
-            num_heads=config.transformer_num_heads,
-            num_layers=config.transformer_num_layers,
-            resblocks_num_before=config.resblocks_num_before,
-            resblocks_num_after=config.resblocks_num_after,
-        )
+        # self.transformer = TransformerEncoder(
+        #     model_size=config.entity_embedding_dim,
+        #     key_size=config.entity_embedding_dim,
+        #     value_size=config.entity_embedding_dim,
+        #     num_heads=config.transformer_num_heads,
+        #     num_layers=config.transformer_num_layers,
+        #     resblocks_num_before=config.resblocks_num_before,
+        #     resblocks_num_after=config.resblocks_num_after,
+        # )
 
-        self.output = PrivateToVector(
+        self.output = ToVector(
             input_dim=config.entity_embedding_dim,
             output_dim=config.output_dim,
         )
@@ -299,38 +295,18 @@ class SideEncoder(nn.Module):
             nn.Linear(config.output_dim, config.output_dim),
         )
 
-        # self.side_convs = nn.ModuleList(
-        #     [
-        #         nn.Sequential(
-        #             nn.Conv1d(9, 16, 3, 2, 1),
-        #             nn.ReLU(),
-        #             nn.Conv1d(16, 16, 1, 1),
-        #         ),
-        #         nn.Sequential(
-        #             nn.Conv1d(16, 16, 3, 2, 1),
-        #             nn.ReLU(),
-        #             nn.Conv1d(16, 16, 1, 1),
-        #         ),
-        #         nn.Sequential(
-        #             nn.Conv1d(16, 32, 3, 2, 1),
-        #             nn.ReLU(),
-        #             nn.Conv1d(32, 32, 1, 1),
-        #         ),
-        #     ]
-        # )
-        # self.side_conv1_pt = nn.ModuleList(
-        #     [
-        #         nn.Conv1d(9, 16, 3, 2, 1),
-        #         nn.Conv1d(16, 16, 3, 2, 1),
-        #         nn.Conv1d(16, 32, 3, 2, 1),
-        #     ]
-        # )
-        # self.side_lin = nn.Linear(4 * config.entity_embedding_dim, 4 * config.entity_embedding_dim)
-
         self.active_moves = nn.Sequential(
-            nn.Linear(2 * config.entity_embedding_dim, config.entity_embedding_dim),
+            nn.Linear(config.entity_embedding_dim, config.entity_embedding_dim),
+            nn.LayerNorm(config.output_dim),
             nn.ReLU(),
             nn.Linear(config.entity_embedding_dim, config.entity_embedding_dim),
+        )
+
+        self.side_embedding_lin = nn.Sequential(
+            nn.Linear(config.output_dim, config.output_dim),
+            nn.LayerNorm(config.output_dim),
+            nn.ReLU(),
+            nn.Linear(config.output_dim, config.output_dim),
         )
 
     def encode_boosts(self, boosts: torch.Tensor):
@@ -375,19 +351,11 @@ class SideEncoder(nn.Module):
         )
         return self.sc_mlp(side_condition_embed)
 
-    # def side_resnet(self, se: torch.Tensor):
-    #     T, B = se.shape[:2]
-    #     se = se.flatten(0, 1)
-    #     for conv, pt in zip(self.side_convs, self.side_conv1_pt):
-    #         se = F.relu(conv(se) + pt(se))
-    #     se = se.flatten(1)
-    #     se = se.view(T, B, *se.shape[1:])
-    #     return self.side_lin(se)
-
     def moves_given_context(self, active: torch.Tensor, moves: torch.Tensor):
         active = active.unsqueeze(-2).repeat_interleave(4, -2)
         moves = moves[..., : self.n_active, :, :]
-        return self.active_moves(torch.cat((active, moves), dim=-1))
+        active_and_moves = torch.cat((moves, active), dim=-1)
+        return F.glu(active_and_moves, dim=-1)
 
     def forward(
         self,
@@ -408,38 +376,26 @@ class SideEncoder(nn.Module):
         encoder_mask[..., 0] = 1
 
         entity_embeddings = entity_embeddings.view(T * B * N, S, -1)
-        entity_embeddings = self.transformer(entity_embeddings, encoder_mask)
+        # entity_embeddings = self.transformer(entity_embeddings, encoder_mask)
 
         entity_embedding = self.output(entity_embeddings, mask.unsqueeze(-1))
         entity_embedding = entity_embedding.view(T, B, N, -1)
 
-        # private_player, public_player, public_opponent = torch.chunk(
-        #     entity_embedding, 3, 2
-        # )
-
-        # private_opponent = self.pred_opponent(public_opponent)
-        # private_entity = torch.cat((private_player, private_opponent), dim=2)
-        # private_entity = private_player
-        # private_entity_disc = private_entity.view(*private_entity.shape[:-1], 16, 16)
-        # private_entity_disc = F.one_hot(private_entity_disc.argmax(-1), 16).flatten(-2)
-        # private_entity = (
-        #     private_entity + (private_entity_disc - private_entity).detach()
-        # )
-
-        # public_entity = torch.cat((public_player, public_opponent), dim=2)
-        # public_entity = public_entity.view(*public_entity.shape[:-1], 16, 16)
-        # public_entity = public_entity.softmax(-1).flatten(-2)
-
         side_embeddings = [
-            # private_entity
-            # public_entity,
-            entity_embedding,
+            torch.cat(
+                (
+                    entity_embedding[:, :, :2].sum(2, keepdim=True),
+                    entity_embedding[:, :, 2:],
+                ),
+                dim=2,
+            ),
             self.encode_boosts(boosts),
             self.encode_volatiles(volatiles),
             self.encode_side_conditions(side_conditions),
         ]
-        # side_embeddings = torch.cat(side_embeddings, dim=2)
-        # side_embedding = self.side_resnet(side_embeddings)
+        side_embeddings = torch.stack(side_embeddings, dim=2)
+        side_embedding = torch.sum(side_embeddings, dim=2)
+        side_embedding = self.side_embedding_lin(side_embedding)
 
         entity_embeddings = entity_embeddings.view(T, B, N, S, -1)
 
@@ -447,14 +403,11 @@ class SideEncoder(nn.Module):
         moves = self.moves_given_context(active, moves_emb[:, :, 0])
         switches = entity_embeddings[:, :, 0, :6]
 
-        # if self.training:
-        #     public_entity = self.pred_opponent(private_player)
-        # else:
         private_player = None
         public_entity = None
 
         return SideEncoderOutput(
-            side_embedding=side_embeddings,
+            side_embedding=side_embedding,
             private_entity=private_player,
             public_entity=public_entity,
             moves=moves,

@@ -19,6 +19,9 @@ def waiting_for_opp(room: BattleRoom):
     )
 
 
+DRAW_BY_TURNS = 200
+
+
 class EvalWorker:
     def __init__(
         self,
@@ -157,21 +160,33 @@ class EvalWorker:
                 if ended:
                     break
 
-                if (turns_since_last_move > 50 and turn > 100) or turn > 200:
-                    if turns_since_last_move > 50:
-                        print(f"{username}: draw by repetition!")
-                    elif turn > 100:
-                        print(f"{username}: draw by turn > 200!")
+                if turns_since_last_move > 50:
+                    print(f"{username}: forfeit by repetition!")
+
+                    await player.client.websocket.send(
+                        player.room.battle_tag + "|" + "/forfeit"
+                    )
+                    while True:
+                        message = await player.client.receive_message()
+                        action_required = await player.recieve(message)
+                        ended = player.room.get_js_attr("battle?.ended")
+                        if ended:
+                            break
+                    break
+
+                if turn > 200:
+                    print(f"{username}: draw by turn > {DRAW_BY_TURNS}!")
+
                     await player.client.websocket.send(
                         player.room.battle_tag + "|" + "/offertie"
                     )
                     while True:
                         message = await player.client.receive_message()
+                        action_required = await player.recieve(message)
                         if "is offering a tie." in message:
                             await player.client.websocket.send(
                                 player.room.battle_tag + "|" + "/offertie"
                             )
-                        action_required = await player.recieve(message)
                         ended = player.room.get_js_attr("battle?.ended")
                         if ended:
                             break

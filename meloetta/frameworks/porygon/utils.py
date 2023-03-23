@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 from typing import Dict, List, Tuple
 
-from meloetta.frameworks.porygon.model.utils import _log_policy
+from meloetta.frameworks.porygon.model.utils import _log_policy, _legal_policy
 from meloetta.data import CHOICE_FLAGS
 
 
@@ -202,8 +202,12 @@ def get_buffer_specs(
             "valid": {
                 "size": (trajectory_length,),
                 "dtype": torch.bool,
-            }
-        }
+            },
+            "value": {
+                "size": (trajectory_length,),
+                "dtype": torch.float32,
+            },
+        },
     )
     return buffer_specs
 
@@ -247,6 +251,7 @@ VTraceFromLogitsReturns = collections.namedtuple(
         "log_rhos",
         "behavior_action_log_probs",
         "target_action_log_probs",
+        "kl_loss",
     ],
 )
 
@@ -289,7 +294,17 @@ def from_logits(
         clip_rho_threshold=clip_rho_threshold,
         clip_pg_rho_threshold=clip_pg_rho_threshold,
     )
+
+    target_dist = torch.distributions.Categorical(
+        probs=_legal_policy(target_policy_logits, policy_mask)
+    )
+    behavior_dist = torch.distributions.Categorical(
+        probs=_legal_policy(behavior_policy_logits, policy_mask)
+    )
+    kl_loss = torch.distributions.kl.kl_divergence(target_dist, behavior_dist)
+
     return VTraceFromLogitsReturns(
+        kl_loss=kl_loss,
         log_rhos=log_rhos,
         behavior_action_log_probs=behavior_action_log_probs,
         target_action_log_probs=target_action_log_probs,

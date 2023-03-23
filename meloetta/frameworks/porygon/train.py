@@ -71,9 +71,11 @@ def main(fpath: str = None):
 
     if config.eval:
         evals = [
-            ("eval0", "random", random_actor, (eval_queue,)),
-            ("eval1", "maxdmg1", maxdmg_actor, (config.gen, eval_queue)),
-            ("eval2", "maxdmg2", maxdmg_actor, (config.gen, eval_queue)),
+            (f"random_eval{i}", f"random{i}", random_actor, (eval_queue,))
+            for i in range(0)
+        ] + [
+            (f"maxdmg_eval{i}", f"maxdmg{i}", maxdmg_actor, (config.gen, eval_queue))
+            for i in range(2)
         ]
         for i, (
             eval_username,
@@ -152,7 +154,7 @@ def main(fpath: str = None):
 if __name__ == "__main__":
     mp.set_start_method("spawn")
 
-    # fpath = "cpkts/cpkt-03000.tar"
-    # main(fpath)
+    fpath = "cpkts/cpkt-02000.tar"
+    main(fpath)
 
     main()

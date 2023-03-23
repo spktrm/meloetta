@@ -126,12 +126,7 @@ class PorygonActor(Actor):
 
     def post_match(self, room: BattleRoom):
         if self.storing_transition:
-            winner = room.get_js_attr("winner")
-
-            if winner == self.username:
-                reward = 1
-            else:
-                reward = -1
+            reward = room.get_js_attr("reward")
 
             final_turn = self._populate_buffer()
 

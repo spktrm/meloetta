@@ -29,7 +29,7 @@ class MoveHead(nn.Module):
         keys = self.key_fc(moves)
 
         query = self.query_fc(state_emb)
-        query = query.view(T, B, 1, 1, -1)
+        query = query.view(T, B, 1, -1)
 
         move_logits = query @ keys.transpose(-2, -1)
         move_logits = move_logits.view(T, B, -1)

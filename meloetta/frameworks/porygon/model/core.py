@@ -132,21 +132,31 @@ class StackedLSTM(nn.Module):
 
 
 class CoreResblock(nn.Module):
-    def __init__(self, inplanes, outplanes, end_dim):
+    def __init__(self, in_features, out_features):
         super().__init__()
 
-        self.conv1 = nn.Sequential(
-            nn.Conv1d(inplanes, outplanes, kernel_size=3, stride=1, padding=1),
-            nn.LayerNorm(end_dim),
+        self.lin1 = nn.Sequential(
+            nn.Linear(in_features, out_features),
+            nn.LayerNorm(out_features),
             nn.ReLU(),
         )
-        self.conv2 = nn.Sequential(
-            nn.Conv1d(outplanes, outplanes, kernel_size=3, stride=1, padding=1),
-            nn.LayerNorm(end_dim),
+        self.lin2 = nn.Sequential(
+            nn.Linear(out_features, out_features),
+            nn.LayerNorm(out_features),
         )
+        if out_features != in_features:
+            self.res = nn.Linear(in_features, out_features)
+        else:
+            self.res = None
 
     def forward(self, x):
-        return self.conv2(self.conv2(x)) + x
+        if self.res:
+            res = self.res(x)
+        else:
+            res = x
+        x = self.lin1(x)
+        x = self.lin2(x)
+        return F.relu(x) + res
 
 
 class Core(nn.Module):
@@ -154,24 +164,9 @@ class Core(nn.Module):
         super().__init__()
         self.config = config
 
-        # self.project_in = nn.Linear(config.raw_embedding_dim, config.hidden_dim)
-
-        layers = [10, 64, 64, 128, 256, config.hidden_dim]
-        end_dims = [256, 128, 64, 32, 16]
-
-        self.resblock_in = nn.ModuleList(
-            [
-                nn.Sequential(
-                    *[CoreResblock(s1, s1, e) for _ in range(2)]
-                    + [nn.Conv1d(s1, s2, kernel_size=1, stride=2)]
-                )
-                for s1, s2, e in zip(layers, layers[1:], end_dims)
-            ]
-        )
-
-        # self.resblock_stack = nn.Sequential(
-        #     *[Resblock(config.hidden_dim, use_layer_norm=True) for _ in range(4)]
-        # )
+        self.mlp1 = CoreResblock(config.raw_embedding_dim, config.hidden_dim)
+        self.mlp2 = CoreResblock(config.hidden_dim, config.hidden_dim)
+        self.mlp3 = CoreResblock(config.hidden_dim, config.hidden_dim)
 
         # self.rnn = script_lnlstm(
         #     config.raw_embedding_dim,
@@ -193,30 +188,20 @@ class Core(nn.Module):
         )
         # return torch.zeros(self.config.num_layers, batch_size, self.config.hidden_dim)
 
-    def input_resblocks(self, state_embedding: torch.Tensor):
-        T, B, *_ = state_embedding.shape
-        x = state_embedding.flatten(0, 1)
-        for layer in self.resblock_in:
-            x = layer(x)
-        return x.mean(-1).view(T, B, -1)
-
     def forward(
         self,
         encoder_output: EncoderOutput,
         hidden_state: Tuple[torch.Tensor, torch.Tensor],
     ):
-        state_embedding = torch.cat(
-            encoder_output.side_embedding
-            + [
-                torch.cat(
-                    (encoder_output.weather_emb, encoder_output.scalar_emb), dim=-1
-                ).unsqueeze(-2)
-            ],
-            dim=-2,
+        state_embedding = (
+            encoder_output.side_embedding.flatten(2)
+            + encoder_output.weather_emb
+            + encoder_output.scalar_emb
         )
 
-        state_embedding = self.input_resblocks(state_embedding)
-        # state_embedding = self.resblock_stack(state_embedding)
+        state_embedding = self.mlp1(state_embedding)
+        state_embedding = self.mlp2(state_embedding)
+        state_embedding = self.mlp3(state_embedding)
 
         # state_embedding, hidden_state = self.rnn(state_embedding, hidden_state)
 
