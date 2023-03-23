@@ -14,7 +14,7 @@ class PrivateEncoderConfig(_Config):
     transformer_num_layers: int = 3
     resblocks_num_before: int = 1
     resblocks_num_after: int = 1
-    output_dim: int = embedding_dim * 2
+    output_dim: int = embedding_dim
 
 
 class PublicEncoderConfig(_Config):
@@ -24,15 +24,15 @@ class PublicEncoderConfig(_Config):
     transformer_num_layers: int = 3
     resblocks_num_before: int = 1
     resblocks_num_after: int = 1
-    output_dim: int = entity_embedding_dim * 2
+    output_dim: int = entity_embedding_dim
 
 
 class ScalarEncoderConfig(_Config):
-    embedding_dim: int = 32
+    embedding_dim: int = 64
 
 
 class WeatherEncoderConfig(_Config):
-    embedding_dim: int = 32
+    embedding_dim: int = 64
 
 
 class EncoderConfig(_Config):
@@ -41,10 +41,10 @@ class EncoderConfig(_Config):
     scalar_encoder_config: ScalarEncoderConfig = ScalarEncoderConfig()
     weather_encoder_config: WeatherEncoderConfig = WeatherEncoderConfig()
     output_dim: int = (
-        private_encoder_config.output_dim
-        + private_encoder_config.entity_embedding_dim
-        + 2 * public_encoder_config.entity_embedding_dim
-        + public_encoder_config.entity_embedding_dim
+        private_encoder_config.output_dim  # private encoder
+        + private_encoder_config.entity_embedding_dim  # private spatial
+        + public_encoder_config.output_dim  # public encoder
+        + public_encoder_config.entity_embedding_dim  # public spatial
         + weather_encoder_config.embedding_dim
         + scalar_encoder_config.embedding_dim
     )
@@ -59,7 +59,7 @@ class CoreConfig(_Config):
 class ValueHeadConfig(_Config):
     state_embedding_dim: int = CoreConfig.hidden_dim
     hidden_dim: int = 256
-    num_resblocks: int = 2
+    num_resblocks: int = 4
 
 
 class ActionTypeHeadConfig(_Config):

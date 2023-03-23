@@ -11,7 +11,9 @@ from meloetta.frameworks.nash_ketchum.model.interfaces import (
 from meloetta.frameworks.nash_ketchum.model.config import EncoderConfig
 from meloetta.frameworks.nash_ketchum.model.encoders import (
     PrivateEncoder,
+    PrivateEncoderV2,
     PublicEncoder,
+    PublicEncoderV2,
     ScalarEncoder,
     WeatherEncoder,
 )
@@ -20,10 +22,10 @@ from meloetta.frameworks.nash_ketchum.model.encoders import (
 class Encoder(nn.Module):
     def __init__(self, gen: int, n_active: int, config: EncoderConfig):
         super().__init__()
-        self.private_encoder = PrivateEncoder(
+        self.private_encoder = PrivateEncoderV2(
             gen=gen, n_active=n_active, config=config.private_encoder_config
         )
-        self.public_encoder = PublicEncoder(
+        self.public_encoder = PublicEncoderV2(
             gen=gen, n_active=n_active, config=config.public_encoder_config
         )
         self.weather_encoder = WeatherEncoder(

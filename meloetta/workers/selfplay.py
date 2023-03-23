@@ -11,8 +11,6 @@ from meloetta.workers.barrier import Barrier
 from meloetta.room import BattleRoom
 from meloetta.utils import expand_bt
 
-DRAW_BY_REPETITION_1 = 50
-DRAW_BY_REPETITION_2 = 100
 DRAW_BY_TURNS = 200
 
 
@@ -81,7 +79,9 @@ class SelfPlayWorker:
 
             turn = 0
             turns_since_last_move = expand_bt(torch.tensor(0))
-            actor = self.actor_fn(*self.actor_args, **self.actor_kwargs)
+            actor = self.actor_fn(
+                *self.actor_args, **self.actor_kwargs, username=username
+            )
 
             while True:
                 message = await player.client.receive_message()
@@ -91,7 +91,6 @@ class SelfPlayWorker:
                         player.room.battle_tag + "|" + "/offertie"
                     )
                 if "|error" in message:
-                    # print(message)
                     # edge case for handling when the pokemon is trapped
                     if "Can't switch: The active Pokémon is trapped" in message:
                         message = await player.client.receive_message()
@@ -100,6 +99,9 @@ class SelfPlayWorker:
 
                     # for some reason, disabled max moves are being selected
                     elif "Can't move" in message:
+                        print(message)
+
+                    else:
                         print(message)
 
                 if action_required:
@@ -138,17 +140,23 @@ class SelfPlayWorker:
                 if ended:
                     break
 
-                if (
-                    turns_since_last_move > DRAW_BY_REPETITION_1
-                    and turn > DRAW_BY_REPETITION_2
-                ) or turn > DRAW_BY_TURNS:
-                    if (
-                        turns_since_last_move > DRAW_BY_REPETITION_1
-                        and turn > DRAW_BY_REPETITION_2
-                    ):
-                        print(f"{username}: draw by repetition!")
-                    elif turn > DRAW_BY_TURNS:
-                        print(f"{username}: draw by turn > {DRAW_BY_TURNS}!")
+                if turns_since_last_move > 50:
+                    print(f"{username}: forfeit by repetition!")
+
+                    await player.client.websocket.send(
+                        player.room.battle_tag + "|" + "/forfeit"
+                    )
+                    while True:
+                        message = await player.client.receive_message()
+                        action_required = await player.recieve(message)
+                        ended = player.room.get_js_attr("battle?.ended")
+                        if ended:
+                            break
+                    break
+
+                if turn > 200:
+                    print(f"{username}: draw by turn > {DRAW_BY_TURNS}!")
+
                     await player.client.websocket.send(
                         player.room.battle_tag + "|" + "/offertie"
                     )
