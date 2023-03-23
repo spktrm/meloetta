@@ -1,33 +1,35 @@
+import os
 import re
 import json
 
 from typing import Union, Dict, Any, List
 from py_mini_racer import MiniRacer
 from py_mini_racer.py_mini_racer import is_unicode
+from meloetta.data import ROOT_DIR
 
 SRC = [
-    "meloetta/js/predef.js",
-    "meloetta/js/polyfill.js",
-    "meloetta/js/cycle.js",
-    "meloetta/js/underscore.js",
-    "meloetta/js/client/aliases.js",
-    "meloetta/js/client/abilities.js",
-    "meloetta/js/client/items.js",
-    "meloetta/js/client/moves.js",
-    "meloetta/js/client/pokedex.js",
-    "meloetta/js/client/typechart.js",
-    "meloetta/js/client/formats-data.js",
-    "meloetta/js/client/teambuilder-tables.js",
-    "meloetta/js/client/battle-scene-stub.js",
-    "meloetta/js/client/battle-choices.js",
-    "meloetta/js/client/battle-dex.js",
-    "meloetta/js/client/battle-dex-data.js",
-    "meloetta/js/client/battle-text-parser.js",
-    "meloetta/js/client/battle-tooltips.js",
-    "meloetta/js/client/battle-log.js",
-    "meloetta/js/client/battle.js",
-    "meloetta/js/client.js",
-    "meloetta/js/engine.js",
+    f"{ROOT_DIR}/js/predef.js",
+    f"{ROOT_DIR}/js/polyfill.js",
+    f"{ROOT_DIR}/js/cycle.js",
+    f"{ROOT_DIR}/js/underscore.js",
+    f"{ROOT_DIR}/js/client/aliases.js",
+    f"{ROOT_DIR}/js/client/abilities.js",
+    f"{ROOT_DIR}/js/client/items.js",
+    f"{ROOT_DIR}/js/client/moves.js",
+    f"{ROOT_DIR}/js/client/pokedex.js",
+    f"{ROOT_DIR}/js/client/typechart.js",
+    f"{ROOT_DIR}/js/client/formats-data.js",
+    f"{ROOT_DIR}/js/client/teambuilder-tables.js",
+    f"{ROOT_DIR}/js/client/battle-scene-stub.js",
+    f"{ROOT_DIR}/js/client/battle-choices.js",
+    f"{ROOT_DIR}/js/client/battle-dex.js",
+    f"{ROOT_DIR}/js/client/battle-dex-data.js",
+    f"{ROOT_DIR}/js/client/battle-text-parser.js",
+    f"{ROOT_DIR}/js/client/battle-tooltips.js",
+    f"{ROOT_DIR}/js/client/battle-log.js",
+    f"{ROOT_DIR}/js/client/battle.js",
+    f"{ROOT_DIR}/js/client.js",
+    f"{ROOT_DIR}/js/engine.js",
 ]
 
 
