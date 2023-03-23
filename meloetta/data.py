@@ -5,8 +5,8 @@ import numpy as np
 from copy import deepcopy
 from typing import Dict, Any
 
-
-DATA_DIR = "meloetta/js/data"
+ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
+DATA_DIR = f"{ROOT_DIR}/js/data"
 
 with open(os.path.join(DATA_DIR, "BattleAbilities.json"), "r") as f:
     BattleAbilities = json.loads(f.read())
@@ -130,7 +130,7 @@ def get_status_token(value: str):
     return STATUS.get(value, -1)
 
 
-with open("meloetta/pretrained/wsnc.json", "r") as f:
+with open(f"{ROOT_DIR}/pretrained/wsnc.json", "r") as f:
     WSNC = json.loads(f.read())
 
 VOLATILES = WSNC["volatiles"]

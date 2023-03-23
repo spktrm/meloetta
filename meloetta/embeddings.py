@@ -1,8 +1,11 @@
+import os
 import torch
 
 from torch import nn
 
 from typing import List
+
+from meloetta.data import ROOT_DIR
 
 
 class PokedexEmbedding(nn.Module):
@@ -10,7 +13,7 @@ class PokedexEmbedding(nn.Module):
         super().__init__()
 
         embeddings: torch.Tensor
-        names, embeddings = torch.load(f"meloetta/pretrained/gen{gen}/pokedex.pt")
+        names, embeddings = torch.load(f"{ROOT_DIR}/pretrained/gen{gen}/pokedex.pt")
         embeddings = embeddings.to(dtype)
         self.names: List[str] = names
         self.num_embeddings = embeddings.shape[0]
@@ -29,7 +32,7 @@ class AbilityEmbedding(nn.Module):
         super().__init__()
 
         embeddings: torch.Tensor
-        names, embeddings = torch.load(f"meloetta/pretrained/gen{gen}/abilitydex.pt")
+        names, embeddings = torch.load(f"{ROOT_DIR}/pretrained/gen{gen}/abilitydex.pt")
         embeddings = embeddings.to(dtype)
         self.names: List[str] = names
         self.num_embeddings = embeddings.shape[0]
@@ -48,7 +51,7 @@ class MoveEmbedding(nn.Module):
         super().__init__()
 
         embeddings: torch.Tensor
-        names, embeddings = torch.load(f"meloetta/pretrained/gen{gen}/movedex.pt")
+        names, embeddings = torch.load(f"{ROOT_DIR}/pretrained/gen{gen}/movedex.pt")
         embeddings = embeddings.to(dtype)
         self.names: List[str] = names
         self.num_embeddings = embeddings.shape[0]
@@ -67,7 +70,7 @@ class ItemEmbedding(nn.Module):
         super().__init__()
 
         embeddings: torch.Tensor
-        names, embeddings = torch.load(f"meloetta/pretrained/gen{gen}/itemdex.pt")
+        names, embeddings = torch.load(f"{ROOT_DIR}/pretrained/gen{gen}/itemdex.pt")
         embeddings = embeddings.to(dtype)
         self.names: List[str] = names
         self.num_embeddings = embeddings.shape[0]
