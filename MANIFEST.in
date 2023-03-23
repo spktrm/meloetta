@@ -1,0 +1,2 @@
+recursive-include meloetta/js *
+recursive-include meloetta/pretrained *
