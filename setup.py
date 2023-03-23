@@ -39,6 +39,7 @@ setup(
     author_email="joseph.twin14@gmail.com",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    include_package_data=True,
     packages=find_packages(),
     install_requires=requirements,
     extras_require=dict(
