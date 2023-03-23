@@ -19,6 +19,9 @@ def waiting_for_opp(room: BattleRoom):
     )
 
 
+DRAW_BY_TURNS = 200
+
+
 class EvalWorker:
     def __init__(
         self,
@@ -32,6 +35,7 @@ class EvalWorker:
         baseline_actor_fn: Type[Actor] = None,
         baseline_actor_args: Sequence[Any] = None,
         baseline_actor_kwargs: Mapping[str, Any] = None,
+        sleep: float = None,
     ):
         self.battle_format = battle_format
         self.team = team
@@ -51,6 +55,7 @@ class EvalWorker:
         self.baseline_actor_kwargs = (
             {} if baseline_actor_kwargs is None else baseline_actor_kwargs
         )
+        self.sleep = sleep
 
     def __repr__(self) -> str:
         return f"EvalWorker"
@@ -83,7 +88,9 @@ class EvalWorker:
         await barrier.wait()
 
         while True:  # 10 battles each player-player pair
-            await asyncio.sleep(2)
+            if self.sleep:
+                await asyncio.sleep(2)
+
             if player_index == 0:
                 await player.client.challenge_user(
                     self.opponent_username, self.battle_format, self.team
@@ -153,27 +160,38 @@ class EvalWorker:
                 if ended:
                     break
 
-                if (turns_since_last_move > 50 and turn > 100) or turn > 200:
-                    if turns_since_last_move > 50:
-                        print(f"{username}: draw by repetition!")
-                    elif turn > 100:
-                        print(f"{username}: draw by turn > 200!")
+                if turns_since_last_move > 50:
+                    print(f"{username}: forfeit by repetition!")
+
                     await player.client.websocket.send(
-                        player.room.battle_tag + "|" + "/offertie"
+                        player.room.battle_tag + "|" + "/forfeit"
                     )
                     while True:
                         message = await player.client.receive_message()
-                        if "is offering a tie." in message:
-                            await player.client.websocket.send(
-                                player.room.battle_tag + "|" + "/offertie"
-                            )
                         action_required = await player.recieve(message)
                         ended = player.room.get_js_attr("battle?.ended")
                         if ended:
                             break
                     break
 
+                if turn > 200:
+                    print(f"{username}: draw by turn > {DRAW_BY_TURNS}!")
+
+                    await player.client.websocket.send(
+                        player.room.battle_tag + "|" + "/offertie"
+                    )
+                    while True:
+                        message = await player.client.receive_message()
+                        action_required = await player.recieve(message)
+                        if "is offering a tie." in message:
+                            await player.client.websocket.send(
+                                player.room.battle_tag + "|" + "/offertie"
+                            )
+                        ended = player.room.get_js_attr("battle?.ended")
+                        if ended:
+                            break
+                    break
+
             await player.client.leave_battle(player.room.battle_tag)
-            datum = player.room.get_reward()
-            actor.store_reward(player.room, datum["pid"], datum["reward"])
+            actor.post_match(player.room)
             player.reset()

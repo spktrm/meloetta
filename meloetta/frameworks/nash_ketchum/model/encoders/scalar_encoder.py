@@ -126,6 +126,6 @@ class ScalarEncoder(nn.Module):
             ]
 
         scalar_emb = torch.cat(scalar_emb, dim=-1)
-        scalar_emb = F.relu(self.lin(scalar_emb))
+        scalar_emb = self.lin(scalar_emb)
 
         return scalar_emb

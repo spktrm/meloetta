@@ -364,11 +364,45 @@ class NAshKetchumLearner:
         loss_dict = {key + "_loss": 0 for key in Policy._fields}
         loss_dict.update({key.replace("policy", "value"): 0 for key in loss_dict})
 
+        fields = (
+            "action_type",
+            "move",
+            "switch",
+        )
+        if self.actor_model.gen >= 6:
+            fields += ("flag",)
+        else:
+            loss_dict.pop("flag_policy_loss")
+            loss_dict.pop("flag_value_loss")
+
+        if self.actor_model.gen == 8:
+            fields += ("max_move",)
+        else:
+            loss_dict.pop("max_move_policy_loss")
+            loss_dict.pop("max_move_value_loss")
+
+        if self.actor_model.gametype != "singles":
+            fields += ("target",)
+        else:
+            loss_dict.pop("target_policy_loss")
+            loss_dict.pop("target_value_loss")
+
         global_action_type = batch.action_type_index
 
-        total_valid = batch.valid.sum().item()
-        total_move_valid = (batch.valid * (global_action_type == 0)).sum().item()
-        total_switch_valid = (batch.valid * (global_action_type == 1)).sum().item()
+        total_valid = batch.valid.sum().clamp(min=1).item()
+
+        total_move_valid = batch.valid * (global_action_type == 0)
+        total_move_valid *= batch.move_mask.sum(-1) > 1
+        total_move_valid = total_move_valid.sum().clamp(min=1).item()
+
+        total_switch_valid = batch.valid * (global_action_type == 1)
+        total_switch_valid *= batch.switch_mask.sum(-1) > 1
+        total_switch_valid = total_switch_valid.sum().clamp(min=1).item()
+
+        if batch.flag_mask is not None:
+            total_flag_valid = batch.valid * (global_action_type == 0)
+            total_flag_valid *= batch.flag_mask.sum(-1) > 1
+            total_flag_valid = total_flag_valid.sum().clamp(min=1).item()
 
         minibatch_size = min(128, (4096 // batch.trajectory_length) + 1)
 
@@ -394,14 +428,7 @@ class NAshKetchumLearner:
                 need_log_policy=False,
             )
 
-            for field in (
-                "action_type",
-                "move",
-                "switch",
-                # "max_move",
-                "flag",
-                # "target",
-            ):
+            for field in fields:
                 pi_field = field + "_policy"
                 logit_field = field + "_logits"
 
@@ -412,14 +439,18 @@ class NAshKetchumLearner:
                     continue
 
                 action_type_index = minibatch.action_type_index
-                if pi_field == "action_type_policy":
+                policy_mask = minibatch.get_mask_from_policy(pi_field)
+
+                if field == "action_type":
                     valid = torch.ones_like(action_type_index)
-                elif pi_field == "switch_policy":
+                elif field == "switch":
                     valid = action_type_index == 1
-                elif pi_field == "target_policy":
+                elif field == "target":
                     valid = action_type_index == 2
                 else:
                     valid = action_type_index == 0
+
+                valid *= policy_mask.sum(-1) > 1
 
                 value_loss = get_loss_v(
                     [output.v] * 2,
@@ -434,7 +465,7 @@ class NAshKetchumLearner:
                     targ.get_policy_target(pi_field),
                     minibatch.valid * valid,
                     minibatch.player_id,
-                    minibatch.get_mask_from_policy(pi_field),
+                    policy_mask,
                     targ.importance_sampling_corrections,
                     clip=self.config.nerd.clip,
                     threshold=self.config.nerd.beta,
@@ -451,7 +482,7 @@ class NAshKetchumLearner:
                 elif "move" in field:
                     policy_valid = total_move_valid
                 elif "flag" in field:
-                    policy_valid = total_move_valid
+                    policy_valid = total_flag_valid
                 elif "switch" in field:
                     policy_valid = total_switch_valid
 
@@ -465,7 +496,7 @@ class NAshKetchumLearner:
             elif "move" in key:
                 loss_dict[key] /= total_move_valid
             elif "flag" in key:
-                loss_dict[key] /= total_move_valid
+                loss_dict[key] /= total_flag_valid
             elif "switch" in key:
                 loss_dict[key] /= total_switch_valid
 
