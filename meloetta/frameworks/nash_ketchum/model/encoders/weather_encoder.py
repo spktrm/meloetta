@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from meloetta.frameworks.nash_ketchum.model import config
+from meloetta.frameworks.nash_ketchum.model.utils import MLP
 from meloetta.data import WEATHERS, PSEUDOWEATHERS
 
 
@@ -26,31 +26,29 @@ class WeatherEncoder(nn.Module):
             + pw_min_onehot.embedding_dim * len(PSEUDOWEATHERS)
             + pw_max_onehot.embedding_dim * len(PSEUDOWEATHERS)
         )
-        self.lin = nn.Sequential(
-            nn.Linear(lin_in, config.embedding_dim),
-            nn.ReLU(),
-            nn.Linear(config.embedding_dim, config.embedding_dim),
-        )
+        self.encoder = MLP([lin_in, config.embedding_dim, config.embedding_dim])
 
     def forward(
         self,
         weather: torch.Tensor,
-        time_left: torch.Tensor,
-        min_time_left: torch.Tensor,
-        pseudo_weather: torch.Tensor,
+        pseudoweather: torch.Tensor,
     ):
-        weather_onehot = self.weather_onehot(weather + 1)
+        weather_token = weather[..., 0]
+        time_left = weather[..., 1]
+        min_time_left = weather[..., 2]
+
+        weather_onehot = self.weather_onehot(weather_token + 1)
         time_left_onehot = self.time_left_onehot(time_left)
         min_time_left_onehot = self.min_time_left_onehot(min_time_left)
 
-        pseudo_weather_x = pseudo_weather + 1
+        pseudo_weather_x = pseudoweather + 1
         pw_min_time_left = pseudo_weather_x[..., 0]
         pw_max_time_left = pseudo_weather_x[..., 1]
 
         pw_min_time_left_onehot = self.pw_min_onehot(pw_min_time_left)
         pw_max_time_left_onehot = self.pw_max_onehot(pw_max_time_left)
 
-        weather_emb = torch.cat(
+        weather_raw = torch.cat(
             (
                 weather_onehot,
                 time_left_onehot,
@@ -60,6 +58,4 @@ class WeatherEncoder(nn.Module):
             ),
             dim=-1,
         )
-        weather_emb = self.lin(weather_emb)
-
-        return weather_emb
+        return self.encoder(weather_raw)

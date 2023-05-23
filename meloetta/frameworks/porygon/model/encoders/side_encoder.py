@@ -10,6 +10,7 @@ from meloetta.frameworks.porygon.model.utils import (
     sqrt_one_hot_matrix,
     power_one_hot_matrix,
     TransformerEncoder,
+    GLU,
     ToVector,
 )
 from meloetta.frameworks.porygon.model.interfaces import SideEncoderOutput
@@ -110,9 +111,13 @@ class PrivatePokemonEmbedding(nn.Module):
             self.can_gmax_embedding = nn.Embedding.from_pretrained(torch.eye(3))
 
         self.encoder = nn.Sequential(
+            nn.Linear(output_dim, output_dim),
             nn.ReLU(),
             nn.LayerNorm(output_dim),
             nn.Linear(output_dim, output_dim),
+            # nn.ReLU(),
+            # nn.LayerNorm(output_dim),
+            # nn.Linear(output_dim, output_dim),
         )
 
     def embed_moves(
@@ -135,6 +140,21 @@ class PrivatePokemonEmbedding(nn.Module):
         )
         return self.item_lin(item_cat)
 
+    def discretize(self, x: torch.Tensor):
+        T, B, _, S, *_ = x.shape
+        x = x.view(T, B, 1, S, -1)
+        res = x
+        x = F.one_hot(x.view(T, B, 1, S, -1, 16).argmax(-1), 16)
+        x = x.view(T, B, 1, S, -1)
+        x = res + (x - res).detach()
+        return x
+
+    def to_dist(self, x: torch.Tensor):
+        T, B, _, S, *_ = x.shape
+        x = x.view(T, B, 1, S, -1, 16).softmax(-1)
+        x = x.view(T, B, 1, S, -1)
+        return x
+
     def forward(
         self, x: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor,]:
@@ -152,11 +172,11 @@ class PrivatePokemonEmbedding(nn.Module):
         level = longs[..., 13]
         gender = longs[..., 14]
         ability = longs[..., 15]
-        base_ability = longs[..., 16]
+        # base_ability = longs[..., 16]
         item = longs[..., 17]
         prev_item = longs[..., 18]
         item_effect = longs[..., 19]
-        prev_item_effect = longs[..., 20]
+        # prev_item_effect = longs[..., 20]
         status = longs[..., 21]
         sleep_turns = longs[..., 22]
         toxic_turns = longs[..., 23]
@@ -166,7 +186,7 @@ class PrivatePokemonEmbedding(nn.Module):
         if self.gen == 9:
             terastallized = longs[..., 29]
             teratype = longs[..., 30]
-            times_attacked = longs[..., 31]
+            # times_attacked = longs[..., 31]
 
         name_emb = self.pokedex_embedding(name)
         forme_emb = self.forme_embedding(forme)
@@ -185,12 +205,10 @@ class PrivatePokemonEmbedding(nn.Module):
         level_emb = self.level_embedding(level)
 
         ability_emb = self.ability_embedding(ability)
-        base_ability_emb = self.ability_embedding(base_ability)
-        base_ability_emb *= ~(ability == base_ability).unsqueeze(-1)
+        # base_ability_emb = self.ability_embedding(base_ability)
 
         item_emb = self.embed_item(item, item_effect)
-        prev_item_emb = self.embed_item(prev_item, prev_item_effect)
-        prev_item_emb *= ~(item == prev_item).unsqueeze(-1)
+        # prev_item_emb = self.embed_item(prev_item, prev_item_effect)
 
         status_onehot = self.status_onehot(status)
         sleep_turns_onehot = self.sleep_turns_onehot(sleep_turns)
@@ -200,7 +218,7 @@ class PrivatePokemonEmbedding(nn.Module):
         )
 
         moves_emb = self.move_embedding(self.move_embedding_ae(moves))
-        moveset_emb = moves_emb.max(-2).values
+        moveset_emb = moves_emb.sum(-2) / (moves > 0).sum(-1, keepdim=True).clamp(min=1)
 
         last_move_emb = self.last_move_embedding(self.move_embedding_ae(last_move))
 
@@ -213,23 +231,35 @@ class PrivatePokemonEmbedding(nn.Module):
             + gender_emb
             + level_emb
             + ability_emb
-            + base_ability_emb
+            # + base_ability_emb
             + item_emb
-            + prev_item_emb
+            # + prev_item_emb
             + status_emb
             + moveset_emb
             + last_move_emb
         )
 
         if self.gen == 9:
-            pokemon_emb += self.teratype_embedding(teratype)
-            pokemon_emb += self.tera_embedding((terastallized > 0).long())
+            pokemon_emb = pokemon_emb + self.teratype_embedding(teratype)
+            pokemon_emb = pokemon_emb + self.tera_embedding((terastallized > 0).long())
 
         mask = (name == 0) | (fainted == 2)
 
         pokemon_emb = self.encoder(pokemon_emb)
 
-        return pokemon_emb, mask, moves_emb
+        priv, pub1, pub2 = pokemon_emb.chunk(3, 2)
+        priv_mask, pub1_mask, pub2_mask = mask.chunk(3, 2)
+
+        # pokemon_emb = torch.cat(
+        #     (
+        #         self.discretize(priv),
+        #         self.to_dist(pub1),
+        #         self.to_dist(pub2),
+        #     ),
+        #     dim=2,
+        # )
+
+        return (priv, pub1, pub2), (priv_mask, pub1_mask, pub2_mask), moves_emb
 
 
 class SideEncoder(nn.Module):
@@ -254,7 +284,40 @@ class SideEncoder(nn.Module):
         #     resblocks_num_after=config.resblocks_num_after,
         # )
 
-        self.output = ToVector(
+        # priv_layer = nn.TransformerEncoderLayer(
+        #     d_model=config.entity_embedding_dim,
+        #     nhead=config.transformer_num_heads,
+        #     dim_feedforward=config.entity_embedding_dim,
+        #     dropout=0,
+        #     batch_first=True,
+        #     norm_first=True,
+        # )
+        # self.priv_encoder = nn.TransformerEncoder(
+        #     priv_layer,
+        #     num_layers=config.transformer_num_layers,
+        #     enable_nested_tensor=False,
+        # )
+
+        # pub_layer = nn.TransformerEncoderLayer(
+        #     d_model=config.entity_embedding_dim,
+        #     nhead=config.transformer_num_heads,
+        #     dim_feedforward=config.entity_embedding_dim,
+        #     dropout=0,
+        #     batch_first=True,
+        #     norm_first=True,
+        # )
+        # self.pub_encoder = nn.TransformerEncoder(
+        #     pub_layer,
+        #     num_layers=config.transformer_num_layers,
+        #     enable_nested_tensor=False,
+        # )
+
+        self.priv_output = ToVector(
+            input_dim=config.entity_embedding_dim,
+            output_dim=config.output_dim,
+        )
+
+        self.pub_output = ToVector(
             input_dim=config.entity_embedding_dim,
             output_dim=config.output_dim,
         )
@@ -262,61 +325,36 @@ class SideEncoder(nn.Module):
         self.boosts_onehot = nn.Embedding.from_pretrained(torch.eye(13))
         self.boosts_lin = nn.Linear(8 * 6, config.output_dim)
 
-        self.volatiles_mlp = nn.Sequential(
-            nn.Linear(len(VOLATILES), config.output_dim),
-            nn.LayerNorm(config.output_dim),
-            nn.ReLU(),
-            nn.Linear(config.output_dim, config.output_dim),
-        )
-
-        self.volatiles_mlp = nn.Sequential(
-            nn.Linear(len(VOLATILES), config.output_dim),
-            nn.LayerNorm(config.output_dim),
-            nn.ReLU(),
-            nn.Linear(config.output_dim, config.output_dim),
-        )
-
         self.toxicspikes_onehot = nn.Embedding.from_pretrained(torch.eye(3)[..., 1:])
         self.spikes_onehot = nn.Embedding.from_pretrained(torch.eye(4)[..., 1:])
 
-        self.sc_embedding = nn.Embedding(len(SIDE_CONDITIONS) - 4, 32)
-        self.sc_max_time_emb = nn.Embedding(9, 32)
-        self.sc_min_time_emb = nn.Embedding(9, 32)
-        self.sc_mlp = nn.Sequential(
-            nn.Linear(
-                2
-                + self.toxicspikes_onehot.embedding_dim
-                + self.spikes_onehot.embedding_dim
-                + self.sc_embedding.embedding_dim,
-                config.output_dim,
-            ),
+        side_con_size = (
+            2
+            + self.toxicspikes_onehot.embedding_dim
+            + self.spikes_onehot.embedding_dim
+            + (len(SIDE_CONDITIONS) - 4)
+        )
+
+        self.hidden_predic = nn.Sequential(
+            nn.Linear(config.output_dim, config.output_dim),
             nn.LayerNorm(config.output_dim),
             nn.ReLU(),
             nn.Linear(config.output_dim, config.output_dim),
         )
 
-        self.active_moves = nn.Sequential(
-            nn.Linear(config.entity_embedding_dim, config.entity_embedding_dim),
-            nn.LayerNorm(config.output_dim),
-            nn.ReLU(),
-            nn.Linear(config.entity_embedding_dim, config.entity_embedding_dim),
-        )
-
-        self.side_embedding_lin = nn.Sequential(
-            nn.Linear(config.output_dim, config.output_dim),
-            nn.LayerNorm(config.output_dim),
-            nn.ReLU(),
-            nn.Linear(config.output_dim, config.output_dim),
+        self.active_moves = GLU(
+            config.entity_embedding_dim,
+            config.entity_embedding_dim,
+            config.entity_embedding_dim,
         )
 
     def encode_boosts(self, boosts: torch.Tensor):
         boosts_embed = self.boosts_onehot(boosts + 6)
         boosts_embed = -boosts_embed[..., :6] + boosts_embed[..., 7:]
-        boosts_embed = self.boosts_lin(boosts_embed.flatten(-2))
-        return boosts_embed
+        return boosts_embed.flatten(2)
 
     def encode_volatiles(self, volatiles: torch.Tensor):
-        return self.volatiles_mlp(volatiles.float())
+        return volatiles.float().flatten(2)
 
     def encode_side_conditions(self, side_conditions: torch.Tensor):
         stealthrock = side_conditions[..., -4].unsqueeze(-1)
@@ -327,35 +365,24 @@ class SideEncoder(nn.Module):
 
         other_sc = side_conditions[..., :-4]
 
-        other_sc_size = len(SIDE_CONDITIONS) - 4
-        other_sc = other_sc.view(*other_sc.shape[:-1], other_sc_size, 3)
-        num_other_sc = other_sc[..., 0].sum(-1, keepdim=True)
-
-        other_sc_mask = other_sc[..., 0].unsqueeze(-1)
-        other_sc_embed = self.sc_embedding.weight.data
-        other_sc_embed = other_sc_embed + self.sc_max_time_emb(other_sc[..., 1])
-        other_sc_embed = other_sc_embed + self.sc_min_time_emb(other_sc[..., 2])
-        other_sc_embed = other_sc_embed * other_sc_mask
-        other_sc_embed = other_sc_embed.sum(-2)
-        other_sc_embed = other_sc_embed / num_other_sc.clamp(min=1)
-
         side_condition_embed = torch.cat(
             [
                 stealthrock,
                 stickyweb,
                 toxicspikes_onehot,
                 spikes_onehot,
-                other_sc_embed,
+                other_sc,
             ],
             dim=-1,
         )
-        return self.sc_mlp(side_condition_embed)
+        return side_condition_embed.flatten(2)
 
     def moves_given_context(self, active: torch.Tensor, moves: torch.Tensor):
-        active = active.unsqueeze(-2).repeat_interleave(4, -2)
+        active = active.unsqueeze(-2)  # .repeat_interleave(4, -2)
         moves = moves[..., : self.n_active, :, :]
-        active_and_moves = torch.cat((moves, active), dim=-1)
-        return F.glu(active_and_moves, dim=-1)
+        return self.active_moves(active, moves)
+        # active_and_moves = torch.cat((moves, active), dim=-1)
+        # return F.glu(active_and_moves, dim=-1)
 
     def forward(
         self,
@@ -365,51 +392,61 @@ class SideEncoder(nn.Module):
         side_conditions: torch.Tensor,
         wisher: torch.Tensor,
     ) -> SideEncoderOutput:
-        entity_embeddings, mask, moves_emb = self.embedding.forward(side)
 
-        T, B, N, S, *_ = entity_embeddings.shape
+        (
+            (priv, pub1, pub2),
+            (priv_mask, pub1_mask, pub2_mask),
+            moves_emb,
+        ) = self.embedding.forward(side)
 
-        mask = mask.to(torch.bool)
-        mask = ~mask.view(T * B * N, S)
+        T, B, _, S, *_ = priv.shape
+        N = 3
 
-        encoder_mask = mask.clone()
-        encoder_mask[..., 0] = 1
+        priv_mask = priv_mask.to(torch.bool)
+        priv_mask = priv_mask.view(T * B * 1, S)
 
-        entity_embeddings = entity_embeddings.view(T * B * N, S, -1)
-        # entity_embeddings = self.transformer(entity_embeddings, encoder_mask)
+        pub_mask = torch.cat((pub1_mask, pub2_mask), dim=2).bool()
+        pub_mask = pub_mask.view(T * B * 2, S)
 
-        entity_embedding = self.output(entity_embeddings, mask.unsqueeze(-1))
-        entity_embedding = entity_embedding.view(T, B, N, -1)
+        priv_encoder_mask = priv_mask.clone()
+        priv_encoder_mask[..., 0] = 0
 
-        side_embeddings = [
-            torch.cat(
-                (
-                    entity_embedding[:, :, :2].sum(2, keepdim=True),
-                    entity_embedding[:, :, 2:],
-                ),
-                dim=2,
-            ),
-            self.encode_boosts(boosts),
-            self.encode_volatiles(volatiles),
-            self.encode_side_conditions(side_conditions),
-        ]
-        side_embeddings = torch.stack(side_embeddings, dim=2)
-        side_embedding = torch.sum(side_embeddings, dim=2)
-        side_embedding = self.side_embedding_lin(side_embedding)
+        pub_encoder_mask = pub_mask.clone()
+        pub_encoder_mask[..., 0] = 0
 
-        entity_embeddings = entity_embeddings.view(T, B, N, S, -1)
+        priv_embeddings = priv.view(T * B, S, -1)
+        # priv_embeddings = self.priv_encoder(
+        #     priv_embeddings, src_key_padding_mask=priv_encoder_mask
+        # )
+        priv_embeddings = priv_embeddings * ~priv_mask.unsqueeze(-1)
+        priv_embedding = self.priv_output(priv_embeddings, ~priv_mask)
+        priv_embedding = priv_embedding.view(T, B, 1, -1)
 
-        active = entity_embeddings[..., 0, : self.n_active, :]
+        pub_embeddings = torch.cat((pub1, pub2), dim=2).view(T * B * 2, S, -1)
+        # pub_embeddings = self.priv_encoder(pub_embeddings, src_key_padding_mask=pub_encoder_mask)
+        pub_embeddings = pub_embeddings * ~pub_mask.unsqueeze(-1)
+        pub_embedding = self.pub_output(pub_embeddings, ~pub_encoder_mask)
+        pub_embedding = pub_embedding.view(T, B, 2, -1)
+
+        side_embedding = torch.cat((priv_embedding, pub_embedding), dim=2)
+
+        boosts = self.encode_boosts(boosts)
+        volatiles = self.encode_volatiles(volatiles)
+        side_conditions = self.encode_side_conditions(side_conditions)
+
+        side_context = torch.cat((boosts, volatiles, side_conditions), dim=-1)
+
+        priv_embeddings = priv_embeddings.view(T, B, S, -1)
+
+        active = priv_embeddings[..., : self.n_active, :]
         moves = self.moves_given_context(active, moves_emb[:, :, 0])
-        switches = entity_embeddings[:, :, 0, :6]
-
-        private_player = None
-        public_entity = None
+        switches = priv_embeddings[:, :, :6]
 
         return SideEncoderOutput(
             side_embedding=side_embedding,
-            private_entity=private_player,
-            public_entity=public_entity,
+            side_context=side_context,
+            targ_hidden=None,
+            pred_hidden=None,
             moves=moves,
             switches=switches,
         )

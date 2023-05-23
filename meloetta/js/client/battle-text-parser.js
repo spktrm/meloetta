@@ -294,11 +294,11 @@
     _proto.extractMessage = function extractMessage(buf) {
         var out = "";
         for (
-            var _i = 0, _buf$split = buf.split("\n");
-            _i < _buf$split.length;
-            _i++
+            var _i2 = 0, _buf$split2 = buf.split("\n");
+            _i2 < _buf$split2.length;
+            _i2++
         ) {
-            var _line = _buf$split[_i];
+            var _line = _buf$split2[_i2];
             var _BattleTextParser$par = BattleTextParser.parseBattleLine(_line),
                 args = _BattleTextParser$par.args,
                 kwArgs = _BattleTextParser$par.kwArgs;
@@ -444,8 +444,8 @@
         ) {
             namespaces[_key - 1] = arguments[_key];
         }
-        for (var _i2 = 0; _i2 < namespaces.length; _i2++) {
-            var namespace = namespaces[_i2];
+        for (var _i4 = 0; _i4 < namespaces.length; _i4++) {
+            var namespace = namespaces[_i4];
             if (!namespace) continue;
             if (namespace === "OWN") {
                 return BattleText["default"][type + "Own"] + "\n";
@@ -527,7 +527,6 @@
                 return "postMajor";
             }
         }
-
         return cmd.charAt(0) === "-" ? "postMajor" : "";
     };
     _proto.sectionBreak = function sectionBreak(args, kwArgs) {
@@ -642,7 +641,6 @@
                         newSpecies = arg2;
                         break;
                 }
-
                 var newSpeciesId = toID(newSpecies);
                 var _id7 = "";
                 var _templateName = "transform";
@@ -711,12 +709,10 @@
                     _id7,
                     kwArgs.msg ? "" : "NODEFAULT"
                 );
-
                 var line1 = this.maybeAbility(
                     kwArgs.from,
                     kwArgs.of || _pokemon4
                 );
-
                 return (
                     line1 +
                     _template2
@@ -733,7 +729,6 @@
                     kwArgs.from,
                     this.own(_side3)
                 );
-
                 return _template3
                     .replace("[TRAINER]", this.trainer(_side3))
                     .replace("[NICKNAME]", this.pokemonName(_pokemon5))
@@ -750,14 +745,14 @@
                 var _pokemon7 = args[1],
                     target = args[2];
                 if (!target || !isNaN(Number(target))) {
-                    var _template6 = this.template("swapCenter");
-                    return _template6.replace(
+                    var _template5 = this.template("swapCenter");
+                    return _template5.replace(
                         "[POKEMON]",
                         this.pokemon(_pokemon7)
                     );
                 }
-                var _template5 = this.template("swap");
-                return _template5
+                var _template6 = this.template("swap");
+                return _template6
                     .replace("[POKEMON]", this.pokemon(_pokemon7))
                     .replace("[TARGET]", this.pokemon(target));
             }
@@ -769,7 +764,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon8
                 );
-
                 if (kwArgs.zeffect) {
                     _line2 = this.template("zEffect").replace(
                         "[POKEMON]",
@@ -828,40 +822,40 @@
                     this.maybeAbility(kwArgs.from, kwArgs.of || _pokemon10);
                 var _id8 = BattleTextParser.effectId(_effect3);
                 if (_id8 === "typechange") {
-                    var _template11 = this.template("typeChange", kwArgs.from);
+                    var _template10 = this.template("typeChange", kwArgs.from);
                     return (
                         _line4 +
-                        _template11
+                        _template10
                             .replace("[POKEMON]", this.pokemon(_pokemon10))
                             .replace("[TYPE]", _arg)
                             .replace("[SOURCE]", this.pokemon(kwArgs.of))
                     );
                 }
                 if (_id8 === "typeadd") {
-                    var _template12 = this.template("typeAdd", kwArgs.from);
+                    var _template11 = this.template("typeAdd", kwArgs.from);
                     return (
                         _line4 +
-                        _template12
+                        _template11
                             .replace("[POKEMON]", this.pokemon(_pokemon10))
                             .replace("[TYPE]", _arg)
                     );
                 }
                 if (_id8.startsWith("stockpile")) {
                     var _num2 = _id8.slice(9);
-                    var _template13 = this.template("start", "stockpile");
+                    var _template12 = this.template("start", "stockpile");
                     return (
                         _line4 +
-                        _template13
+                        _template12
                             .replace("[POKEMON]", this.pokemon(_pokemon10))
                             .replace("[NUMBER]", _num2)
                     );
                 }
                 if (_id8.startsWith("perish")) {
                     var _num3 = _id8.slice(6);
-                    var _template14 = this.template("activate", "perishsong");
+                    var _template13 = this.template("activate", "perishsong");
                     return (
                         _line4 +
-                        _template14
+                        _template13
                             .replace("[POKEMON]", this.pokemon(_pokemon10))
                             .replace("[NUMBER]", _num3)
                     );
@@ -871,14 +865,13 @@
                     _id8.startsWith("quarkdrive")
                 ) {
                     var stat = _id8.slice(-3);
-                    var _template15 = this.template(
+                    var _template14 = this.template(
                         "start",
                         _id8.slice(0, _id8.length - 3)
                     );
-
                     return (
                         _line4 +
-                        _template15
+                        _template14
                             .replace("[POKEMON]", this.pokemon(_pokemon10))
                             .replace("[STAT]", BattleTextParser.stat(stat))
                     );
@@ -901,14 +894,14 @@
                 ) {
                     templateId += "FromItem";
                 }
-                var _template10 = this.template(
+                var _template15 = this.template(
                     templateId,
                     kwArgs.from,
                     _effect3
                 );
                 return (
                     _line4 +
-                    _template10
+                    _template15
                         .replace("[POKEMON]", this.pokemon(_pokemon10))
                         .replace("[EFFECT]", this.effect(_effect3))
                         .replace("[MOVE]", _arg)
@@ -926,28 +919,28 @@
                     this.maybeAbility(kwArgs.from, kwArgs.of || _pokemon11);
                 var _id9 = BattleTextParser.effectId(_effect4);
                 if (_id9 === "doomdesire" || _id9 === "futuresight") {
-                    var _template17 = this.template("activate", _effect4);
+                    var _template16 = this.template("activate", _effect4);
                     return (
                         _line5 +
-                        _template17.replace(
+                        _template16.replace(
                             "[TARGET]",
                             this.pokemon(_pokemon11)
                         )
                     );
                 }
                 var _templateId = "end";
-                var _template16 = "";
+                var _template17 = "";
                 if (
                     (_kwArgs$from2 = kwArgs.from) != null &&
                     _kwArgs$from2.startsWith("item:")
                 ) {
-                    _template16 = this.template("endFromItem", _effect4);
+                    _template17 = this.template("endFromItem", _effect4);
                 }
-                if (!_template16)
-                    _template16 = this.template(_templateId, _effect4);
+                if (!_template17)
+                    _template17 = this.template(_templateId, _effect4);
                 return (
                     _line5 +
-                    _template16
+                    _template17
                         .replace("[POKEMON]", this.pokemon(_pokemon11))
                         .replace("[EFFECT]", this.effect(_effect4))
                         .replace("[SOURCE]", this.pokemon(kwArgs.of))
@@ -973,20 +966,19 @@
                 if (oldAbility) _line6 += this.ability(oldAbility, _pokemon12);
                 _line6 += this.ability(ability, _pokemon12);
                 if (kwArgs.fail) {
-                    var _template19 = this.template("block", kwArgs.from);
-                    return _line6 + _template19;
+                    var _template18 = this.template("block", kwArgs.from);
+                    return _line6 + _template18;
                 }
                 if (kwArgs.from) {
                     _line6 =
                         this.maybeAbility(kwArgs.from, _pokemon12) + _line6;
-                    var _template20 = this.template(
+                    var _template19 = this.template(
                         "changeAbility",
                         kwArgs.from
                     );
-
                     return (
                         _line6 +
-                        _template20
+                        _template19
                             .replace("[POKEMON]", this.pokemon(_pokemon12))
                             .replace("[ABILITY]", this.effect(ability))
                             .replace("[SOURCE]", this.pokemon(kwArgs.of))
@@ -994,10 +986,10 @@
                 }
                 var _id10 = BattleTextParser.effectId(ability);
                 if (_id10 === "unnerve") {
-                    var _template21 = this.template("start", ability);
+                    var _template20 = this.template("start", ability);
                     return (
                         _line6 +
-                        _template21.replace(
+                        _template20.replace(
                             "[TEAM]",
                             this.team(_pokemon12.slice(0, 2), true)
                         )
@@ -1006,15 +998,14 @@
                 var _templateId2 = "start";
                 if (_id10 === "anticipation" || _id10 === "sturdy")
                     _templateId2 = "activate";
-                var _template18 = this.template(
+                var _template21 = this.template(
                     _templateId2,
                     ability,
                     "NODEFAULT"
                 );
-
                 return (
                     _line6 +
-                    _template18.replace("[POKEMON]", this.pokemon(_pokemon12))
+                    _template21.replace("[POKEMON]", this.pokemon(_pokemon12))
                 );
             }
 
@@ -1026,7 +1017,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon13
                 );
-
                 var _template22 = this.template("start", "Gastro Acid");
                 return (
                     _line7 +
@@ -1048,7 +1038,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon14
                 );
-
                 if (
                     [
                         "thief",
@@ -1058,10 +1047,10 @@
                         "pickpocket",
                     ].includes(_id11)
                 ) {
-                    var _template24 = this.template("takeItem", kwArgs.from);
+                    var _template23 = this.template("takeItem", kwArgs.from);
                     return (
                         _line8 +
-                        _template24
+                        _template23
                             .replace("[POKEMON]", this.pokemon(_pokemon14))
                             .replace("[ITEM]", this.effect(item))
                             .replace(
@@ -1073,32 +1062,31 @@
                 if (_id11 === "frisk") {
                     var hasTarget =
                         kwArgs.of && _pokemon14 && kwArgs.of !== _pokemon14;
-                    var _template25 = this.template(
+                    var _template24 = this.template(
                         hasTarget ? "activate" : "activateNoTarget",
                         "Frisk"
                     );
-
                     return (
                         _line8 +
-                        _template25
+                        _template24
                             .replace("[POKEMON]", this.pokemon(kwArgs.of))
                             .replace("[ITEM]", this.effect(item))
                             .replace("[TARGET]", this.pokemon(_pokemon14))
                     );
                 }
                 if (kwArgs.from) {
-                    var _template26 = this.template("addItem", kwArgs.from);
+                    var _template25 = this.template("addItem", kwArgs.from);
                     return (
                         _line8 +
-                        _template26
+                        _template25
                             .replace("[POKEMON]", this.pokemon(_pokemon14))
                             .replace("[ITEM]", this.effect(item))
                     );
                 }
-                var _template23 = this.template("start", item, "NODEFAULT");
+                var _template26 = this.template("start", item, "NODEFAULT");
                 return (
                     _line8 +
-                    _template23.replace("[POKEMON]", this.pokemon(_pokemon14))
+                    _template26.replace("[POKEMON]", this.pokemon(_pokemon14))
                 );
             }
 
@@ -1109,65 +1097,63 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon15
                 );
-
                 if (kwArgs.eat) {
-                    var _template28 = this.template("eatItem", kwArgs.from);
+                    var _template27 = this.template("eatItem", kwArgs.from);
                     return (
                         _line9 +
-                        _template28
+                        _template27
                             .replace("[POKEMON]", this.pokemon(_pokemon15))
                             .replace("[ITEM]", this.effect(_item))
                     );
                 }
                 var _id12 = BattleTextParser.effectId(kwArgs.from);
                 if (_id12 === "gem") {
-                    var _template29 = this.template("useGem", _item);
+                    var _template28 = this.template("useGem", _item);
                     return (
                         _line9 +
-                        _template29
+                        _template28
                             .replace("[POKEMON]", this.pokemon(_pokemon15))
                             .replace("[ITEM]", this.effect(_item))
                             .replace("[MOVE]", kwArgs.move)
                     );
                 }
                 if (_id12 === "stealeat") {
-                    var _template30 = this.template("removeItem", "Bug Bite");
+                    var _template29 = this.template("removeItem", "Bug Bite");
                     return (
                         _line9 +
-                        _template30
+                        _template29
                             .replace("[SOURCE]", this.pokemon(kwArgs.of))
                             .replace("[ITEM]", this.effect(_item))
                     );
                 }
                 if (kwArgs.from) {
-                    var _template31 = this.template("removeItem", kwArgs.from);
+                    var _template30 = this.template("removeItem", kwArgs.from);
                     return (
                         _line9 +
-                        _template31
+                        _template30
                             .replace("[POKEMON]", this.pokemon(_pokemon15))
                             .replace("[ITEM]", this.effect(_item))
                             .replace("[SOURCE]", this.pokemon(kwArgs.of))
                     );
                 }
                 if (kwArgs.weaken) {
-                    var _template32 = this.template("activateWeaken");
+                    var _template31 = this.template("activateWeaken");
                     return (
                         _line9 +
-                        _template32
+                        _template31
                             .replace("[POKEMON]", this.pokemon(_pokemon15))
                             .replace("[ITEM]", this.effect(_item))
                     );
                 }
-                var _template27 = this.template("end", _item, "NODEFAULT");
-                if (!_template27)
-                    _template27 = this.template("activateItem").replace(
+                var _template32 = this.template("end", _item, "NODEFAULT");
+                if (!_template32)
+                    _template32 = this.template("activateItem").replace(
                         "[ITEM]",
                         this.effect(_item)
                     );
-
                 return (
                     _line9 +
-                    _template27
+                    _template32
                         .replace("[POKEMON]", this.pokemon(_pokemon15))
                         .replace("[TARGET]", this.pokemon(kwArgs.of))
                 );
@@ -1180,21 +1166,20 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon16
                 );
-
                 if (BattleTextParser.effectId(kwArgs.from) === "rest") {
-                    var _template34 = this.template("startFromRest", status);
+                    var _template33 = this.template("startFromRest", status);
                     return (
                         _line10 +
-                        _template34.replace(
+                        _template33.replace(
                             "[POKEMON]",
                             this.pokemon(_pokemon16)
                         )
                     );
                 }
-                var _template33 = this.template("start", status);
+                var _template34 = this.template("start", status);
                 return (
                     _line10 +
-                    _template33.replace("[POKEMON]", this.pokemon(_pokemon16))
+                    _template34.replace("[POKEMON]", this.pokemon(_pokemon16))
                 );
             }
 
@@ -1203,8 +1188,8 @@
                 var _pokemon17 = args[1],
                     _status = args[2];
                 if (BattleTextParser.effectId(kwArgs.from) === "naturalcure") {
-                    var _template36 = this.template("activate", kwArgs.from);
-                    return _template36.replace(
+                    var _template35 = this.template("activate", kwArgs.from);
+                    return _template35.replace(
                         "[POKEMON]",
                         this.pokemon(_pokemon17)
                     );
@@ -1213,37 +1198,36 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon17
                 );
-
                 if (
                     (_kwArgs$from3 = kwArgs.from) != null &&
                     _kwArgs$from3.startsWith("item:")
                 ) {
-                    var _template37 = this.template("endFromItem", _status);
+                    var _template36 = this.template("endFromItem", _status);
                     return (
                         _line11 +
-                        _template37
+                        _template36
                             .replace("[POKEMON]", this.pokemon(_pokemon17))
                             .replace("[ITEM]", this.effect(kwArgs.from))
                     );
                 }
                 if (kwArgs.thaw) {
-                    var _template38 = this.template("endFromMove", _status);
+                    var _template37 = this.template("endFromMove", _status);
                     return (
                         _line11 +
-                        _template38
+                        _template37
                             .replace("[POKEMON]", this.pokemon(_pokemon17))
                             .replace("[MOVE]", this.effect(kwArgs.from))
                     );
                 }
-                var _template35 = this.template("end", _status, "NODEFAULT");
-                if (!_template35)
-                    _template35 = this.template("end").replace(
+                var _template38 = this.template("end", _status, "NODEFAULT");
+                if (!_template38)
+                    _template38 = this.template("end").replace(
                         "[EFFECT]",
                         _status
                     );
                 return (
                     _line11 +
-                    _template35.replace("[POKEMON]", this.pokemon(_pokemon17))
+                    _template38.replace("[POKEMON]", this.pokemon(_pokemon17))
                 );
             }
 
@@ -1260,24 +1244,23 @@
                     this.maybeAbility(kwArgs.from, kwArgs.of || _pokemon18);
                 var _id13 = BattleTextParser.effectId(_effect5);
                 if (_id13 === "instruct") {
-                    var _template40 = this.template("activate", _effect5);
+                    var _template39 = this.template("activate", _effect5);
                     return (
                         _line12 +
-                        _template40
+                        _template39
                             .replace("[POKEMON]", this.pokemon(kwArgs.of))
                             .replace("[TARGET]", this.pokemon(_pokemon18))
                     );
                 }
-                var _template39 = this.template("start", _effect5, "NODEFAULT");
-                if (!_template39)
-                    _template39 = this.template("start").replace(
+                var _template40 = this.template("start", _effect5, "NODEFAULT");
+                if (!_template40)
+                    _template40 = this.template("start").replace(
                         "[EFFECT]",
                         this.effect(_effect5)
                     );
-
                 return (
                     _line12 +
-                    _template39
+                    _template40
                         .replace("[POKEMON]", this.pokemon(_pokemon18))
                         .replace("[SOURCE]", this.pokemon(kwArgs.of))
                         .replace("[TEAM]", this.team(_pokemon18.slice(0, 2)))
@@ -1293,7 +1276,6 @@
                         "[EFFECT]",
                         this.effect(_effect6)
                     );
-
                 return _template41
                     .replace("[TEAM]", this.team(_side5))
                     .replace("[PARTY]", this.party(_side5));
@@ -1308,7 +1290,6 @@
                         "[EFFECT]",
                         this.effect(_effect7)
                     );
-
                 return _template42
                     .replace("[TEAM]", this.team(_side6))
                     .replace("[PARTY]", this.party(_side6));
@@ -1317,32 +1298,29 @@
             case "-weather": {
                 var weather = args[1];
                 if (!weather || weather === "none") {
-                    var _template44 = this.template(
+                    var _template43 = this.template(
                         "end",
                         kwArgs.from,
                         "NODEFAULT"
                     );
-
-                    if (!_template44)
+                    if (!_template43)
                         return this.template("endFieldEffect").replace(
                             "[EFFECT]",
                             this.effect(weather)
                         );
-
-                    return _template44;
+                    return _template43;
                 }
                 if (kwArgs.upkeep) {
                     return this.template("upkeep", weather, "NODEFAULT");
                 }
                 var _line13 = this.maybeAbility(kwArgs.from, kwArgs.of);
-                var _template43 = this.template("start", weather, "NODEFAULT");
-                if (!_template43)
-                    _template43 = this.template("startFieldEffect").replace(
+                var _template44 = this.template("start", weather, "NODEFAULT");
+                if (!_template44)
+                    _template44 = this.template("startFieldEffect").replace(
                         "[EFFECT]",
                         this.effect(weather)
                     );
-
-                return _line13 + _template43;
+                return _line13 + _template44;
             }
 
             case "-fieldstart":
@@ -1371,7 +1349,6 @@
                         "[EFFECT]",
                         this.effect(_effect8)
                     );
-
                 return (
                     _line14 +
                     _template45.replace("[POKEMON]", this.pokemon(kwArgs.of))
@@ -1386,7 +1363,6 @@
                         "[EFFECT]",
                         this.effect(_effect9)
                     );
-
                 return _template46;
             }
 
@@ -1437,10 +1413,10 @@
                 var _line15 = this.maybeAbility(_effect11, _pokemon19);
 
                 if (_id14 === "lockon" || _id14 === "mindreader") {
-                    var _template48 = this.template("start", _effect11);
+                    var _template47 = this.template("start", _effect11);
                     return (
                         _line15 +
-                        _template48
+                        _template47
                             .replace("[POKEMON]", this.pokemon(kwArgs.of))
                             .replace("[SOURCE]", this.pokemon(_pokemon19))
                     );
@@ -1455,11 +1431,21 @@
                         _id14 === "mummy" ? "Mummy" : "Lingering Aroma",
                         _target2
                     );
-
-                    var _template49 = this.template("changeAbility", _id14);
+                    var _template48 = this.template("changeAbility", _id14);
                     return (
                         _line15 +
-                        _template49.replace("[TARGET]", this.pokemon(_target2))
+                        _template48.replace("[TARGET]", this.pokemon(_target2))
+                    );
+                }
+
+                if (_id14 === "commander") {
+                    if (_target2 === _pokemon19) return _line15;
+                    var _template49 = this.template("activate", _id14);
+                    return (
+                        _line15 +
+                        _template49
+                            .replace("[POKEMON]", this.pokemon(_pokemon19))
+                            .replace(/\[TARGET\]/g, this.pokemon(_target2))
                     );
                 }
 
@@ -1476,22 +1462,22 @@
                 if (_id14 === "orichalcumpulse" && kwArgs.source) {
                     _templateId4 = "start";
                 }
-                var _template47 = this.template(
+                var _template50 = this.template(
                     _templateId4,
                     _effect11,
                     "NODEFAULT"
                 );
-                if (!_template47) {
+                if (!_template50) {
                     if (_line15) return _line15;
-                    _template47 = this.template("activate");
+                    _template50 = this.template("activate");
                     return (
                         _line15 +
-                        _template47.replace("[EFFECT]", this.effect(_effect11))
+                        _template50.replace("[EFFECT]", this.effect(_effect11))
                     );
                 }
 
                 if (_id14 === "brickbreak") {
-                    _template47 = _template47.replace(
+                    _template50 = _template50.replace(
                         "[TEAM]",
                         this.team(_target2.slice(0, 2))
                     );
@@ -1508,7 +1494,7 @@
                     kwArgs.item ||
                     kwArgs.name
                 ) {
-                    _template47 = _template47
+                    _template50 = _template50
                         .replace("[MOVE]", kwArgs.move)
                         .replace("[NUMBER]", kwArgs.number)
                         .replace("[ITEM]", kwArgs.item)
@@ -1516,7 +1502,7 @@
                 }
                 return (
                     _line15 +
-                    _template47
+                    _template50
                         .replace("[POKEMON]", this.pokemon(_pokemon19))
                         .replace("[TARGET]", this.pokemon(_target2))
                         .replace("[SOURCE]", this.pokemon(kwArgs.of))
@@ -1527,8 +1513,8 @@
                 var _pokemon20 = args[1],
                     _effect12 = args[2],
                     _target3 = args[3];
-                var _template50 = this.template("prepare", _effect12);
-                return _template50
+                var _template51 = this.template("prepare", _effect12);
+                return _template51
                     .replace("[POKEMON]", this.pokemon(_pokemon20))
                     .replace("[TARGET]", this.pokemon(_target3));
             }
@@ -1536,22 +1522,20 @@
             case "-damage": {
                 var _pokemon21 = args[1],
                     percentage = args[3];
-                var _template51 = this.template(
+                var _template52 = this.template(
                     "damage",
                     kwArgs.from,
                     "NODEFAULT"
                 );
-
                 var _line16 = this.maybeAbility(
                     kwArgs.from,
                     kwArgs.of || _pokemon21
                 );
-
                 var _id15 = BattleTextParser.effectId(kwArgs.from);
-                if (_template51) {
+                if (_template52) {
                     return (
                         _line16 +
-                        _template51.replace(
+                        _template52.replace(
                             "[POKEMON]",
                             this.pokemon(_pokemon21)
                         )
@@ -1559,25 +1543,23 @@
                 }
 
                 if (!kwArgs.from) {
-                    _template51 = this.template(
+                    _template52 = this.template(
                         percentage ? "damagePercentage" : "damage"
                     );
-
                     return (
                         _line16 +
-                        _template51
+                        _template52
                             .replace("[POKEMON]", this.pokemon(_pokemon21))
                             .replace("[PERCENTAGE]", percentage)
                     );
                 }
                 if (kwArgs.from.startsWith("item:")) {
-                    _template51 = this.template(
+                    _template52 = this.template(
                         kwArgs.of ? "damageFromPokemon" : "damageFromItem"
                     );
-
                     return (
                         _line16 +
-                        _template51
+                        _template52
                             .replace("[POKEMON]", this.pokemon(_pokemon21))
                             .replace("[ITEM]", this.effect(kwArgs.from))
                             .replace("[SOURCE]", this.pokemon(kwArgs.of))
@@ -1588,34 +1570,34 @@
                     _id15 === "bind" ||
                     _id15 === "wrap"
                 ) {
-                    _template51 = this.template("damageFromPartialTrapping");
+                    _template52 = this.template("damageFromPartialTrapping");
                     return (
                         _line16 +
-                        _template51
+                        _template52
                             .replace("[POKEMON]", this.pokemon(_pokemon21))
                             .replace("[MOVE]", this.effect(kwArgs.from))
                     );
                 }
 
-                _template51 = this.template("damage");
+                _template52 = this.template("damage");
                 return (
                     _line16 +
-                    _template51.replace("[POKEMON]", this.pokemon(_pokemon21))
+                    _template52.replace("[POKEMON]", this.pokemon(_pokemon21))
                 );
             }
 
             case "-heal": {
                 var _pokemon22 = args[1];
-                var _template52 = this.template(
+                var _template53 = this.template(
                     "heal",
                     kwArgs.from,
                     "NODEFAULT"
                 );
                 var _line17 = this.maybeAbility(kwArgs.from, _pokemon22);
-                if (_template52) {
+                if (_template53) {
                     return (
                         _line17 +
-                        _template52
+                        _template53
                             .replace("[POKEMON]", this.pokemon(_pokemon22))
                             .replace("[SOURCE]", this.pokemon(kwArgs.of))
                             .replace("[NICKNAME]", kwArgs.wisher)
@@ -1623,19 +1605,19 @@
                 }
 
                 if (kwArgs.from && !kwArgs.from.startsWith("ability:")) {
-                    _template52 = this.template("healFromEffect");
+                    _template53 = this.template("healFromEffect");
                     return (
                         _line17 +
-                        _template52
+                        _template53
                             .replace("[POKEMON]", this.pokemon(_pokemon22))
                             .replace("[EFFECT]", this.effect(kwArgs.from))
                     );
                 }
 
-                _template52 = this.template("heal");
+                _template53 = this.template("heal");
                 return (
                     _line17 +
-                    _template52.replace("[POKEMON]", this.pokemon(_pokemon22))
+                    _template53.replace("[POKEMON]", this.pokemon(_pokemon22))
                 );
             }
 
@@ -1651,7 +1633,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon23
                 );
-
                 var _templateId5 = cmd.slice(1);
                 if (amount >= 3) _templateId5 += "3";
                 else if (amount >= 2) _templateId5 += "2";
@@ -1669,7 +1650,6 @@
                         _templateId5 + "FromItem",
                         kwArgs.from
                     );
-
                     return (
                         _line18 +
                         _template54
@@ -1678,10 +1658,10 @@
                             .replace("[ITEM]", this.effect(kwArgs.from))
                     );
                 }
-                var _template53 = this.template(_templateId5, kwArgs.from);
+                var _template55 = this.template(_templateId5, kwArgs.from);
                 return (
                     _line18 +
-                    _template53
+                    _template55
                         .replace("[POKEMON]", this.pokemon(_pokemon23))
                         .replace("[STAT]", BattleTextParser.stat(_stat2))
                 );
@@ -1694,10 +1674,10 @@
                     _effect13,
                     kwArgs.of || _pokemon24
                 );
-                var _template55 = this.template("boost", _effect13);
+                var _template56 = this.template("boost", _effect13);
                 return (
                     _line19 +
-                    _template55.replace("[POKEMON]", this.pokemon(_pokemon24))
+                    _template56.replace("[POKEMON]", this.pokemon(_pokemon24))
                 );
             }
 
@@ -1708,15 +1688,14 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon25
                 );
-
                 var _id16 = BattleTextParser.effectId(kwArgs.from);
                 var _templateId6 = "swapBoost";
                 if (_id16 === "guardswap") _templateId6 = "swapDefensiveBoost";
                 if (_id16 === "powerswap") _templateId6 = "swapOffensiveBoost";
-                var _template56 = this.template(_templateId6, kwArgs.from);
+                var _template57 = this.template(_templateId6, kwArgs.from);
                 return (
                     _line20 +
-                    _template56
+                    _template57
                         .replace("[POKEMON]", this.pokemon(_pokemon25))
                         .replace("[TARGET]", this.pokemon(_target4))
                 );
@@ -1729,11 +1708,10 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon26
                 );
-
-                var _template57 = this.template("copyBoost", kwArgs.from);
+                var _template58 = this.template("copyBoost", kwArgs.from);
                 return (
                     _line21 +
-                    _template57
+                    _template58
                         .replace("[POKEMON]", this.pokemon(_pokemon26))
                         .replace("[TARGET]", this.pokemon(_target5))
                 );
@@ -1748,13 +1726,12 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon27
                 );
-
                 var _templateId7 = "clearBoost";
                 if (kwArgs.zeffect) _templateId7 = "clearBoostFromZEffect";
-                var _template58 = this.template(_templateId7, kwArgs.from);
+                var _template59 = this.template(_templateId7, kwArgs.from);
                 return (
                     _line22 +
-                    _template58
+                    _template59
                         .replace("[POKEMON]", this.pokemon(_pokemon27))
                         .replace("[SOURCE]", this.pokemon(source))
                 );
@@ -1766,11 +1743,10 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon28
                 );
-
-                var _template59 = this.template("invertBoost", kwArgs.from);
+                var _template60 = this.template("invertBoost", kwArgs.from);
                 return (
                     _line23 +
-                    _template59.replace("[POKEMON]", this.pokemon(_pokemon28))
+                    _template60.replace("[POKEMON]", this.pokemon(_pokemon28))
                 );
             }
 
@@ -1786,8 +1762,8 @@
                 if (_templateId8 === "supereffective")
                     _templateId8 = "superEffective";
                 if (kwArgs.spread) _templateId8 += "Spread";
-                var _template60 = this.template(_templateId8);
-                return _template60.replace(
+                var _template61 = this.template(_templateId8);
+                return _template61.replace(
                     "[POKEMON]",
                     this.pokemon(_pokemon29)
                 );
@@ -1806,10 +1782,10 @@
                 var _templateId9 = "block";
                 if (_id17 === "mist" && this.gen <= 2)
                     _templateId9 = "blockGen" + this.gen;
-                var _template61 = this.template(_templateId9, _effect14);
+                var _template62 = this.template(_templateId9, _effect14);
                 return (
                     _line24 +
-                    _template61
+                    _template62
                         .replace("[POKEMON]", this.pokemon(_pokemon30))
                         .replace(
                             "[SOURCE]",
@@ -1829,7 +1805,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon31
                 );
-
                 var _templateId10 = "block";
                 if (
                     ["desolateland", "primordialsea"].includes(blocker) &&
@@ -1846,11 +1821,11 @@
                 } else if (blocker === "uproar" && kwArgs.msg) {
                     _templateId10 = "blockSelf";
                 }
-                var _template62 = this.template(_templateId10, kwArgs.from);
-                if (_template62) {
+                var _template63 = this.template(_templateId10, kwArgs.from);
+                if (_template63) {
                     return (
                         _line25 +
-                        _template62.replace(
+                        _template63.replace(
                             "[POKEMON]",
                             this.pokemon(_pokemon31)
                         )
@@ -1858,14 +1833,13 @@
                 }
 
                 if (_id18 === "unboost") {
-                    _template62 = this.template(
+                    _template63 = this.template(
                         _stat3 ? "failSingular" : "fail",
                         "unboost"
                     );
-
                     return (
                         _line25 +
-                        _template62
+                        _template63
                             .replace("[POKEMON]", this.pokemon(_pokemon31))
                             .replace("[STAT]", _stat3)
                     );
@@ -1888,10 +1862,10 @@
                 if (kwArgs.heavy) _templateId10 = "failTooHeavy";
                 if (kwArgs.weak) _templateId10 = "fail";
                 if (kwArgs.forme) _templateId10 = "failWrongForme";
-                _template62 = this.template(_templateId10, _id18);
+                _template63 = this.template(_templateId10, _id18);
                 return (
                     _line25 +
-                    _template62.replace("[POKEMON]", this.pokemon(_pokemon31))
+                    _template63.replace("[POKEMON]", this.pokemon(_pokemon31))
                 );
             }
 
@@ -1901,18 +1875,17 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon32
                 );
-
-                var _template63 = this.template("block", kwArgs.from);
-                if (!_template63) {
+                var _template64 = this.template("block", kwArgs.from);
+                if (!_template64) {
                     var _templateId11 = kwArgs.ohko ? "immuneOHKO" : "immune";
-                    _template63 = this.template(
+                    _template64 = this.template(
                         _pokemon32 ? _templateId11 : "immuneNoPokemon",
                         kwArgs.from
                     );
                 }
                 return (
                     _line26 +
-                    _template63.replace("[POKEMON]", this.pokemon(_pokemon32))
+                    _template64.replace("[POKEMON]", this.pokemon(_pokemon32))
                 );
             }
 
@@ -1923,7 +1896,6 @@
                     kwArgs.from,
                     kwArgs.of || _pokemon33
                 );
-
                 if (!_pokemon33) {
                     var _template65 = this.template("missNoPokemon");
                     return (
@@ -1931,10 +1903,10 @@
                         _template65.replace("[SOURCE]", this.pokemon(_source))
                     );
                 }
-                var _template64 = this.template("miss");
+                var _template66 = this.template("miss");
                 return (
                     _line27 +
-                    _template64.replace("[POKEMON]", this.pokemon(_pokemon33))
+                    _template66.replace("[POKEMON]", this.pokemon(_pokemon33))
                 );
             }
 
@@ -1962,16 +1934,16 @@
                 if (!_id19 && cmd === "-mega" && this.gen < 7)
                     _templateId12 = "megaGen6";
                 if (!_item2 && cmd === "-mega") _templateId12 = "megaNoItem";
-                var _template66 = this.template(_templateId12, _id19);
+                var _template67 = this.template(_templateId12, _id19);
                 var _side7 = _pokemon34.slice(0, 2);
                 var pokemonName = this.pokemon(_pokemon34);
                 if (cmd === "-mega") {
                     var template2 = this.template("transformMega");
-                    _template66 += template2
+                    _template67 += template2
                         .replace("[POKEMON]", pokemonName)
                         .replace("[SPECIES]", species);
                 }
-                return _template66
+                return _template67
                     .replace("[POKEMON]", pokemonName)
                     .replace("[ITEM]", _item2)
                     .replace("[TRAINER]", this.trainer(_side7));
@@ -1982,17 +1954,17 @@
                     type = args[2];
                 var _id20 = "";
                 var _templateId13 = cmd.slice(1);
-                var _template67 = this.template(_templateId13, _id20);
+                var _template68 = this.template(_templateId13, _id20);
                 var _pokemonName = this.pokemon(_pokemon35);
-                return _template67
+                return _template68
                     .replace("[POKEMON]", _pokemonName)
                     .replace("[TYPE]", type);
             }
 
             case "-zpower": {
                 var _pokemon36 = args[1];
-                var _template68 = this.template("zPower");
-                return _template68.replace(
+                var _template69 = this.template("zPower");
+                return _template69.replace(
                     "[POKEMON]",
                     this.pokemon(_pokemon36)
                 );
@@ -2000,8 +1972,8 @@
 
             case "-burst": {
                 var _pokemon37 = args[1];
-                var _template69 = this.template("activate", "Ultranecrozium Z");
-                return _template69.replace(
+                var _template70 = this.template("activate", "Ultranecrozium Z");
+                return _template70.replace(
                     "[POKEMON]",
                     this.pokemon(_pokemon37)
                 );
@@ -2009,8 +1981,8 @@
 
             case "-zbroken": {
                 var _pokemon38 = args[1];
-                var _template70 = this.template("zBroken");
-                return _template70.replace(
+                var _template71 = this.template("zBroken");
+                return _template71.replace(
                     "[POKEMON]",
                     this.pokemon(_pokemon38)
                 );
@@ -2027,8 +1999,8 @@
             case "-waiting": {
                 var _pokemon39 = args[1],
                     _target6 = args[2];
-                var _template71 = this.template("activate", "Water Pledge");
-                return _template71
+                var _template72 = this.template("activate", "Water Pledge");
+                return _template72
                     .replace("[POKEMON]", this.pokemon(_pokemon39))
                     .replace("[TARGET]", this.pokemon(_target6));
             }

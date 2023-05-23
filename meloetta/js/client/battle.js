@@ -92,7 +92,6 @@
             case "r":
                 return "hpbar hpbar-red";
         }
-
         return "hpbar";
     };
     Pokemon.getPixelRange = function getPixelRange(pixels, color) {
@@ -154,7 +153,6 @@
             damage[3] + damage[0],
             this.hpcolor
         );
-
         if (damage[0] === 0) {
             return [0, newrange[1] - newrange[0]];
         }
@@ -188,7 +186,6 @@
                 var percent = Math.round(
                     (Math.ceil((damage * 48) / 100) / 48) * 100
                 );
-
                 var pixels = Math.ceil((damage * 48) / 100);
                 return [pixels, 48, percent];
             }
@@ -321,15 +318,14 @@
                 0,
                 recursionSource
             );
-
             moveName = "*" + moveName;
         }
         for (
-            var _i = 0, _this$moveTrack = this.moveTrack;
-            _i < _this$moveTrack.length;
-            _i++
+            var _i2 = 0, _this$moveTrack2 = this.moveTrack;
+            _i2 < _this$moveTrack2.length;
+            _i2++
         ) {
-            var entry = _this$moveTrack[_i];
+            var entry = _this$moveTrack2[_i2];
             if (moveName === entry[0]) {
                 entry[1] += pp;
                 if (entry[1] < 0) entry[1] = 0;
@@ -495,16 +491,16 @@
                 "yawn",
             ];
             for (
-                var _i2 = 0, _Dex$statNamesExceptH = Dex.statNamesExceptHP;
-                _i2 < _Dex$statNamesExceptH.length;
-                _i2++
+                var _i4 = 0, _Dex$statNamesExceptH2 = Dex.statNamesExceptHP;
+                _i4 < _Dex$statNamesExceptH2.length;
+                _i4++
             ) {
-                var statName = _Dex$statNamesExceptH[_i2];
+                var statName = _Dex$statNamesExceptH2[_i4];
                 volatilesToRemove.push("protosynthesis" + statName);
                 volatilesToRemove.push("quarkdrive" + statName);
             }
-            for (var _i3 = 0; _i3 < volatilesToRemove.length; _i3++) {
-                var volatile = volatilesToRemove[_i3];
+            for (var _i6 = 0; _i6 < volatilesToRemove.length; _i6++) {
+                var volatile = volatilesToRemove[_i6];
                 delete this.volatiles[volatile];
             }
         }
@@ -531,7 +527,6 @@
         var _pokemon$getTypes = pokemon.getTypes(undefined, preterastallized),
             types = _pokemon$getTypes[0],
             addedType = _pokemon$getTypes[1];
-
         this.addVolatile("typechange", types.join("/"));
         if (addedType) {
             this.addVolatile("typeadd", addedType);
@@ -603,7 +598,6 @@
                 (serverPokemon == null ? void 0 : serverPokemon.baseAbility) ||
                 ""
         );
-
         if (this.side.battle.ngasActive() && !ability.isPermanent) {
             return "";
         }
@@ -617,7 +611,6 @@
         var _this$getTypes = this.getTypes(serverPokemon, preterastallized),
             types = _this$getTypes[0],
             addedType = _this$getTypes[1];
-
         return addedType ? types.concat(addedType) : types;
     };
     _proto.getSpeciesForme = function getSpeciesForme(serverPokemon) {
@@ -676,7 +669,6 @@
             return (
                 ((100 * pokemon.hp) / pokemon.maxhp).toFixed(precision) + "%"
             );
-
         var range = Pokemon.getPixelRange(pokemon.hp, pokemon.hpcolor);
         return Pokemon.getFormattedRange(range, precision, "–");
     };
@@ -734,17 +726,15 @@ var Side = (function () {
     };
     _proto2.clearPokemon = function clearPokemon() {
         for (
-            var _i4 = 0, _this$pokemon = this.pokemon;
-            _i4 < _this$pokemon.length;
-            _i4++
+            var _i8 = 0, _this$pokemon2 = this.pokemon;
+            _i8 < _this$pokemon2.length;
+            _i8++
         ) {
-            var _pokemon = _this$pokemon[_i4];
+            var _pokemon = _this$pokemon2[_i8];
             _pokemon.destroy();
         }
         this.pokemon = [];
-        for (var i = 0; i < this.active.length; i++) {
-            this.active[i] = null;
-        }
+        for (var i = 0; i < this.active.length; i++) this.active[i] = null;
         this.lastPokemon = null;
     };
     _proto2.reset = function reset() {
@@ -787,7 +777,6 @@ var Side = (function () {
                     5,
                     this.battle.gen >= 4 ? 8 : 0,
                 ];
-
                 break;
             case "safeguard":
                 this.sideConditions[condition] = [
@@ -796,7 +785,6 @@ var Side = (function () {
                     persist ? 7 : 5,
                     0,
                 ];
-
                 break;
             case "lightscreen":
                 this.sideConditions[condition] = [
@@ -805,7 +793,6 @@ var Side = (function () {
                     5,
                     this.battle.gen >= 4 ? 8 : 0,
                 ];
-
                 break;
             case "mist":
                 this.sideConditions[condition] = [effect.name, 1, 5, 0];
@@ -817,7 +804,6 @@ var Side = (function () {
                     this.battle.gen >= 5 ? (persist ? 6 : 4) : persist ? 5 : 3,
                     0,
                 ];
-
                 break;
             case "luckychant":
                 this.sideConditions[condition] = [effect.name, 1, 5, 0];
@@ -847,7 +833,6 @@ var Side = (function () {
                 this.sideConditions[condition] = [effect.name, 1, 0, 0];
                 break;
         }
-
         this.battle.scene.addSideCondition(this.n, condition);
     };
     _proto2.removeSideCondition = function removeSideCondition(condition) {
@@ -909,11 +894,11 @@ var Side = (function () {
                 if (this.pokemon[toRemove].fainted) {
                     var illusionFound = null;
                     for (
-                        var _i5 = 0, _this$pokemon2 = this.pokemon;
-                        _i5 < _this$pokemon2.length;
-                        _i5++
+                        var _i10 = 0, _this$pokemon4 = this.pokemon;
+                        _i10 < _this$pokemon4.length;
+                        _i10++
                     ) {
-                        var curPoke = _this$pokemon2[_i5];
+                        var curPoke = _this$pokemon4[_i10];
                         if (curPoke === poke) continue;
                         if (curPoke.fainted) continue;
                         if (this.active.indexOf(curPoke) >= 0) continue;
@@ -928,11 +913,11 @@ var Side = (function () {
                     }
                     if (!illusionFound) {
                         for (
-                            var _i6 = 0, _this$pokemon3 = this.pokemon;
-                            _i6 < _this$pokemon3.length;
-                            _i6++
+                            var _i12 = 0, _this$pokemon6 = this.pokemon;
+                            _i12 < _this$pokemon6.length;
+                            _i12++
                         ) {
-                            var _curPoke = _this$pokemon3[_i6];
+                            var _curPoke = _this$pokemon6[_i12];
                             if (_curPoke === poke) continue;
                             if (_curPoke.fainted) continue;
                             if (this.active.indexOf(_curPoke) >= 0) continue;
@@ -1113,6 +1098,7 @@ var Side = (function () {
 })();
 var Battle = (function () {
     function Battle() {
+        var _this = this;
         var options =
             arguments.length > 0 && arguments[0] !== undefined
                 ? arguments[0]
@@ -1173,9 +1159,35 @@ var Battle = (function () {
         this.ignoreSpects = !!Dex.prefs("ignorespects");
         this.debug = void 0;
         this.joinButtons = false;
+        this.autoresize = void 0;
         this.paused = void 0;
+        this.onResize = function () {
+            var width = $(window).width();
+            if (width < 950 || _this.hardcoreMode) {
+                _this.messageShownTime = 500;
+            } else {
+                _this.messageShownTime = 1;
+            }
+            if (width && width < 640) {
+                var _this$scene$$frame, _this$scene$$frame2;
+                var scale = width / 640;
+                (_this$scene$$frame = _this.scene.$frame) == null
+                    ? void 0
+                    : _this$scene$$frame.css(
+                          "transform",
+                          "scale(" + scale + ")"
+                      );
+                (_this$scene$$frame2 = _this.scene.$frame) == null
+                    ? void 0
+                    : _this$scene$$frame2.css("transform-origin", "top left");
+            } else {
+                var _this$scene$$frame3;
+                (_this$scene$$frame3 = _this.scene.$frame) == null
+                    ? void 0
+                    : _this$scene$$frame3.css("transform", "none");
+            }
+        };
         this.id = options.id || "";
-
         if (options.$frame && options.$logFrame) {
             this.scene = new BattleScene(
                 this,
@@ -1189,13 +1201,14 @@ var Battle = (function () {
                 "You must specify $frame and $logFrame simultaneously"
             );
         }
-
         this.paused = !!options.paused;
         this.started = !this.paused;
         this.debug = !!options.debug;
+        if (typeof options.log === "string")
+            options.log = options.log.split("\n");
         this.stepQueue = options.log || [];
         this.subscription = options.subscription || null;
-
+        this.autoresize = !!options.autoresize;
         this.p1 = new Side(this, 0);
         this.p2 = new Side(this, 1);
         this.sides = [this.p1, this.p2];
@@ -1203,8 +1216,11 @@ var Battle = (function () {
         this.p1.foe = this.p2;
         this.nearSide = this.mySide = this.p1;
         this.farSide = this.p2;
-
         this.resetStep();
+        if (this.autoresize) {
+            window.addEventListener("resize", this.onResize);
+            this.onResize();
+        }
     }
     var _proto3 = Battle.prototype;
     _proto3.subscribe = function subscribe(listener) {
@@ -1229,11 +1245,11 @@ var Battle = (function () {
     };
     _proto3.hasPseudoWeather = function hasPseudoWeather(weather) {
         for (
-            var _i7 = 0, _this$pseudoWeather = this.pseudoWeather;
-            _i7 < _this$pseudoWeather.length;
-            _i7++
+            var _i14 = 0, _this$pseudoWeather2 = this.pseudoWeather;
+            _i14 < _this$pseudoWeather2.length;
+            _i14++
         ) {
-            var _ref = _this$pseudoWeather[_i7];
+            var _ref = _this$pseudoWeather2[_i14];
             var pseudoWeatherName = _ref[0];
             if (weather === pseudoWeatherName) {
                 return true;
@@ -1247,11 +1263,11 @@ var Battle = (function () {
         for (var i = 0; i < 2; i++) {
             var side = this.sides[i];
             for (
-                var _i8 = 0, _side$active = side.active;
-                _i8 < _side$active.length;
-                _i8++
+                var _i16 = 0, _side$active2 = side.active;
+                _i16 < _side$active2.length;
+                _i16++
             ) {
-                var active = _side$active[_i8];
+                var active = _side$active2[_i16];
                 if (active && !active.fainted) {
                     pokemonList.push(active);
                 }
@@ -1261,11 +1277,11 @@ var Battle = (function () {
     };
     _proto3.ngasActive = function ngasActive() {
         for (
-            var _i9 = 0, _this$getAllActive = this.getAllActive();
-            _i9 < _this$getAllActive.length;
-            _i9++
+            var _i18 = 0, _this$getAllActive2 = this.getAllActive();
+            _i18 < _this$getAllActive2.length;
+            _i18++
         ) {
-            var active = _this$getAllActive[_i9];
+            var active = _this$getAllActive2[_i18];
             if (
                 active.ability === "Neutralizing Gas" &&
                 !active.volatiles["gastroacid"]
@@ -1276,21 +1292,20 @@ var Battle = (function () {
         return false;
     };
     _proto3.abilityActive = function abilityActive(abilities) {
-        var _this = this;
+        var _this2 = this;
         if (typeof abilities === "string") abilities = [abilities];
         if (this.ngasActive()) {
             abilities = abilities.filter(function (a) {
-                return _this.dex.abilities.get(a).isPermanent;
+                return _this2.dex.abilities.get(a).isPermanent;
             });
-
             if (!abilities.length) return false;
         }
         for (
-            var _i10 = 0, _this$getAllActive2 = this.getAllActive();
-            _i10 < _this$getAllActive2.length;
-            _i10++
+            var _i20 = 0, _this$getAllActive4 = this.getAllActive();
+            _i20 < _this$getAllActive4.length;
+            _i20++
         ) {
-            var active = _this$getAllActive2[_i10];
+            var active = _this$getAllActive4[_i20];
             if (
                 abilities.includes(active.ability) &&
                 !active.volatiles["gastroacid"]
@@ -1320,11 +1335,11 @@ var Battle = (function () {
         this.pseudoWeather = [];
         this.lastMove = "";
         for (
-            var _i11 = 0, _this$sides = this.sides;
-            _i11 < _this$sides.length;
-            _i11++
+            var _i22 = 0, _this$sides2 = this.sides;
+            _i22 < _this$sides2.length;
+            _i22++
         ) {
-            var side = _this$sides[_i11];
+            var side = _this$sides2[_i22];
             if (side) side.reset();
         }
         this.myPokemon = null;
@@ -1338,6 +1353,9 @@ var Battle = (function () {
         this.nextStep();
     };
     _proto3.destroy = function destroy() {
+        if (this.autoresize) {
+            window.removeEventListener("resize", this.onResize);
+        }
         this.scene.destroy();
 
         for (var i = 0; i < this.sides.length; i++) {
@@ -1514,8 +1532,8 @@ var Battle = (function () {
         } else {
             var side1 = this.sides[0];
             var side2 = this.sides[1];
-            for (var _i12 = 0; _i12 < sideConditions.length; _i12++) {
-                var _id3 = sideConditions[_i12];
+            for (var _i24 = 0; _i24 < sideConditions.length; _i24++) {
+                var _id3 = sideConditions[_i24];
                 if (side1.sideConditions[_id3] && side2.sideConditions[_id3]) {
                     var _ref2 = [
                         side2.sideConditions[_id3],
@@ -1546,20 +1564,20 @@ var Battle = (function () {
     };
     _proto3.updateTurnCounters = function updateTurnCounters() {
         for (
-            var _i13 = 0, _this$pseudoWeather2 = this.pseudoWeather;
-            _i13 < _this$pseudoWeather2.length;
-            _i13++
+            var _i26 = 0, _this$pseudoWeather4 = this.pseudoWeather;
+            _i26 < _this$pseudoWeather4.length;
+            _i26++
         ) {
-            var pWeather = _this$pseudoWeather2[_i13];
+            var pWeather = _this$pseudoWeather4[_i26];
             if (pWeather[1]) pWeather[1]--;
             if (pWeather[2]) pWeather[2]--;
         }
         for (
-            var _i14 = 0, _this$sides2 = this.sides;
-            _i14 < _this$sides2.length;
-            _i14++
+            var _i28 = 0, _this$sides4 = this.sides;
+            _i28 < _this$sides4.length;
+            _i28++
         ) {
-            var side = _this$sides2[_i14];
+            var side = _this$sides4[_i28];
             for (var _id4 in side.sideConditions) {
                 var cond = side.sideConditions[_id4];
                 if (cond[2]) cond[2]--;
@@ -1567,12 +1585,12 @@ var Battle = (function () {
             }
         }
         for (
-            var _i15 = 0,
-                _ref3 = [].concat(this.nearSide.active, this.farSide.active);
-            _i15 < _ref3.length;
-            _i15++
+            var _i30 = 0,
+                _ref4 = [].concat(this.nearSide.active, this.farSide.active);
+            _i30 < _ref4.length;
+            _i30++
         ) {
-            var poke = _ref3[_i15];
+            var poke = _ref4[_i30];
             if (poke) {
                 if (poke.status === "tox") poke.statusData.toxicTurns++;
                 poke.clearTurnstatuses();
@@ -1645,11 +1663,11 @@ var Battle = (function () {
                     ].includes(moveTarget)
                 ) {
                     for (
-                        var _i16 = 0, _this$getAllActive3 = this.getAllActive();
-                        _i16 < _this$getAllActive3.length;
-                        _i16++
+                        var _i32 = 0, _this$getAllActive6 = this.getAllActive();
+                        _i32 < _this$getAllActive6.length;
+                        _i32++
                     ) {
-                        var active = _this$getAllActive3[_i16];
+                        var active = _this$getAllActive6[_i32];
                         if (active === pokemon) continue;
 
                         if (
@@ -1663,8 +1681,8 @@ var Battle = (function () {
                 } else if (target && target.side !== pokemon.side) {
                     foeTargets.push(target);
                 }
-                for (var _i17 = 0; _i17 < foeTargets.length; _i17++) {
-                    var foe = foeTargets[_i17];
+                for (var _i34 = 0; _i34 < foeTargets.length; _i34++) {
+                    var foe = foeTargets[_i34];
                     if (
                         foe &&
                         !foe.fainted &&
@@ -1715,18 +1733,17 @@ var Battle = (function () {
             targets.push(target.side.missedPokemon);
         } else {
             for (
-                var _i18 = 0, _kwArgs$spread$split = kwArgs.spread.split(",");
-                _i18 < _kwArgs$spread$split.length;
-                _i18++
+                var _i36 = 0, _kwArgs$spread$split2 = kwArgs.spread.split(",");
+                _i36 < _kwArgs$spread$split2.length;
+                _i36++
             ) {
-                var hitTarget = _kwArgs$spread$split[_i18];
+                var hitTarget = _kwArgs$spread$split2[_i36];
                 var curTarget = this.getPokemon(hitTarget + ": ?");
                 if (!curTarget) {
                     this.log([
                         "error",
                         'Invalid spread move target: "' + hitTarget + '"',
                     ]);
-
                     continue;
                 }
                 targets.push(curTarget);
@@ -1777,7 +1794,6 @@ var Battle = (function () {
                 this.scene.resultAnim(pokemon, "Immobilized", "neutral");
                 break;
         }
-
         this.scene.animReset(pokemon);
     };
     _proto3.activateAbility = function activateAbility(
@@ -1890,11 +1906,9 @@ var Battle = (function () {
                             break;
                         case "confusion":
                             this.scene.runStatusAnim("confusedselfhit", [poke]);
-
                             break;
                         case "leechseed":
                             this.scene.runOtherAnim("leech", [ofpoke, poke]);
-
                             break;
                         case "bind":
                         case "wrap":
@@ -1914,7 +1928,6 @@ var Battle = (function () {
                             damage[1] === 100 ? 0 : 1,
                             "\u2013"
                         );
-
                     if (damage[1] !== 100) {
                         var hover =
                             "" +
@@ -1934,7 +1947,6 @@ var Battle = (function () {
                     poke,
                     Pokemon.getFormattedRange(range, 0, " to ")
                 );
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -1958,18 +1970,18 @@ var Battle = (function () {
                     switch (_effect.id) {
                         case "lunardance":
                             for (
-                                var _i19 = 0, _poke$moveTrack = _poke.moveTrack;
-                                _i19 < _poke$moveTrack.length;
-                                _i19++
+                                var _i38 = 0,
+                                    _poke$moveTrack2 = _poke.moveTrack;
+                                _i38 < _poke$moveTrack2.length;
+                                _i38++
                             ) {
-                                var trackedMove = _poke$moveTrack[_i19];
+                                var trackedMove = _poke$moveTrack2[_i38];
                                 trackedMove[1] = 0;
                             }
 
                         case "healingwish":
                             this.lastMove = "healing-wish";
                             this.scene.runResidualAnim("healingwish", _poke);
-
                             _poke.side.wisher = null;
                             _poke.statusData.sleepTurns = 0;
                             _poke.statusData.toxicTurns = 0;
@@ -1995,7 +2007,6 @@ var Battle = (function () {
                     _poke,
                     Pokemon.getFormattedRange(_range, 0, " to ")
                 );
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -2010,7 +2021,6 @@ var Battle = (function () {
                             0,
                             " to "
                         );
-
                         var diff = _damage2[0];
                         if (diff > 0) {
                             this.scene.healAnim(cpoke, formattedRange);
@@ -2034,7 +2044,6 @@ var Battle = (function () {
                         "already " + _poke2.getBoost(_stat),
                         "neutral"
                     );
-
                     this.log(args, kwArgs);
                     break;
                 }
@@ -2066,7 +2075,6 @@ var Battle = (function () {
                         "already " + _poke3.getBoost(_stat2),
                         "neutral"
                     );
-
                     this.log(args, kwArgs);
                     break;
                 }
@@ -2094,7 +2102,6 @@ var Battle = (function () {
                     _poke4.getBoost(_stat3),
                     _amount2 > 0 ? "good" : "bad"
                 );
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -2112,8 +2119,8 @@ var Battle = (function () {
                           "accuracy",
                           "evasion",
                       ];
-                for (var _i20 = 0; _i20 < stats.length; _i20++) {
-                    var _stat4 = stats[_i20];
+                for (var _i40 = 0; _i40 < stats.length; _i40++) {
+                    var _stat4 = stats[_i40];
                     var tmp = _poke5.boosts[_stat4];
                     _poke5.boosts[_stat4] = poke2.boosts[_stat4];
                     if (!_poke5.boosts[_stat4]) delete _poke5.boosts[_stat4];
@@ -2142,7 +2149,6 @@ var Battle = (function () {
                                 _ofpoke3,
                                 _poke6,
                             ]);
-
                             break;
                     }
                 }
@@ -2177,8 +2183,8 @@ var Battle = (function () {
                           "accuracy",
                           "evasion",
                       ];
-                for (var _i21 = 0; _i21 < _stats.length; _i21++) {
-                    var _stat7 = _stats[_i21];
+                for (var _i42 = 0; _i42 < _stats.length; _i42++) {
+                    var _stat7 = _stats[_i42];
                     _poke8.boosts[_stat7] = frompoke.boosts[_stat7];
                     if (!_poke8.boosts[_stat7]) delete _poke8.boosts[_stat7];
                 }
@@ -2188,8 +2194,8 @@ var Battle = (function () {
                         "gmaxchistrike",
                         "laserfocus",
                     ];
-                    for (var _i22 = 0; _i22 < volatilesToCopy.length; _i22++) {
-                        var volatile = volatilesToCopy[_i22];
+                    for (var _i44 = 0; _i44 < volatilesToCopy.length; _i44++) {
+                        var volatile = volatilesToCopy[_i44];
                         if (frompoke.volatiles[volatile]) {
                             _poke8.addVolatile(volatile);
                         } else {
@@ -2228,11 +2234,11 @@ var Battle = (function () {
             case "-clearallboost": {
                 var timeOffset = this.scene.timeOffset;
                 for (
-                    var _i23 = 0, _this$getAllActive4 = this.getAllActive();
-                    _i23 < _this$getAllActive4.length;
-                    _i23++
+                    var _i46 = 0, _this$getAllActive8 = this.getAllActive();
+                    _i46 < _this$getAllActive8.length;
+                    _i46++
                 ) {
-                    var active = _this$getAllActive4[_i23];
+                    var active = _this$getAllActive8[_i46];
                     active.boosts = {};
                     this.scene.timeOffset = timeOffset;
                     this.scene.resultAnim(active, "Stats reset", "neutral");
@@ -2282,7 +2288,6 @@ var Battle = (function () {
                     this.getPokemon(kwArgs.of) || _poke14,
                     fromeffect
                 );
-
                 this.log(args, kwArgs);
                 this.scene.resultAnim(_poke14, "Immune", "neutral");
                 break;
@@ -2312,7 +2317,6 @@ var Battle = (function () {
                             "Already burned",
                             "neutral"
                         );
-
                         break;
                     case "tox":
                     case "psn":
@@ -2321,7 +2325,6 @@ var Battle = (function () {
                             "Already poisoned",
                             "neutral"
                         );
-
                         break;
                     case "slp":
                         if (_fromeffect.id === "uproar") {
@@ -2340,7 +2343,6 @@ var Battle = (function () {
                             "Already paralyzed",
                             "neutral"
                         );
-
                         break;
                     case "frz":
                         this.scene.resultAnim(
@@ -2348,7 +2350,6 @@ var Battle = (function () {
                             "Already frozen",
                             "neutral"
                         );
-
                         break;
                     case "unboost":
                         this.scene.resultAnim(
@@ -2356,7 +2357,6 @@ var Battle = (function () {
                             "Stat drop blocked",
                             "neutral"
                         );
-
                         break;
                     default:
                         if (_poke15) {
@@ -2364,7 +2364,6 @@ var Battle = (function () {
                         }
                         break;
                 }
-
                 this.scene.animReset(_poke15);
                 this.log(args, kwArgs);
                 break;
@@ -2402,7 +2401,6 @@ var Battle = (function () {
                         _poke16.item = "Ability Shield";
                         break;
                 }
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -2482,7 +2480,6 @@ var Battle = (function () {
                         this.scene.updateStatbar(_poke20);
                         break;
                 }
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -2531,7 +2528,6 @@ var Battle = (function () {
                                 "Paralysis cured",
                                 "good"
                             );
-
                             break;
                         case "frz":
                             this.scene.resultAnim(_poke21, "Thawed", "good");
@@ -2547,11 +2543,11 @@ var Battle = (function () {
             case "-cureteam": {
                 var _poke22 = this.getPokemon(args[1]);
                 for (
-                    var _i24 = 0, _poke22$side$pokemon = _poke22.side.pokemon;
-                    _i24 < _poke22$side$pokemon.length;
-                    _i24++
+                    var _i48 = 0, _poke22$side$pokemon2 = _poke22.side.pokemon;
+                    _i48 < _poke22$side$pokemon2.length;
+                    _i48++
                 ) {
-                    var _target2 = _poke22$side$pokemon[_i24];
+                    var _target2 = _poke22$side$pokemon2[_i48];
                     _target2.status = "";
                     this.scene.updateStatbarIfExists(_target2);
                 }
@@ -2616,7 +2612,6 @@ var Battle = (function () {
                                 "Item Stolen",
                                 "bad"
                             );
-
                             break;
                         case "harvest":
                             _poke23.itemEffect = "harvested";
@@ -2688,7 +2683,6 @@ var Battle = (function () {
                                 "Item knocked off",
                                 "neutral"
                             );
-
                             break;
                         case "stealeat":
                             _poke24.prevItemEffect = "stolen";
@@ -2710,7 +2704,6 @@ var Battle = (function () {
                                 "Balloon popped",
                                 "neutral"
                             );
-
                             break;
                         case "focussash":
                             _poke24.prevItemEffect = "consumed";
@@ -2722,7 +2715,6 @@ var Battle = (function () {
                                 "Focus Band",
                                 "neutral"
                             );
-
                             break;
                         case "redcard":
                             _poke24.prevItemEffect = "held up";
@@ -2857,14 +2849,13 @@ var Battle = (function () {
                     gender,
                     _level
                 );
-
                 _poke28.addVolatile("formechange", speciesForme);
                 for (
-                    var _i25 = 0, _tpoke$moveTrack = tpoke.moveTrack;
-                    _i25 < _tpoke$moveTrack.length;
-                    _i25++
+                    var _i50 = 0, _tpoke$moveTrack2 = tpoke.moveTrack;
+                    _i50 < _tpoke$moveTrack2.length;
+                    _i50++
                 ) {
-                    var _trackedMove = _tpoke$moveTrack[_i25];
+                    var _trackedMove = _tpoke$moveTrack2[_i50];
                     _poke28.rememberMove(_trackedMove[0], 0);
                 }
                 this.scene.animTransform(_poke28);
@@ -2873,7 +2864,6 @@ var Battle = (function () {
                     ["-transform", args[1], args[2], tpoke.speciesForme],
                     kwArgs
                 );
-
                 break;
             }
             case "-formechange": {
@@ -2915,6 +2905,7 @@ var Battle = (function () {
             case "-terastallize": {
                 var _poke31 = this.getPokemon(args[1]);
                 var type = Dex.types.get(args[2]).name;
+                _poke31.removeVolatile("typeadd");
                 _poke31.terastallized = type;
                 _poke31.details += ", tera:" + type;
                 _poke31.searchid += ", tera:" + type;
@@ -3020,7 +3011,6 @@ var Battle = (function () {
                             "Stockpile&times;2",
                             "good"
                         );
-
                         break;
                     case "stockpile3":
                         _poke32.removeVolatile("stockpile2");
@@ -3029,7 +3019,6 @@ var Battle = (function () {
                             "Stockpile&times;3",
                             "good"
                         );
-
                         break;
                     case "perish0":
                         _poke32.removeVolatile("perish1");
@@ -3116,7 +3105,6 @@ var Battle = (function () {
                         this.scene.resultAnim(_poke32, "Reflect", "good");
                         break;
                 }
-
                 if (!(_effect15.id === "typechange" && _poke32.terastallized)) {
                     _poke32.addVolatile(_effect15.id);
                 }
@@ -3142,7 +3130,6 @@ var Battle = (function () {
                                 "Power Trick",
                                 "neutral"
                             );
-
                             break;
                         case "telekinesis":
                             this.scene.resultAnim(
@@ -3150,7 +3137,6 @@ var Battle = (function () {
                                 "Telekinesis&nbsp;ended",
                                 "neutral"
                             );
-
                             break;
                         case "skydrop":
                             if (kwArgs.interrupt) {
@@ -3163,7 +3149,6 @@ var Battle = (function () {
                                 "Confusion&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "leechseed":
                             if (_fromeffect4.id === "rapidspin") {
@@ -3180,7 +3165,6 @@ var Battle = (function () {
                                 "Heal Block ended",
                                 "good"
                             );
-
                             break;
                         case "attract":
                             this.scene.resultAnim(
@@ -3188,7 +3172,6 @@ var Battle = (function () {
                                 "Attract&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "taunt":
                             this.scene.resultAnim(
@@ -3196,7 +3179,6 @@ var Battle = (function () {
                                 "Taunt&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "disable":
                             this.scene.resultAnim(
@@ -3204,7 +3186,6 @@ var Battle = (function () {
                                 "Disable&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "embargo":
                             this.scene.resultAnim(
@@ -3212,7 +3193,6 @@ var Battle = (function () {
                                 "Embargo ended",
                                 "good"
                             );
-
                             break;
                         case "torment":
                             this.scene.resultAnim(
@@ -3220,7 +3200,6 @@ var Battle = (function () {
                                 "Torment&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "encore":
                             this.scene.resultAnim(
@@ -3228,11 +3207,9 @@ var Battle = (function () {
                                 "Encore&nbsp;ended",
                                 "good"
                             );
-
                             break;
                         case "bide":
                             this.scene.runOtherAnim("bideunleash", [_poke33]);
-
                             break;
                         case "illusion":
                             this.scene.resultAnim(
@@ -3240,7 +3217,6 @@ var Battle = (function () {
                                 "Illusion ended",
                                 "bad"
                             );
-
                             _poke33.rememberAbility("Illusion");
                             break;
                         case "slowstart":
@@ -3249,7 +3225,6 @@ var Battle = (function () {
                                 "Slow Start ended",
                                 "good"
                             );
-
                             break;
                         case "perishsong":
                             _poke33.removeVolatile("perish3");
@@ -3343,7 +3318,6 @@ var Battle = (function () {
                         this.scene.resultAnim(_poke34, "Beak Blast", "neutral");
                         break;
                 }
-
                 this.scene.updateStatbar(_poke34);
                 this.log(args, kwArgs);
                 break;
@@ -3364,7 +3338,6 @@ var Battle = (function () {
                         );
                         break;
                 }
-
                 this.scene.updateStatbar(_poke35);
                 this.log(args, kwArgs);
                 break;
@@ -3423,12 +3396,12 @@ var Battle = (function () {
                         );
                         _poke36.removeTurnstatus("protect");
                         for (
-                            var _i26 = 0,
-                                _poke36$side$pokemon = _poke36.side.pokemon;
-                            _i26 < _poke36$side$pokemon.length;
-                            _i26++
+                            var _i52 = 0,
+                                _poke36$side$pokemon2 = _poke36.side.pokemon;
+                            _i52 < _poke36$side$pokemon2.length;
+                            _i52++
                         ) {
-                            var curTarget = _poke36$side$pokemon[_i26];
+                            var curTarget = _poke36$side$pokemon2[_i52];
                             curTarget.removeTurnstatus("wideguard");
                             curTarget.removeTurnstatus("quickguard");
                             curTarget.removeTurnstatus("craftyshield");
@@ -3484,13 +3457,13 @@ var Battle = (function () {
                         } else {
                             var foeActive = [];
                             for (
-                                var _i27 = 0,
-                                    _poke36$side$foe$acti =
+                                var _i54 = 0,
+                                    _poke36$side$foe$acti2 =
                                         _poke36.side.foe.active;
-                                _i27 < _poke36$side$foe$acti.length;
-                                _i27++
+                                _i54 < _poke36$side$foe$acti2.length;
+                                _i54++
                             ) {
-                                var maybeTarget = _poke36$side$foe$acti[_i27];
+                                var maybeTarget = _poke36$side$foe$acti2[_i54];
                                 if (maybeTarget && !maybeTarget.fainted)
                                     foeActive.push(maybeTarget);
                             }
@@ -3515,7 +3488,6 @@ var Battle = (function () {
                             kwArgs.move,
                             _effect19.id === "leppaberry" ? -10 : -5
                         );
-
                         break;
                     case "focusband":
                         _poke36.item = "Focus Band";
@@ -3535,7 +3507,6 @@ var Battle = (function () {
                             );
                         }
                 }
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -3561,7 +3532,6 @@ var Battle = (function () {
                         this.scene.updateWeather();
                         break;
                 }
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -3619,17 +3589,16 @@ var Battle = (function () {
                     case "gravity":
                         if (this.seeking !== null) break;
                         for (
-                            var _i28 = 0,
-                                _this$getAllActive5 = this.getAllActive();
-                            _i28 < _this$getAllActive5.length;
-                            _i28++
+                            var _i56 = 0,
+                                _this$getAllActive10 = this.getAllActive();
+                            _i56 < _this$getAllActive10.length;
+                            _i56++
                         ) {
-                            var _active = _this$getAllActive5[_i28];
+                            var _active = _this$getAllActive10[_i56];
                             this.scene.runOtherAnim("gravity", [_active]);
                         }
                         break;
                 }
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -3647,7 +3616,6 @@ var Battle = (function () {
                         this.scene.updateStatbars();
                         break;
                 }
-
                 this.log(args, kwArgs);
                 break;
             }
@@ -3771,14 +3739,7 @@ var Battle = (function () {
             siden = parseInt(name.charAt(1), 10) - 1;
             name = name.slice(4);
         } else if (/^p[1-9][a-f]: /.test(name)) {
-            var slotChart = {
-                a: 0,
-                b: 1,
-                c: 2,
-                d: 3,
-                e: 4,
-                f: 5,
-            };
+            var slotChart = { a: 0, b: 1, c: 2, d: 3, e: 4, f: 5 };
             siden = parseInt(name.charAt(1), 10) - 1;
             slot = slotChart[name.charAt(2)];
             name = name.slice(5);
@@ -3840,11 +3801,11 @@ var Battle = (function () {
             siden = _this$parsePokemonId4.siden;
         var searchid = serverPokemon.ident + "|" + serverPokemon.details;
         for (
-            var _i29 = 0, _this$sides$siden$pok = this.sides[siden].pokemon;
-            _i29 < _this$sides$siden$pok.length;
-            _i29++
+            var _i58 = 0, _this$sides$siden$pok2 = this.sides[siden].pokemon;
+            _i58 < _this$sides$siden$pok2.length;
+            _i58++
         ) {
-            var _pokemon4 = _this$sides$siden$pok[_i29];
+            var _pokemon4 = _this$sides$siden$pok2[_i58];
             if (_pokemon4.searchid === searchid) {
                 return _pokemon4;
             }
@@ -3871,11 +3832,11 @@ var Battle = (function () {
 
         if (!isInactive && side.active[slot]) return side.active[slot];
         for (
-            var _i30 = 0, _side$pokemon = side.pokemon;
-            _i30 < _side$pokemon.length;
-            _i30++
+            var _i60 = 0, _side$pokemon2 = side.pokemon;
+            _i60 < _side$pokemon2.length;
+            _i60++
         ) {
-            var _pokemon5 = _side$pokemon[_i30];
+            var _pokemon5 = _side$pokemon2[_i60];
             if (isInactive && side.active.includes(_pokemon5)) continue;
             if (_pokemon5.ident === pokemonid) {
                 if (slot >= 0) _pokemon5.slot = slot;
@@ -3984,16 +3945,15 @@ var Battle = (function () {
                         break;
                     default:
                         for (
-                            var _i31 = 0, _this$sides3 = this.sides;
-                            _i31 < _this$sides3.length;
-                            _i31++
+                            var _i62 = 0, _this$sides6 = this.sides;
+                            _i62 < _this$sides6.length;
+                            _i62++
                         ) {
-                            var side = _this$sides3[_i31];
+                            var side = _this$sides6[_i62];
                             side.active = [null];
                         }
                         break;
                 }
-
                 if (!this.pokemonControlled)
                     this.pokemonControlled = this.nearSide.active.length;
                 this.scene.updateGen();
@@ -4150,7 +4110,6 @@ var Battle = (function () {
                     args[1],
                     args[2]
                 );
-
                 if (args[3] === "mail") {
                     _pokemon6.item = "(mail)";
                 } else if (args[3] === "item") {
@@ -4334,11 +4293,10 @@ var Battle = (function () {
                     "majorerror",
                     "Error parsing: " + str + " (" + err + ")",
                 ]);
-
                 if (err.stack) {
                     var stack = ("" + err.stack).split("\n");
-                    for (var _i32 = 0; _i32 < stack.length; _i32++) {
-                        var line = stack[_i32];
+                    for (var _i64 = 0; _i64 < stack.length; _i64++) {
+                        var line = stack[_i64];
                         if (/\brun\b/.test(line)) {
                             break;
                         }
@@ -4383,13 +4341,24 @@ var Battle = (function () {
             : _this$subscription8.call(this, "playing");
     };
     _proto3.skipTurn = function skipTurn() {
-        this.seekTurn(this.turn + 1);
+        this.seekBy(1);
+    };
+    _proto3.seekBy = function seekBy(deltaTurn) {
+        var _this$seeking;
+        if (this.seeking === Infinity && deltaTurn < 0) {
+            return this.seekTurn(this.turn + 1);
+        }
+        this.seekTurn(
+            ((_this$seeking = this.seeking) != null
+                ? _this$seeking
+                : this.turn) + deltaTurn
+        );
     };
     _proto3.seekTurn = function seekTurn(turn, forceReset) {
         if (isNaN(turn)) return;
         turn = Math.max(Math.floor(turn), 0);
 
-        if (this.seeking !== null && this.seeking > turn && !forceReset) {
+        if (this.seeking !== null && turn > this.turn && !forceReset) {
             this.seeking = turn;
             return;
         }
@@ -4436,12 +4405,14 @@ var Battle = (function () {
         return !(this.paused && this.turn >= 0);
     };
     _proto3.nextStep = function nextStep() {
-        var _this2 = this;
+        var _this3 = this;
         if (!this.shouldStep()) return;
 
+        var time = Date.now();
         this.scene.startAnimations();
         var animations = undefined;
 
+        var interruptionCount;
         do {
             this.waitForAnimations = true;
             if (this.currentStep >= this.stepQueue.length) {
@@ -4465,6 +4436,16 @@ var Battle = (function () {
             } else if (this.waitForAnimations === "simult") {
                 this.scene.timeOffset = 0;
             }
+
+            if (Date.now() - time > 300) {
+                interruptionCount = this.scene.interruptionCount;
+                setTimeout(function () {
+                    if (interruptionCount === _this3.scene.interruptionCount) {
+                        _this3.nextStep();
+                    }
+                }, 1);
+                return;
+            }
         } while (!animations && this.shouldStep());
 
         if (this.paused && this.turn >= 0 && this.seeking === null) {
@@ -4474,10 +4455,10 @@ var Battle = (function () {
 
         if (!animations) return;
 
-        var interruptionCount = this.scene.interruptionCount;
+        interruptionCount = this.scene.interruptionCount;
         animations.done(function () {
-            if (interruptionCount === _this2.scene.interruptionCount) {
-                _this2.nextStep();
+            if (interruptionCount === _this3.scene.interruptionCount) {
+                _this3.nextStep();
             }
         });
     };

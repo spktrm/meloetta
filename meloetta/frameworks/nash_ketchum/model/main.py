@@ -1,28 +1,22 @@
-import math
-import torch
 import torch.nn as nn
 
 from copy import deepcopy
-from typing import Optional, Union, Literal, Tuple, Dict, Any, List
+from typing import Optional, Union, Literal, Dict, Any
 
-from meloetta.actors.types import State, Choices
+from meloetta.actors.types import State
 
-from meloetta.frameworks.nash_ketchum.model.utils import _log_policy
+from meloetta.frameworks.nash_ketchum.model.utils import _log_policy, MLP
 
 from meloetta.frameworks.nash_ketchum.model import config
 from meloetta.frameworks.nash_ketchum.model import (
     Encoder,
     PolicyHeads,
     Core,
+    Policy,
     ValueHead,
     Indices,
-    Logits,
-    Policy,
-    LogPolicy,
-    TrainingOutput,
-    EnvStep,
+    ModelOutput,
     PostProcess,
-    Batch,
 )
 
 from meloetta.data import _STATE_FIELDS
@@ -58,6 +52,10 @@ class NAshKetchumModel(nn.Module):
         self.core = Core(config.resnet_core_config)
         self.value_Head = ValueHead(config.value_head_config)
 
+        hidden_dim = config.resnet_core_config.hidden_dim
+        self.state_action_mlp = MLP([hidden_dim, hidden_dim, hidden_dim])
+        self.state_mlp = MLP([hidden_dim, hidden_dim, hidden_dim])
+
     def get_learnable_params(self) -> int:
         return sum([p.numel() for p in self.parameters() if p.requires_grad])
 
@@ -65,168 +63,63 @@ class NAshKetchumModel(nn.Module):
         return {k: state[k] for k in self.state_fields}
 
     def forward(
-        self,
-        state: State,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
-        choices: Choices = None,
-        training: bool = False,
-        need_log_policy: bool = True,
-    ):
+        self, state: State, compute_value: bool = True, indices: Indices = None
+    ) -> ModelOutput:
         encoder_output = self.encoder.forward(state)
-        state_emb, hidden_state = self.core.forward(encoder_output, hidden_state)
-        value = self.value_Head.forward(state_emb)
-        indices, logits, policy = self.policy_heads.forward(
+        state_emb = self.core.forward(encoder_output)
+        if compute_value:
+            value = self.value_Head.forward(state_emb)
+        else:
+            value = None
+        indices, logits, policy, _ = self.policy_heads.forward(
             state_emb,
             encoder_output,
             state,
-        )
-        return self._postprocess(
-            state,
-            hidden_state,
             indices,
-            logits,
-            policy,
-            value,
-            choices,
-            training,
-            need_log_policy,
+        )
+        return ModelOutput(
+            indices=indices,
+            logit=logits,
+            pi=policy,
+            v=value,
+            # state_action_emb=self.state_action_mlp(state_action_emb),
+            # state_emb=self.state_mlp(state_emb),
         )
 
-    def learning_forward(
-        self,
-        batch: Batch,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
-    ):
-        T, B = batch.trajectory_length, batch.batch_size
+    def acting_forward(self, state: State) -> ModelOutput:
+        return self.forward(state, compute_value=False)
 
-        outputs: List[TrainingOutput] = []
+    def learning_forward(self, state: State, indices: Indices = None) -> ModelOutput:
+        model_output = self.forward(state, compute_value=True, indices=indices)
+        return self.postprocess(state, model_output)
 
-        minibatch_size = min(128, (4096 // batch.trajectory_length) + 1)
-
-        for batch_index in range(math.ceil(batch.batch_size / minibatch_size)):
-            mini_state_h, mini_state_c = hidden_state
-
-            batch_start = minibatch_size * batch_index
-            batch_end = minibatch_size * (batch_index + 1)
-
-            mini_state_h = mini_state_h[:, batch_start:batch_end].contiguous()
-            mini_state_c = mini_state_c[:, batch_start:batch_end].contiguous()
-
-            minibatch = {
-                key: value[:, batch_start:batch_end].contiguous()
-                for key, value in batch._asdict().items()
-                if value is not None
-            }
-            output, (mini_state_h, mini_state_c) = self.forward(
-                minibatch,
-                (mini_state_h, mini_state_c),
-                training=True,
-            )
-            outputs.append(output)
-
-        pi_dict: Dict[str, List[torch.Tensor]] = {}
-        log_pi_dict: Dict[str, List[torch.Tensor]] = {}
-        logit_dict: Dict[str, List[torch.Tensor]] = {}
-        vs: List[torch.Tensor] = []
-
-        for o in outputs:
-            for key in Policy._fields:
-                mbv = getattr(o.pi, key)
-                if getattr(o.pi, key) is not None:
-                    if key not in pi_dict:
-                        pi_dict[key] = []
-                    pi_dict[key].append(mbv)
-
-            for key in LogPolicy._fields:
-                mbv = getattr(o.log_pi, key)
-                if getattr(o.log_pi, key) is not None:
-                    if key not in log_pi_dict:
-                        log_pi_dict[key] = []
-                    log_pi_dict[key].append(mbv)
-
-            for key in Logits._fields:
-                mbv = getattr(o.logit, key)
-                if getattr(o.logit, key) is not None:
-                    if key not in logit_dict:
-                        logit_dict[key] = []
-                    logit_dict[key].append(mbv)
-
-            vs.append(o.v)
-
-        pi_dict = {
-            key: torch.cat(value, dim=1)
-            .contiguous()
-            .view(T, B, *value[0].shape[2:])
-            .squeeze()
-            for key, value in pi_dict.items()
-        }
-        log_pi_dict = {
-            key: torch.cat(value, dim=1)
-            .contiguous()
-            .view(T, B, *value[0].shape[2:])
-            .squeeze()
-            for key, value in log_pi_dict.items()
-        }
-        logit_dict = {
-            key: torch.cat(value, dim=1)
-            .contiguous()
-            .view(T, B, *value[0].shape[2:])
-            .squeeze()
-            for key, value in logit_dict.items()
-        }
-        vs = torch.cat(vs, dim=1).contiguous().view(T, B, 1)
-
-        return TrainingOutput(
-            pi=Policy(**pi_dict),
-            v=vs,
-            logit=Logits(**logit_dict),
-            log_pi=LogPolicy(**log_pi_dict),
-        )
-
-    def _postprocess(
+    def postprocess(
         self,
         state: State,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
-        indices: Indices,
-        logits: Logits,
-        policy: Policy,
-        value: torch.Tensor,
+        model_output: ModelOutput,
         choices: Optional[Dict[str, Any]] = None,
-        training: bool = False,
-        need_log_policy: bool = True,
-    ) -> Union[
-        Tuple[TrainingOutput, Tuple[torch.Tensor, torch.Tensor]],
-        Tuple[EnvStep, PostProcess, Tuple[torch.Tensor, torch.Tensor]],
-    ]:
-        if not training:
+    ) -> Union[ModelOutput, PostProcess]:
+        """post process method"""
+
+        if choices:
             targeting = bool(state.get("targeting"))
-            post_process = self.index_to_action(targeting, indices, choices)
-            env_step = EnvStep(
-                indices=indices,
-                policy=policy,
-                logits=logits,
-            )
-            output = (env_step, post_process, hidden_state)
+            output = self.index_to_action(targeting, model_output.indices, choices)
+
         else:
-            if need_log_policy:
-                log_policy = self.get_log_policy(logits, state)
-            else:
-                log_policy = None
-            output = (
-                TrainingOutput(
-                    pi=policy,
-                    v=value,
-                    log_pi=log_policy,
-                    logit=logits,
-                ),
-                hidden_state,
+            output = ModelOutput(
+                indices=model_output.indices,
+                pi=model_output.pi,
+                v=model_output.v,
+                log_pi=self.get_log_policy(model_output.logit, state),
+                logit=model_output.logit,
             )
+
         return output
 
-    def get_log_policy(self, logits: Logits, state: State):
+    def get_log_policy(self, logits: Policy, state: State):
         if self.gametype != "singles":
             target_log_policy = _log_policy(
-                logits.target_logits,
+                logits.target,
                 state["target_mask"],
             )
         else:
@@ -234,7 +127,7 @@ class NAshKetchumModel(nn.Module):
 
         if self.gen == 8:
             max_move_log_policy = _log_policy(
-                logits.max_move_logits,
+                logits.max_move,
                 state["max_move_mask"],
             )
         else:
@@ -242,28 +135,19 @@ class NAshKetchumModel(nn.Module):
 
         if self.gen >= 6:
             flag_log_policy = _log_policy(
-                logits.flag_logits,
+                logits.flag,
                 state["flag_mask"],
             )
         else:
             flag_log_policy = None
 
-        return LogPolicy(
-            action_type_log_policy=_log_policy(
-                logits.action_type_logits,
-                state["action_type_mask"],
-            ),
-            move_log_policy=_log_policy(
-                logits.move_logits,
-                state["move_mask"],
-            ),
-            switch_log_policy=_log_policy(
-                logits.switch_logits,
-                state["switch_mask"],
-            ),
-            max_move_log_policy=max_move_log_policy,
-            flag_log_policy=flag_log_policy,
-            target_log_policy=target_log_policy,
+        return Policy(
+            action_type=_log_policy(logits.action_type, state["action_type_mask"]),
+            move=_log_policy(logits.move, state["move_mask"]),
+            switch=_log_policy(logits.switch, state["switch_mask"]),
+            max_move=max_move_log_policy,
+            flag=flag_log_policy,
+            target=target_log_policy,
         )
 
     def index_to_action(
@@ -272,18 +156,17 @@ class NAshKetchumModel(nn.Module):
         indices: Indices,
         choices: Optional[Dict[str, Any]] = None,
     ):
-        action_type_index = indices.action_type_index
-        move_index = indices.move_index
-        max_move_index = indices.max_move_index
-        switch_index = indices.switch_index
-        flag_index = indices.flag_index
-        target_index = indices.target_index
+        action_type_index = indices.action_type_index.item()
+        move_index = indices.move_index.item()
+        switch_index = indices.switch_index.item()
 
         if not targeting:
             index = action_type_index
 
             if action_type_index == 0:
+                flag_index = (indices.flag_index).item()
                 if flag_index == 3:
+                    max_move_index = (indices.max_move_index).item()
                     index = max_move_index
                 else:
                     index = move_index
@@ -316,6 +199,11 @@ class NAshKetchumModel(nn.Module):
                 data = choices["targets"]
             else:
                 data = None
+
+            target_index = (indices.target_index).item()
             index = target_index
 
-        return PostProcess(data, index)
+        try:
+            return PostProcess(data, index)
+        except:
+            print()

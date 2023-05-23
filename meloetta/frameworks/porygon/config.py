@@ -38,7 +38,7 @@ class PorygonConfig:
     """Learning pararms"""
 
     # The batch size to use when learning/improving parameters.
-    batch_size: int = 32
+    batch_size: int = 16
     # The learning rate for `params`.
     learning_rate: float = 5e-5
     # The config related to the ADAM optimizer used for updating `params`.

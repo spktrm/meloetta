@@ -26,11 +26,6 @@ class WeatherEncoder(nn.Module):
             + pw_min_onehot.embedding_dim * len(PSEUDOWEATHERS)
             + pw_max_onehot.embedding_dim * len(PSEUDOWEATHERS)
         )
-        self.lin = nn.Sequential(
-            nn.Linear(lin_in, config.embedding_dim),
-            nn.ReLU(),
-            nn.Linear(config.embedding_dim, config.embedding_dim),
-        )
 
     def forward(
         self,
@@ -62,5 +57,4 @@ class WeatherEncoder(nn.Module):
             ),
             dim=-1,
         )
-        weather_emb = self.lin(weather_raw)
-        return weather_emb
+        return weather_raw

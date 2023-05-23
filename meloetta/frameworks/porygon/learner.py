@@ -8,8 +8,6 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 
-from typing import Tuple
-
 from meloetta.frameworks.porygon import utils
 from meloetta.frameworks.porygon.buffer import ReplayBuffer
 from meloetta.frameworks.porygon.config import PorygonConfig
@@ -20,19 +18,18 @@ from meloetta.frameworks.porygon.model import (
     Targets,
     Loss,
     Policy,
-    Logits,
-    LogPolicy,
 )
 from meloetta.frameworks.porygon.utils import from_logits as vtrace_from_logits
 
 
 def compute_baseline_loss(advantages, valid):
-    return 0.5 * torch.sum((advantages * valid) ** 2)
+    return torch.sum((advantages * valid) ** 2)
 
 
 def compute_entropy_loss(policy, log_policy, valid):
     """Return the entropy loss, i.e., the negative entropy of the policy."""
     entropy = (policy * log_policy).sum(-1)
+    entropy = entropy / (policy > 0).sum(-1).clamp(min=1)
     return torch.sum(entropy * valid)
 
 
@@ -175,21 +172,16 @@ class PorygonLearner:
         return learner
 
     def collect_batch_trajectory(self):
-        hidden_state = self.learner_model.core.initial_state(self.config.batch_size)
-        hidden_state = (
-            hidden_state[0].to(self.config.learner_device, non_blocking=True),
-            hidden_state[1].to(self.config.learner_device, non_blocking=True),
-        )
         # hidden_state = hidden_state.to(self.config.learner_device, non_blocking=True)
         batch = None
         while batch is None:
             time.sleep(1)
             batch = self.replay_buffer.get_batch(self.config.batch_size)
-        return batch, hidden_state
+        return batch
 
     def step(self):
-        batch, hidden_state = self.collect_batch_trajectory()
-        self.update_paramters(batch, hidden_state)
+        batch = self.collect_batch_trajectory()
+        self.update_paramters(batch)
         self.learner_steps += 1
         if self.learner_steps % 500 == 0:
             self.save()
@@ -197,14 +189,13 @@ class PorygonLearner:
     def update_paramters(
         self,
         batch: Batch,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
         lock=threading.Lock(),
     ):
         with lock:
-            targets = self._get_targets(batch, hidden_state)
+            targets = self._get_targets(batch)
 
             self.optimizer.zero_grad(set_to_none=True)
-            losses = self._backpropagate(batch, hidden_state, targets)
+            losses = self._backpropagate(batch, targets)
 
             static_loss_dict = losses.to_log(batch)
             static_loss_dict["s"] = self.learner_steps
@@ -224,12 +215,13 @@ class PorygonLearner:
             #     if self.learner_steps % 100 == 0:
             #         self.actor_model.load_state_dict(self.learner_model.state_dict())
             # else:
-            self.actor_model.load_state_dict(self.learner_model.state_dict())
+
+            if self.learner_steps % 20 == 0:
+                self.actor_model.load_state_dict(self.learner_model.state_dict())
 
     def _get_targets(
         self,
         batch: Batch,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
     ) -> Targets:
         bidx = torch.arange(
             batch.batch_size, device=next(self.learner_model.parameters()).device
@@ -239,7 +231,7 @@ class PorygonLearner:
         learner: TrainingOutput
 
         with torch.no_grad():
-            learner, _, _ = self.learner_model(batch._asdict(), hidden_state)
+            learner = self.learner_model.learning_forward(batch)
 
         bootstrap_value = learner.v.squeeze(-1)[lengths.squeeze() - 1, bidx]
 
@@ -278,77 +270,54 @@ class PorygonLearner:
             ] = vtrace_returns
 
         return Targets(**targets_dict)
+        # return Targets(
+        #     **{
+        #         k: [vt.flatten(0, 1).unsqueeze(0) for vt in v]
+        #         for k, v in targets_dict.items()
+        #     }
+        # )
 
     def _backpropagate(
         self,
         batch: Batch,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
         targets: Targets,
     ) -> Loss:
 
-        loss_dict = {key + "_loss": 0 for key in Policy._fields}
+        loss_dict = {
+            key + "_loss": 0
+            for key, value in batch._asdict().items()
+            if "_policy" in key and value is not None
+        }
+        fields = set([field.replace("_policy_loss", "") for field in loss_dict])
+
         loss_dict.update({key.replace("policy", "value"): 0 for key in loss_dict})
         loss_dict.update({key.replace("policy", "entropy"): 0 for key in loss_dict})
-        loss_dict["recon_loss"] = 0
 
-        fields = ["action"]
-        if self.actor_model.gen >= 6:
-            fields += ("flag",)
-        else:
-            loss_dict.pop("flag_policy_loss")
-            loss_dict.pop("flag_value_loss")
-            loss_dict.pop("flag_entropy_loss")
-
-        if self.actor_model.gen == 8:
-            fields += ("max_move",)
-        else:
-            loss_dict.pop("max_move_policy_loss")
-            loss_dict.pop("max_move_value_loss")
-            loss_dict.pop("max_move_entropy_loss")
-
-        if self.actor_model.gametype != "singles":
-            fields += ("target",)
-        else:
-            loss_dict.pop("target_policy_loss")
-            loss_dict.pop("target_value_loss")
-            loss_dict.pop("target_entropy_loss")
-
-        global_action_type = batch.action_index >= 4
-
-        total_policy_mask = (
-            torch.cat((batch.move_mask, batch.switch_mask), dim=-1).sum(-1) > 1
+        total_valid = (batch.valid).sum().clamp(min=1).item()
+        total_move_valid = (
+            (batch.valid * (batch.action_type_index == 0)).sum().clamp(min=1).item()
         )
-        total_valid = (batch.valid * total_policy_mask).sum().clamp(min=1).item()
+        total_switch_valid = (
+            (batch.valid * (batch.action_type_index == 1)).sum().clamp(min=1).item()
+        )
 
-        if batch.flag_mask is not None:
-            total_flag_valid = batch.valid * (global_action_type == 0)
-            total_flag_valid *= batch.flag_mask.sum(-1) > 1
-            total_flag_valid = total_flag_valid.sum().clamp(min=1).item()
-
-        # minibatch_size = batch.batch_size
-        minibatch_size = 16
+        minibatch_size = 8
 
         for batch_index in range(math.ceil(batch.batch_size / minibatch_size)):
             batch_start = minibatch_size * batch_index
             batch_end = minibatch_size * (batch_index + 1)
 
-            mini_state_h, mini_state_c = hidden_state
-
-            mini_state_h = mini_state_h[:, batch_start:batch_end].contiguous()
-            mini_state_c = mini_state_c[:, batch_start:batch_end].contiguous()
-
-            # mini_hidden_state = hidden_state[:, batch_start:batch_end].contiguous()
-            mini_hidden_state = (mini_state_h, mini_state_c)
-
             loss = 0
 
-            max_length = batch.valid[:, batch_start:batch_end].sum(0).max()
-            minibatch = batch.slice(batch_start, batch_end, max_length=max_length)
-            targ = targets.slice(batch_start, batch_end, max_length=max_length)
+            minibatch = batch.slice(batch_start, batch_end)
 
-            output, _, encoder_output = self.learner_model.forward(
+            if minibatch.valid.sum() == 0:
+                continue
+
+            targ = targets.slice(batch_start, batch_end)
+
+            output, _, _ = self.learner_model.forward(
                 minibatch._asdict(),
-                mini_hidden_state,
                 need_log_policy=True,
             )
 
@@ -365,43 +334,34 @@ class PorygonLearner:
                 if pi is None:
                     continue
 
-                if pi_field == "action_policy":
-                    policy_mask = torch.cat(
-                        (minibatch.move_mask, minibatch.switch_mask), dim=-1
-                    )
-                    valid = minibatch.valid
-                else:
-                    policy_mask = minibatch.get_mask_from_policy(pi_field)
-                    valid = minibatch.valid * (minibatch.action_index < 4)
+                valid = minibatch.valid
+                policy_valid = total_valid
+
+                policy_mask = minibatch.get_mask_from_policy(pi_field)
+
+                if field == "move" or field == "flag":
+                    valid = valid * (minibatch.action_type_index == 0)
+                    policy_valid = total_move_valid
+
+                elif field == "switch":
+                    valid = valid * (minibatch.action_type_index == 1)
+                    policy_valid = total_switch_valid
 
                 vtrace_returns = getattr(targ, vtrace_field)
-                kl_mask = vtrace_returns.kl_loss.detach() < 0.3
 
-                valid *= policy_mask.sum(-1) > 1
-
-                value_loss = 0.5 * compute_baseline_loss(
-                    vtrace_returns.vs - output.v.squeeze(-1), valid  # * kl_mask
+                value_loss = 0.25 * compute_baseline_loss(
+                    vtrace_returns.vs - output.v.squeeze(-1), valid
                 )
 
-                # policy_cloning_loss = (
-                #     5e-2 * (vtrace_returns.kl_loss * kl_mask * valid).sum()
-                # )
-                # value_cloning_loss = 5e-3 * torch.dist(
-                #     minibatch.value * kl_mask * valid,
-                #     output.v.squeeze(-1) * kl_mask * valid,
-                #     p=2,
-                # )
-
-                # Uses v-trace to define q-values for Nerd
                 policy_loss = compute_policy_gradient_loss(
                     getattr(output.logit, logit_field),
                     getattr(minibatch, index_field),
-                    vtrace_returns.pg_advantages,  # * kl_mask,
+                    vtrace_returns.pg_advantages,
                     policy_mask,
                     valid,
                 )
 
-                entropy_loss = 1e-2 * compute_entropy_loss(
+                entropy_loss = 5e-1 * compute_entropy_loss(
                     getattr(output.pi, pi_field),
                     getattr(output.log_pi, log_pi_field),
                     valid,
@@ -415,29 +375,17 @@ class PorygonLearner:
                 loss_dict[value_loss_field] += value_loss.item()
                 loss_dict[entropy_loss_field] += entropy_loss.item()
 
-                if "action" in field:
-                    policy_valid = total_valid
-
-                elif "flag" in field:
-                    policy_valid = total_flag_valid
-
-                loss += (
-                    value_loss
-                    + policy_loss
-                    + entropy_loss
-                    # + policy_cloning_loss
-                    # + value_cloning_loss
-                ) / policy_valid
+                loss += (value_loss + policy_loss + entropy_loss) / policy_valid
 
             loss.backward()
 
         for key in loss_dict:
-            if "action" in key:
+            if "action_type" in key:
                 loss_dict[key] /= total_valid
-            elif "flag" in key:
-                loss_dict[key] /= total_flag_valid
-
-        loss_dict["recon_loss"] /= total_valid
+            elif "move" in key or "flag" in key:
+                loss_dict[key] /= total_move_valid
+            elif "switch" in key:
+                loss_dict[key] /= total_switch_valid
 
         return Loss(**loss_dict)
 

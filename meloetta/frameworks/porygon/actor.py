@@ -1,4 +1,6 @@
+import json
 import torch
+import traceback
 
 from torch.nn.utils.rnn import pad_sequence
 
@@ -40,7 +42,7 @@ class PorygonActor(Actor):
         self,
         model: PorygonModel,
         replay_buffer: ReplayBuffer = None,
-        username: str = None,
+        pid: str = None,
     ):
         self.model = model
         self.gen = model.gen
@@ -55,7 +57,7 @@ class PorygonActor(Actor):
         self.env_outputs = []
         self.model_outputs = []
 
-        self.username = username
+        self.username = pid
 
     @property
     def storing_transition(self):
@@ -69,7 +71,9 @@ class PorygonActor(Actor):
     ):
         output: Tuple[ModelOutput, PostProcess]
         with torch.no_grad():
-            output = self.model(env_output, self.hidden_state, choices)
+            output = self.model(
+                env_output, self.hidden_state, choices, battle_tag=room.battle_tag
+            )
         model_output, postprocess, self.hidden_state = output
 
         if self.storing_transition:
@@ -77,7 +81,30 @@ class PorygonActor(Actor):
 
         data = postprocess.data
         index = postprocess.index
-        func, args, kwargs = data[index.item()]
+        try:
+            func, args, kwargs = data[index]
+        except Exception:
+            traceback.print_exc()
+
+            battle_tag = room.battle_tag
+            datum = {
+                "ModelOutput": {
+                    esk: {k: v for k, v in esv._asdict().items() if v is not None}
+                    if not isinstance(esv, torch.Tensor)
+                    else esv
+                    for esk, esv in model_output._asdict().items()
+                    if esv is not None
+                },
+                "index": index,
+            }
+            with open(f"errors/{battle_tag}-nashketchum_model.json", "w") as f:
+                json.dump(datum, f)
+
+            return self.choose_action(env_output, room, choices)
+        else:
+            if self.storing_transition:
+                self._store_transition(env_output, model_output, room)
+
         return func, args, kwargs
 
     def _clean_env_output(self, env_output: State):

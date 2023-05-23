@@ -1689,7 +1689,7 @@ const Items = {
                 target.hp &&
                 move &&
                 move.category !== "Status" &&
-                !move.isFutureMove
+                !move.flags["futuremove"]
             ) {
                 if (
                     !this.canSwitch(target.side) ||
@@ -1765,11 +1765,10 @@ const Items = {
         spritenum: 120,
         isGem: true,
         onSourceTryPrimaryHit(target, source, move) {
-            const pledges = ["firepledge", "grasspledge", "waterpledge"];
             if (
                 target === source ||
                 move.category === "Status" ||
-                pledges.includes(move.id)
+                move.flags["pledgecombo"]
             )
                 return;
             if (move.type === "Electric" && source.useItem()) {
@@ -2026,11 +2025,10 @@ const Items = {
         spritenum: 141,
         isGem: true,
         onSourceTryPrimaryHit(target, source, move) {
-            const pledges = ["firepledge", "grasspledge", "waterpledge"];
             if (
                 target === source ||
                 move.category === "Status" ||
-                pledges.includes(move.id)
+                move.flags["pledgecombo"]
             )
                 return;
             if (move.type === "Fire" && source.useItem()) {
@@ -2490,11 +2488,10 @@ const Items = {
         spritenum: 172,
         isGem: true,
         onSourceTryPrimaryHit(target, source, move) {
-            const pledges = ["firepledge", "grasspledge", "waterpledge"];
             if (
                 target === source ||
                 move.category === "Status" ||
-                pledges.includes(move.id)
+                move.flags["pledgecombo"]
             )
                 return;
             if (move.type === "Grass" && source.useItem()) {
@@ -4346,11 +4343,10 @@ const Items = {
         spritenum: 307,
         isGem: true,
         onSourceTryPrimaryHit(target, source, move) {
-            const pledges = ["firepledge", "grasspledge", "waterpledge"];
             if (
                 target === source ||
                 move.category === "Status" ||
-                pledges.includes(move.id)
+                move.flags["pledgecombo"]
             )
                 return;
             if (move.type === "Normal" && source.useItem()) {
@@ -5038,7 +5034,12 @@ const Items = {
     },
     quickclaw: {
         onFractionalPriorityPriority: -2,
-        onFractionalPriority(priority, pokemon) {
+        onFractionalPriority(priority, pokemon, target, move) {
+            if (
+                move.category === "Status" &&
+                pokemon.hasAbility("myceliummight")
+            )
+                return;
             if (priority <= 0 && this.randomChance(1, 5)) {
                 this.add("-activate", pokemon, "item: Quick Claw");
                 return 0.1;
@@ -7600,11 +7601,10 @@ const Items = {
         spritenum: 528,
         isGem: true,
         onSourceTryPrimaryHit(target, source, move) {
-            const pledges = ["firepledge", "grasspledge", "waterpledge"];
             if (
                 target === source ||
                 move.category === "Status" ||
-                pledges.includes(move.id)
+                move.flags["pledgecombo"]
             )
                 return;
             if (move.type === "Water" && source.useItem()) {

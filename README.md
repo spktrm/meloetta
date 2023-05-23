@@ -30,13 +30,6 @@ cd pokemon-showdown-client
 node build
 ```
 
-Then run these commands in node (remeber to use the other backslash `\` on windows).
-
-```bash
-node pokemon-showdown-client/build-tools/build-indexes
-node pokemon-showdown-client/build-tools/build-learnsets
-```
-
 Then finally run `extract.py` from the main directory. This will copy over the necessary source files.
 
 # Defining Actors
