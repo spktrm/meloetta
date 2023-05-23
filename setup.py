@@ -3,18 +3,19 @@ from setuptools import find_packages, setup
 from meloetta import __version__
 
 requirements = [
-    "py_mini_racer==0.6.0",
-    "requests==2.28.1",
-    "aioprocessing==2.0.1",
-    "websockets==10.4",
-    "beautifulsoup4==4.11.1",
+    "beautifulsoup4==4.12.2",
+    "jax==0.3.14",
     "detoxify==0.5.1",
     "pandas==1.3.5",
+    "numpy==1.21.5",
+    "py_mini_racer==0.6.0",
     "plotly==5.11.0",
-    "scikit_learn==1.0.2",
-    "setuptools>=65.5.1",
-    "torch>=1.13.1",
+    "scikit_learn==1.2.2",
+    "requests==2.26.0",
+    "torch==1.13.0",
+    "setuptools==58.0.0",
     "tqdm==4.64.1",
+    "websockets==10.1",
 ]
 
 
