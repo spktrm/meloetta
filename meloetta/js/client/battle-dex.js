@@ -80,7 +80,6 @@ var PSUtils = new ((function () {
         if (Array.isArray(a)) {
             for (var i = 0; i < a.length; i++) {
                 var comparison = PSUtils.compare(a[i], b[i]);
-
                 if (comparison) return comparison;
             }
             return 0;
@@ -112,7 +111,6 @@ function toName(name) {
         /[\u0300-\u036f\u0483-\u0489\u0610-\u0615\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06ED\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]{3,}/g,
         ""
     );
-
     name = name.replace(/[\u239b-\u23b9]/g, "");
 
     return name;
@@ -291,12 +289,12 @@ var Dex = new ((function () {
                     window.BattleBaseSpeciesChart
                 ) {
                     for (
-                        var _i = 0,
-                            _BattleBaseSpeciesCha = BattleBaseSpeciesChart;
-                        _i < _BattleBaseSpeciesCha.length;
-                        _i++
+                        var _i2 = 0,
+                            _BattleBaseSpeciesCha2 = BattleBaseSpeciesChart;
+                        _i2 < _BattleBaseSpeciesCha2.length;
+                        _i2++
                     ) {
-                        var baseSpeciesId = _BattleBaseSpeciesCha[_i];
+                        var baseSpeciesId = _BattleBaseSpeciesCha2[_i2];
                         if (formid.startsWith(baseSpeciesId)) {
                             id = baseSpeciesId;
                             break;
@@ -327,12 +325,12 @@ var Dex = new ((function () {
 
                 if (species.cosmeticFormes) {
                     for (
-                        var _i2 = 0,
-                            _species$cosmeticForm = species.cosmeticFormes;
-                        _i2 < _species$cosmeticForm.length;
-                        _i2++
+                        var _i4 = 0,
+                            _species$cosmeticForm2 = species.cosmeticFormes;
+                        _i4 < _species$cosmeticForm2.length;
+                        _i4++
                     ) {
-                        var forme = _species$cosmeticForm[_i2];
+                        var forme = _species$cosmeticForm2[_i4];
                         if (toID(forme) === formid) {
                             species = new Species(
                                 formid,
@@ -345,7 +343,6 @@ var Dex = new ((function () {
                                     otherFormes: null,
                                 })
                             );
-
                             window.BattlePokedexAltForms[formid] = species;
                             break;
                         }
@@ -608,11 +605,14 @@ var Dex = new ((function () {
                     (formeid === "-crowned" ||
                         formeid === "-eternal" ||
                         formeid === "-eternamax" ||
+                        formeid === "-four" ||
                         formeid === "-hangry" ||
+                        formeid === "-hero" ||
                         formeid === "-lowkey" ||
                         formeid === "-noice" ||
                         formeid === "-primal" ||
                         formeid === "-rapidstrike" ||
+                        formeid === "-roaming" ||
                         formeid === "-school" ||
                         formeid === "-sky" ||
                         formeid === "-starter" ||
@@ -625,8 +625,10 @@ var Dex = new ((function () {
                         baseSpeciesid === "indeedee" ||
                         baseSpeciesid === "lycanroc" ||
                         baseSpeciesid === "necrozma" ||
+                        baseSpeciesid === "oinkologne" ||
                         baseSpeciesid === "oricorio" ||
                         baseSpeciesid === "slowpoke" ||
+                        baseSpeciesid === "tatsugiri" ||
                         baseSpeciesid === "zygarde"))
             ) {
                 spriteData.cryurl += formeid;
@@ -661,7 +663,6 @@ var Dex = new ((function () {
                 options.mod +
                 "/audio/" +
                 toID(species.baseSpecies);
-
             spriteData.cryurl += ".mp3";
         }
 
@@ -832,11 +833,10 @@ var Dex = new ((function () {
             (_pokemon5 = pokemon) != null && _pokemon5.fainted
                 ? ";opacity:.3;filter:grayscale(100%) brightness(.5)"
                 : "";
-
         return (
             "background:transparent url(" +
             Dex.resourcePrefix +
-            "sprites/pokemonicons-sheet.png?v10) no-repeat scroll -" +
+            "sprites/pokemonicons-sheet.png?v12) no-repeat scroll -" +
             left +
             "px -" +
             top +
@@ -990,7 +990,6 @@ var Dex = new ((function () {
                 sanitizedCategory = "undefined";
                 break;
         }
-
         return (
             '<img src="' +
             Dex.resourcePrefix +
@@ -1006,11 +1005,11 @@ var Dex = new ((function () {
         this.pokeballs = [];
         if (!window.BattleItems) window.BattleItems = {};
         for (
-            var _i3 = 0, _ref2 = Object.values(window.BattleItems);
-            _i3 < _ref2.length;
-            _i3++
+            var _i6 = 0, _ref3 = Object.values(window.BattleItems);
+            _i6 < _ref3.length;
+            _i6++
         ) {
-            var data = _ref2[_i3];
+            var data = _ref3[_i6];
             if (!data.isPokeball) continue;
             this.pokeballs.push(data.name);
         }
@@ -1209,11 +1208,11 @@ var ModdedDex = (function () {
         this.pokeballs = [];
         if (!window.BattleItems) window.BattleItems = {};
         for (
-            var _i4 = 0, _ref3 = Object.values(window.BattleItems);
-            _i4 < _ref3.length;
-            _i4++
+            var _i8 = 0, _ref5 = Object.values(window.BattleItems);
+            _i8 < _ref5.length;
+            _i8++
         ) {
-            var data = _ref3[_i4];
+            var data = _ref5[_i8];
             if (data.gen && data.gen > this.gen) continue;
             if (!data.isPokeball) continue;
             this.pokeballs.push(data.name);

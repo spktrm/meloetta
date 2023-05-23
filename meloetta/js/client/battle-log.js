@@ -19,6 +19,7 @@
         this.scene = null;
         this.preemptElem = null;
         this.atBottom = true;
+        this.skippedLines = false;
         this.className = void 0;
         this.battleParser = null;
         this.joinLeave = null;
@@ -55,18 +56,57 @@
     _proto.reset = function reset() {
         this.innerElem.innerHTML = "";
         this.atBottom = true;
+        this.skippedLines = false;
     };
     _proto.destroy = function destroy() {
         this.elem.onscroll = null;
     };
+    _proto.addSeekEarlierButton = function addSeekEarlierButton() {
+        var _this2 = this;
+        if (this.skippedLines) return;
+        this.skippedLines = true;
+        var el = document.createElement("div");
+        el.className = "chat";
+        el.innerHTML =
+            '<button class="button earlier-button"><i class="fa fa-caret-up"></i><br />Earlier messages</button>';
+        var button = el.getElementsByTagName("button")[0];
+        button == null
+            ? void 0
+            : button.addEventListener == null
+            ? void 0
+            : button.addEventListener("click", function (e) {
+                  var _this2$scene;
+                  e.preventDefault();
+                  (_this2$scene = _this2.scene) == null
+                      ? void 0
+                      : _this2$scene.battle.seekTurn(
+                            _this2.scene.battle.turn - 100
+                        );
+              });
+        this.addNode(el);
+    };
     _proto.add = function add(args, kwArgs, preempt) {
         var _this$scene,
+            _this$scene2,
             _window$app,
             _window$app$ignore,
             _window$app2,
             _window$app2$rooms,
-            _this$scene2;
+            _this$scene3;
         if (kwArgs != null && kwArgs.silent) return;
+        if ((_this$scene = this.scene) != null && _this$scene.battle.seeking) {
+            var battle = this.scene.battle;
+            if (battle.stepQueue.length > 2000) {
+                if (
+                    battle.seeking === Infinity
+                        ? battle.currentStep < battle.stepQueue.length - 2000
+                        : battle.turn < battle.seeking - 100
+                ) {
+                    this.addSeekEarlierButton();
+                    return;
+                }
+            }
+        }
         var divClass = "chat";
         var divHTML = "";
         var noNotify;
@@ -77,10 +117,10 @@
             case "chat":
             case "c":
             case "c:":
-                var battle =
-                    (_this$scene = this.scene) == null
+                var _battle =
+                    (_this$scene2 = this.scene) == null
                         ? void 0
-                        : _this$scene.battle;
+                        : _this$scene2.battle;
                 var name;
                 var message;
                 if (args[0] === "c:") {
@@ -92,12 +132,12 @@
                 }
                 var rank = name.charAt(0);
                 if (
-                    battle != null &&
-                    battle.ignoreSpects &&
+                    _battle != null &&
+                    _battle.ignoreSpects &&
                     " +".includes(rank)
                 )
                     return;
-                if (battle != null && battle.ignoreOpponent) {
+                if (_battle != null && _battle.ignoreOpponent) {
                     if (
                         "\u2605\u2606".includes(rank) &&
                         toUserid(name) !== app.user.get("userid")
@@ -116,7 +156,7 @@
                         ? void 0
                         : (_window$app2$rooms = _window$app2.rooms) == null
                         ? void 0
-                        : _window$app2$rooms[battle.roomid].getHighlight(
+                        : _window$app2$rooms[_battle.roomid].getHighlight(
                               message
                           );
                 var _this$parseChatMessag = this.parseChatMessage(
@@ -128,11 +168,10 @@
                 divClass = _this$parseChatMessag[0];
                 divHTML = _this$parseChatMessag[1];
                 noNotify = _this$parseChatMessag[2];
-
                 if (!noNotify && isHighlighted) {
                     var notifyTitle =
-                        "Mentioned by " + name + " in " + battle.roomid;
-                    app.rooms[battle.roomid].notifyOnce(
+                        "Mentioned by " + name + " in " + _battle.roomid;
+                    app.rooms[_battle.roomid].notifyOnce(
                         notifyTitle,
                         '"' + message + '"',
                         "highlight"
@@ -146,8 +185,8 @@
             case "l": {
                 var user = BattleTextParser.parseNameParts(args[1]);
                 if (
-                    battle != null &&
-                    battle.ignoreSpects &&
+                    _battle != null &&
+                    _battle.ignoreSpects &&
                     " +".includes(user.group)
                 )
                     return;
@@ -183,11 +222,9 @@
                 }
                 this.joinLeave.element.innerHTML =
                     "<small>" + BattleLog.escapeHTML(buf) + "</small>";
-
                 (preempt ? this.preemptElem : this.innerElem).appendChild(
                     this.joinLeave.element
                 );
-
                 return;
             }
 
@@ -213,11 +250,9 @@
                     " renamed from " +
                     BattleLog.escapeHTML(this.lastRename.from) +
                     ".</small>";
-
                 (preempt ? this.preemptElem : this.innerElem).appendChild(
                     this.lastRename.element
                 );
-
                 return;
             }
 
@@ -250,7 +285,6 @@
                         BattleLog.escapeHTML(args[1]).replace(/\|/g, "<br />") +
                         "</div>"
                 );
-
                 return;
 
             case "pm":
@@ -273,7 +307,6 @@
                         BattleLog.escapeHTML(args[1]) +
                         '"><b>Register</b></button></div>'
                 );
-
                 return;
 
             case "unlink": {
@@ -308,9 +341,9 @@
                 var title = args[1];
                 var body = args[2];
                 var roomid =
-                    (_this$scene2 = this.scene) == null
+                    (_this$scene3 = this.scene) == null
                         ? void 0
-                        : _this$scene2.battle.roomid;
+                        : _this$scene3.battle.roomid;
                 if (!roomid) break;
                 app.rooms[roomid].notifyOnce(title, body, "highlight");
                 break;
@@ -332,7 +365,6 @@
                 this.addBattleMessage(args, kwArgs);
                 return;
         }
-
         if (divHTML) this.addDiv(divClass, divHTML, preempt);
     };
     _proto.addBattleMessage = function addBattleMessage(args, kwArgs) {
@@ -341,11 +373,9 @@
                 this.message(
                     "<strong>Warning:</strong> " + BattleLog.escapeHTML(args[1])
                 );
-
                 this.message(
                     'Bug? Report it to <a href="http://www.smogon.com/forums/showthread.php?t=3453192">the replay viewer\'s Smogon thread</a>'
                 );
-
                 if (this.scene) this.scene.wait(1000);
                 return;
 
@@ -356,7 +386,6 @@
                         BattleLog.escapeHTML(args[1]) +
                         "</em></small>"
                 );
-
                 break;
 
             case "rule":
@@ -370,7 +399,6 @@
                         BattleLog.escapeHTML(ruleArgs[1] || "") +
                         "</small>"
                 );
-
                 break;
 
             case "rated":
@@ -380,7 +408,6 @@
                         (BattleLog.escapeHTML(args[1]) || "Rated battle") +
                         "</strong>"
                 );
-
                 break;
 
             case "tier":
@@ -390,7 +417,6 @@
                         BattleLog.escapeHTML(args[1]) +
                         "</strong>"
                 );
-
                 break;
 
             case "turn":
@@ -429,7 +455,6 @@
                         "chat message-error",
                         "Unrecognized: |" + BattleLog.escapeHTML(args.join("|"))
                     );
-
                     return;
                 }
                 if (!line) return;
@@ -440,8 +465,8 @@
     _proto.textList = function textList(list) {
         var message = "";
         var listNoDuplicates = [];
-        for (var _i = 0, _list = list; _i < _list.length; _i++) {
-            var user = _list[_i];
+        for (var _i2 = 0, _list2 = list; _i2 < _list2.length; _i2++) {
+            var user = _list2[_i2];
             if (!listNoDuplicates.includes(user)) listNoDuplicates.push(user);
         }
         list = listNoDuplicates;
@@ -465,7 +490,6 @@
                 /\|\|([^\|]*)\|\|([^\|]*)\|\|/,
                 '<abbr title="$1">$2</abbr>'
             );
-
             if (line.startsWith("  "))
                 line = "<small>" + line.trim() + "</small>";
             return line;
@@ -523,11 +547,11 @@
         var classContains = " uhtml-" + id + " ";
         var elements = [];
         for (
-            var _i2 = 0, _ref = this.innerElem.childNodes;
-            _i2 < _ref.length;
-            _i2++
+            var _i4 = 0, _ref2 = this.innerElem.childNodes;
+            _i4 < _ref2.length;
+            _i4++
         ) {
-            var node = _ref[_i2];
+            var node = _ref2[_i4];
             if (
                 node.className &&
                 (" " + node.className + " ").includes(classContains)
@@ -537,11 +561,11 @@
         }
         if (this.preemptElem) {
             for (
-                var _i3 = 0, _ref2 = this.preemptElem.childNodes;
-                _i3 < _ref2.length;
-                _i3++
+                var _i6 = 0, _ref4 = this.preemptElem.childNodes;
+                _i6 < _ref4.length;
+                _i6++
             ) {
-                var _node = _ref2[_i3];
+                var _node = _ref4[_i6];
                 if (
                     _node.className &&
                     (" " + _node.className + " ").includes(classContains)
@@ -551,15 +575,15 @@
             }
         }
         if (htmlSrc && elements.length && !forceAdd) {
-            for (var _i4 = 0; _i4 < elements.length; _i4++) {
-                var element = elements[_i4];
+            for (var _i8 = 0; _i8 < elements.length; _i8++) {
+                var element = elements[_i8];
                 element.innerHTML = BattleLog.sanitizeHTML(htmlSrc);
             }
             this.updateScroll();
             return;
         }
-        for (var _i5 = 0; _i5 < elements.length; _i5++) {
-            var _element = elements[_i5];
+        for (var _i10 = 0; _i10 < elements.length; _i10++) {
+            var _element = elements[_i10];
             _element.parentElement.removeChild(_element);
         }
         if (!htmlSrc) return;
@@ -584,11 +608,11 @@
         var classStart = "chat chatmessage-" + userid + " ";
         var nodes = [];
         for (
-            var _i6 = 0, _ref3 = this.innerElem.childNodes;
-            _i6 < _ref3.length;
-            _i6++
+            var _i12 = 0, _ref6 = this.innerElem.childNodes;
+            _i12 < _ref6.length;
+            _i12++
         ) {
-            var node = _ref3[_i6];
+            var node = _ref6[_i12];
             if (
                 node.className &&
                 (node.className + " ").startsWith(classStart)
@@ -598,11 +622,11 @@
         }
         if (this.preemptElem) {
             for (
-                var _i7 = 0, _ref4 = this.preemptElem.childNodes;
-                _i7 < _ref4.length;
-                _i7++
+                var _i14 = 0, _ref8 = this.preemptElem.childNodes;
+                _i14 < _ref8.length;
+                _i14++
             ) {
-                var _node2 = _ref4[_i7];
+                var _node2 = _ref8[_i14];
                 if (
                     _node2.className &&
                     (_node2.className + " ").startsWith(classStart)
@@ -612,8 +636,8 @@
             }
         }
         if (lineCount) nodes = nodes.slice(-lineCount);
-        for (var _i8 = 0, _nodes = nodes; _i8 < _nodes.length; _i8++) {
-            var _node3 = _nodes[_i8];
+        for (var _i16 = 0, _nodes2 = nodes; _i16 < _nodes2.length; _i16++) {
+            var _node3 = _nodes2[_i16];
             _node3.style.display = "none";
             _node3.className = "revealed " + _node3.className;
         }
@@ -635,8 +659,8 @@
         lastNode.appendChild(button);
     };
     BattleLog.unlinkNodeList = function unlinkNodeList(nodeList, classStart) {
-        for (var _i9 = 0, _ref5 = nodeList; _i9 < _ref5.length; _i9++) {
-            var node = _ref5[_i9];
+        for (var _i18 = 0, _ref10 = nodeList; _i18 < _ref10.length; _i18++) {
+            var node = _ref10[_i18];
             if (
                 node.className &&
                 (node.className + " ").startsWith(classStart)
@@ -648,11 +672,11 @@
                     var parent = linkNode.parentElement;
                     if (!parent) continue;
                     for (
-                        var _i10 = 0, _ref6 = linkNode.childNodes;
-                        _i10 < _ref6.length;
-                        _i10++
+                        var _i20 = 0, _ref12 = linkNode.childNodes;
+                        _i20 < _ref12.length;
+                        _i20++
                     ) {
-                        var childNode = _ref6[_i10];
+                        var childNode = _ref12[_i20];
                         parent.insertBefore(childNode, linkNode);
                     }
                     parent.removeChild(linkNode);
@@ -794,7 +818,6 @@
                 B1 = 0;
                 break;
         }
-
         var R = R1 + m;
         var G = G1 + m;
         var B = B1 + m;
@@ -827,7 +850,6 @@
         }
         var colorStyle =
             ' style="color:' + BattleLog.usernameColor(toID(name)) + '"';
-
         var clickableName =
             "<small>" +
             BattleLog.escapeHTML(group) +
@@ -939,7 +961,6 @@
                     "chat message-error",
                     "[outdated code no longer supported]",
                 ];
-
             case "text":
                 return ["chat", BattleLog.parseMessage(target)];
             case "error":
@@ -1020,7 +1041,7 @@
         return str;
     };
     BattleLog.initSanitizeHTML = function initSanitizeHTML() {
-        var _this2 = this;
+        var _this3 = this;
         if (this.tagPolicy) return;
         if (!("html4" in window)) {
             throw new Error("sanitizeHTML requires caja");
@@ -1144,7 +1165,7 @@
                 };
             } else if (tagName === "username") {
                 tagName = "strong";
-                var color = _this2.usernameColor(toID(getAttrib("name")));
+                var color = _this3.usernameColor(toID(getAttrib("name")));
                 var style = getAttrib("style");
                 setAttrib("style", style + ";color:" + color);
             } else if (tagName === "spotify") {
@@ -1202,10 +1223,14 @@
                     null
                         ? void 0
                         : _exec4[1];
-
+                _this3.players.push(null);
+                var idx = _this3.players.length;
+                _this3.initYoutubePlayer(idx);
                 return {
                     tagName: "iframe",
                     attribs: [
+                        "id",
+                        "youtube-iframe-" + idx,
                         "width",
                         _width,
                         "height",
@@ -1213,8 +1238,8 @@
                         "src",
                         "https://www.youtube.com/embed/" +
                             videoId +
-                            (time ? "?start=" + time : ""),
-
+                            "?enablejsapi=1&playsinline=1" +
+                            (time ? "&start=" + time : ""),
                         "frameborder",
                         "0",
                         "allow",
@@ -1250,7 +1275,6 @@
                             "class",
                             "picon" + (className ? " " + className : "")
                         );
-
                         setAttrib(
                             "style",
                             Dex.getPokemonIcon(iconValue) +
@@ -1261,7 +1285,6 @@
                             "class",
                             "itemicon" + (className ? " " + className : "")
                         );
-
                         setAttrib(
                             "style",
                             Dex.getItemIcon(iconValue) +
@@ -1362,6 +1385,69 @@
             this.localizeTime
         );
     };
+    BattleLog.initYoutubePlayer = function initYoutubePlayer(idx) {
+        var _this4 = this;
+        var id = "youtube-iframe-" + idx;
+        var loadPlayer = function () {
+            if (!$("#" + id).length) return;
+            var player = new window.YT.Player(id, {
+                events: {
+                    onStateChange: function (event) {
+                        if (event.data === window.YT.PlayerState.PLAYING) {
+                            for (
+                                var _i22 = 0,
+                                    _BattleLog$players2 = BattleLog.players;
+                                _i22 < _BattleLog$players2.length;
+                                _i22++
+                            ) {
+                                var curPlayer = _BattleLog$players2[_i22];
+                                if (player === curPlayer) continue;
+                                curPlayer == null
+                                    ? void 0
+                                    : curPlayer.pauseVideo == null
+                                    ? void 0
+                                    : curPlayer.pauseVideo();
+                            }
+                        }
+                    },
+                },
+            });
+            _this4.players[idx - 1] = player;
+        };
+
+        this.ensureYoutube().then(function () {
+            setTimeout(function () {
+                return loadPlayer();
+            }, 300);
+        });
+    };
+    BattleLog.ensureYoutube = function ensureYoutube() {
+        if (this.ytLoading) return this.ytLoading;
+
+        this.ytLoading = new Promise(function (resolve) {
+            var el = document.createElement("script");
+            el.type = "text/javascript";
+            el.async = true;
+            el.src = "https://youtube.com/iframe_api";
+            el.onload = function () {
+                var loopCheck = function () {
+                    var _window$YT;
+                    if (
+                        !((_window$YT = window.YT) != null && _window$YT.Player)
+                    ) {
+                        setTimeout(function () {
+                            return loopCheck();
+                        }, 300);
+                    } else {
+                        resolve();
+                    }
+                };
+                loopCheck();
+            };
+            document.body.appendChild(el);
+        });
+        return this.ytLoading;
+    };
     BattleLog.createReplayFile = function createReplayFile(room) {
         var battle = room.battle;
         var replayid = room.id;
@@ -1417,7 +1503,6 @@
             '" class="subtle" target="_blank">' +
             BattleLog.escapeHTML(battle.p2.name) +
             "</a></h1>\n";
-
         buf +=
             '<script type="text/plain" class="battle-log-data">' +
             battle.stepQueue.join("\n").replace(/\//g, "\\/") +
@@ -1466,8 +1551,8 @@ BattleLog.interstice = (function () {
             if (uri[0] === "/" && uri[1] !== "/") {
                 return true;
             }
-            for (var _i11 = 0; _i11 < patterns.length; _i11++) {
-                var pattern = patterns[_i11];
+            for (var _i24 = 0; _i24 < patterns.length; _i24++) {
+                var pattern = patterns[_i24];
                 if (pattern.test(uri)) return true;
             }
             return false;
@@ -1482,5 +1567,7 @@ BattleLog.interstice = (function () {
         },
     };
 })();
+BattleLog.players = [];
+BattleLog.ytLoading = null;
 BattleLog.tagPolicy = null;
 //# sourceMappingURL=battle-log.js.map

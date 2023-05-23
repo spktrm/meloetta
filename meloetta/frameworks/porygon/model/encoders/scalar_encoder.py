@@ -77,12 +77,6 @@ class ScalarEncoder(nn.Module):
             )
             lin_in += self.choices_done_onehot.embedding_dim
 
-        self.lin = nn.Sequential(
-            nn.Linear(lin_in, config.embedding_dim),
-            nn.ReLU(),
-            nn.Linear(config.embedding_dim, config.embedding_dim),
-        )
-
     def forward(
         self,
         turn: torch.Tensor,
@@ -133,6 +127,4 @@ class ScalarEncoder(nn.Module):
             ]
 
         scalar_raw = torch.cat(scalar_emb, dim=-1)
-        scalar_emb = self.lin(scalar_raw)
-
-        return scalar_emb
+        return scalar_raw

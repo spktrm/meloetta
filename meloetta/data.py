@@ -57,7 +57,7 @@ with open(os.path.join(DATA_DIR, "Formats.json"), "r") as f:
 GMAX_MOVES = [move for move in BattleMovedex if "gmax" in move]
 
 
-BOOSTS = ["atk", "def", "spa", "spd", "spe", "evasion", "accuracy", "spc"]
+BOOSTS = ["atk", "def", "spc", "spa", "spd", "spe", "evasion", "accuracy"]
 
 
 def load_feature_embedding(type: str, gen: int):
@@ -207,11 +207,7 @@ _STATE_FIELDS = {
     "pseudoweathers",
     "weather",
     "wisher",
-    "turn",
-    "n",
-    "total_pokemon",
-    "faint_counter",
-    "turn",
+    "scalars",
     "prev_choices",
     "choices_done",
     "action_type_mask",

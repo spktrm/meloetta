@@ -1,4 +1,5 @@
 import re
+import json
 import torch
 
 from collections import OrderedDict
@@ -27,7 +28,54 @@ class Choices(NamedTuple):
 
 
 class ChoiceBuilder:
-    def __init__(self, room: BattleRoom):
+    def __init__(
+        self, room: BattleRoom = None, turns_since_last_move: int = 0, path: str = None
+    ):
+        if room is not None:
+            choices = self._init_from_room(room)
+        elif path is not None:
+            choices = self._init_from_error(path)
+
+        self.soup = BeautifulSoup(self.html, "html.parser")
+
+        self.isMega = any("mega" in choice for choice in choices)
+        self.isZMove = any("zmove" in choice for choice in choices)
+        self.isUltraBurst = any("ultra" in choice for choice in choices)
+        self.isDynamax = any("dynamax" in choice for choice in choices)
+        self.isTerastal = any("terastal" in choice for choice in choices)
+
+        choices = []
+        self.checkboxes = {
+            checkbox.find("input").attrs["name"]
+            for checkbox in self.soup.find_all("label")
+        }
+        self.turns_since_last_move = turns_since_last_move
+
+    def _init_from_error(self, path: str):
+        with open(path, "r") as f:
+            log = json.load(f)
+
+        tier = log["state"]["battle"]["tier"]
+        self.gen = int(re.search(r"([0-9])", tier).group())
+        self.gametype = log["state"]["battle"]["gameType"]
+
+        if self.gametype == "singles":
+            self.n = 1
+        if self.gametype == "doubles":
+            self.n = 2
+        if self.gametype == "triples":
+            self.n = 3
+        controls = log["state"]["controls"]["controls"]
+        self.choice = log["state"]["choice"]
+        choices = self.choice.get("choices", [])
+        choices = [c for c in choices if c is not None]
+        self.choices: List[str] = choices
+        self.pos = len(choices)
+
+        self.html = controls
+        return choices
+
+    def _init_from_room(self, room: BattleRoom):
         self.room = room
         tier = room.get_js_attr("battle.tier")
         self.gen = int(re.search(r"([0-9])", tier).group())
@@ -47,21 +95,9 @@ class ChoiceBuilder:
         self.pos = len(choices)
 
         self.html = controls
-        self.soup = BeautifulSoup(controls, "html.parser")
+        return choices
 
-        self.isMega = any("mega" in choice for choice in choices)
-        self.isZMove = any("zmove" in choice for choice in choices)
-        self.isUltraBurst = any("ultra" in choice for choice in choices)
-        self.isDynamax = any("dynamax" in choice for choice in choices)
-        self.isTerastal = any("terastal" in choice for choice in choices)
-
-        choices = []
-        self.checkboxes = {
-            checkbox.find("input").attrs["name"]
-            for checkbox in self.soup.find_all("label")
-        }
-
-    def get_choices(self):
+    def get_choices(self) -> Choices:
         choices = {}
         action_masks = {}
 
@@ -158,19 +194,24 @@ class ChoiceBuilder:
         move_mask = torch.tensor(list(move_mask.values()))
         choices["moves"] = moves
 
-        action_type = torch.tensor([move, switch, not (move or switch)])
+        if self.turns_since_last_move > 5 and move:
+            switch = False
+            switch_mask = switch_mask & torch.zeros_like(switch_mask)
+
+        targeting = not (move or switch)
+        action_type = torch.tensor([move, switch, targeting])
         flags = torch.tensor([noflag, mega, zmove, max, tera])
 
-        action_masks["action_type_mask"] = expand_bt(action_type)
-        action_masks["move_mask"] = expand_bt(move_mask)
+        action_masks["action_type_mask"] = expand_bt(action_type).bool()
+        action_masks["move_mask"] = expand_bt(move_mask).bool()
         if self.gen == 8:
-            action_masks["max_move_mask"] = expand_bt(max_move_mask)
+            action_masks["max_move_mask"] = expand_bt(max_move_mask).bool()
         else:
             action_masks["max_move_mask"] = None
-        action_masks["switch_mask"] = expand_bt(switch_mask)
-        action_masks["flag_mask"] = expand_bt(flags)
+        action_masks["switch_mask"] = expand_bt(switch_mask).bool()
+        action_masks["flag_mask"] = expand_bt(flags).bool()
         if self.gametype != "singles" or self.gen == 9:
-            action_masks["target_mask"] = expand_bt(target_mask)
+            action_masks["target_mask"] = expand_bt(target_mask).bool()
         else:
             action_masks["target_mask"] = None
 
@@ -237,7 +278,7 @@ class ChoiceBuilder:
         for choice in teampreview:
             index = choice.attrs.get("value")
             choices[int(index)] = (
-                self.room.choose_team_preview,
+                None if not hasattr(self, "room") else self.room.choose_team_preview,
                 [choice.attrs.get("value")],
                 {},
             )
@@ -255,7 +296,7 @@ class ChoiceBuilder:
         for choice in self.reg_moves:
             index = choice.attrs.get("value")
             choices[int(index) - 1] = (
-                self.room.choose_move,
+                None if not hasattr(self, "room") else self.room.choose_move,
                 [index],
                 {
                     "target": choice.attrs.get("data-target"),
@@ -281,7 +322,7 @@ class ChoiceBuilder:
             for choice in list(max_moves):
                 index = choice.attrs.get("value")
                 choices[int(index) - 1] = (
-                    self.room.choose_move,
+                    None if not hasattr(self, "room") else self.room.choose_move,
                     [index],
                     {
                         "target": choice.attrs.get("data-target"),
@@ -304,7 +345,7 @@ class ChoiceBuilder:
             for choice in mega_moves:
                 index = choice.attrs.get("value")
                 choices[int(index) - 1] = (
-                    self.room.choose_move,
+                    None if not hasattr(self, "room") else self.room.choose_move,
                     [choice.attrs.get("value")],
                     {
                         "target": choice.attrs.get("data-target"),
@@ -327,7 +368,7 @@ class ChoiceBuilder:
             for choice in list(z_moves):
                 index = choice.attrs.get("value")
                 choices[int(index) - 1] = (
-                    self.room.choose_move,
+                    None if not hasattr(self, "room") else self.room.choose_move,
                     [index],
                     {
                         "target": choice.attrs.get("data-target"),
@@ -346,7 +387,7 @@ class ChoiceBuilder:
             for choice in self.reg_moves:
                 index = choice.attrs.get("value")
                 choices[int(index) - 1] = (
-                    self.room.choose_move,
+                    None if not hasattr(self, "room") else self.room.choose_move,
                     [index],
                     {
                         "target": choice.attrs.get("data-target"),
@@ -371,7 +412,11 @@ class ChoiceBuilder:
             if key > 0:
                 key -= 1
             key += self.n
-            choices[key] = (self.room.choose_move_target, [index], {})
+            choices[key] = (
+                None if not hasattr(self, "room") else self.room.choose_move_target,
+                [index],
+                {},
+            )
         return choices
 
     def get_switches(self):
@@ -382,7 +427,11 @@ class ChoiceBuilder:
         choices = {}
         for choice in switches:
             index = choice.attrs.get("value")
-            choices[int(index)] = (self.room.choose_switch, [index], {})
+            choices[int(index)] = (
+                None if not hasattr(self, "room") else self.room.choose_switch,
+                [index],
+                {},
+            )
         return choices
 
     def get_switch_targets(self):
@@ -393,7 +442,11 @@ class ChoiceBuilder:
         choices = {}
         for choice in switch_targets:
             index = choice.attrs.get("value")
-            choices[int(index)] = (self.room.choose_switch_target, [index], {})
+            choices[int(index)] = (
+                None if not hasattr(self, "room") else self.room.choose_switch_target,
+                [index],
+                {},
+            )
         return choices
 
     def get_shifts(self):
@@ -402,7 +455,11 @@ class ChoiceBuilder:
             attrs={"name": "chooseShift"},
         )
         return {
-            int(choice.attrs.get("value")): (self.room.choose_shift, [], {})
+            int(choice.attrs.get("value")): (
+                None if not hasattr(self, "room") else self.room.choose_shift,
+                [],
+                {},
+            )
             for choice in shift
         }
 
@@ -457,5 +514,5 @@ class Player:
     def get_state(self, raw: bool = False):
         return self.room.get_state(raw=raw)
 
-    def get_choices(self):
-        return ChoiceBuilder(self.room).get_choices()
+    def get_choices(self, turns_since_last_move: int):
+        return ChoiceBuilder(self.room, turns_since_last_move).get_choices()

@@ -3,9 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from meloetta.frameworks.nash_ketchum.model import config
-from meloetta.frameworks.nash_ketchum.model.utils import binary_enc_matrix
+from meloetta.frameworks.nash_ketchum.model.utils import sqrt_one_hot_matrix, MLP
 
 from meloetta.data import CHOICE_FLAGS, CHOICE_TARGETS, CHOICE_TOKENS
+
+DRAW_BY_TURNS = 300
 
 
 class ScalarEncoder(nn.Module):
@@ -13,8 +15,9 @@ class ScalarEncoder(nn.Module):
         super().__init__()
 
         self.gen = gen
-        self.turn1_bin = nn.Embedding.from_pretrained(binary_enc_matrix(202))
-        self.turn2_bin = nn.Embedding.from_pretrained(binary_enc_matrix(53))
+        self.turn1_sqrt_onehot = nn.Embedding.from_pretrained(
+            sqrt_one_hot_matrix(DRAW_BY_TURNS + 2)
+        )
 
         action_mask_size = (
             3  # action types
@@ -28,11 +31,13 @@ class ScalarEncoder(nn.Module):
         if n_active > 1:
             action_mask_size += 2 * n_active  # n_targets
 
+        self.n_onehot = nn.Embedding.from_pretrained(torch.eye(7))
+
         lin_in = (
-            self.turn1_bin.embedding_dim
-            + self.turn2_bin.embedding_dim
+            self.turn1_sqrt_onehot.embedding_dim
             + action_mask_size
-            + 2
+            + 1
+            + self.n_onehot.embedding_dim * 2 * 3
         )
         self.n_active = n_active
 
@@ -74,36 +79,32 @@ class ScalarEncoder(nn.Module):
             )
             lin_in += self.choices_done_onehot.embedding_dim
 
-        self.lin = nn.Sequential(
-            nn.Linear(lin_in, config.embedding_dim),
-            nn.ReLU(),
-            nn.Linear(config.embedding_dim, config.embedding_dim),
-        )
+        self.encoder = MLP([lin_in, config.embedding_dim, config.embedding_dim])
 
     def forward(
         self,
         turn: torch.Tensor,
-        turns_since_last_move: torch.Tensor,
-        prev_choices: torch.Tensor,
-        choices_done: torch.Tensor,
         action_type_mask: torch.Tensor,
         move_mask: torch.Tensor,
         max_move_mask: torch.Tensor,
         switch_mask: torch.Tensor,
         flag_mask: torch.Tensor,
         target_mask: torch.Tensor,
+        n: torch.Tensor,
+        total_pokemon: torch.Tensor,
+        faint_counter: torch.Tensor,
     ):
-        turn = turn.clamp(min=0, max=200)
-        turns_since_last_move = turns_since_last_move.clamp(min=0, max=50)
+        turn = turn.clamp(min=0, max=DRAW_BY_TURNS)
         scalar_emb = [
-            self.turn1_bin(turn),
-            self.turn2_bin(turns_since_last_move),
-            (turn / 200).unsqueeze(-1),
-            (turns_since_last_move / 50).unsqueeze(-1),
+            self.turn1_sqrt_onehot(turn),
+            (turn / DRAW_BY_TURNS).unsqueeze(-1),
             action_type_mask,
             move_mask,
             switch_mask,
             flag_mask,
+            self.n_onehot(n).flatten(-2),
+            self.n_onehot(total_pokemon).flatten(-2),
+            self.n_onehot(faint_counter).flatten(-2),
         ]
         if self.gen == 8:
             scalar_emb.append(max_move_mask)
@@ -125,7 +126,5 @@ class ScalarEncoder(nn.Module):
                 target_mask,
             ]
 
-        scalar_emb = torch.cat(scalar_emb, dim=-1)
-        scalar_emb = self.lin(scalar_emb)
-
-        return scalar_emb
+        scalar_raw = torch.cat(scalar_emb, dim=-1)
+        return self.encoder(scalar_raw)

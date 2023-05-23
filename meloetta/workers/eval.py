@@ -19,7 +19,7 @@ def waiting_for_opp(room: BattleRoom):
     )
 
 
-DRAW_BY_TURNS = 200
+DRAW_BY_TURNS = 300
 
 
 class EvalWorker:
@@ -127,6 +127,9 @@ class EvalWorker:
                 if action_required:
                     # inputs to neural net
                     battle = player.room.get_battle()
+                    battle["turn"] = DRAW_BY_TURNS * (
+                        1 - (1 - (battle["turn"] / DRAW_BY_TURNS)) ** 2
+                    )
                     turn = battle["turn"]
                     vstate = actor.get_vectorized_state(player.room, battle)
 
@@ -134,10 +137,9 @@ class EvalWorker:
                 while (
                     action_required and not waiting_for_opp(player.room) and not ended
                 ):
-                    choices = player.get_choices()
+                    choices = player.get_choices(turns_since_last_move)
                     state = {
                         **vstate,
-                        "turns_since_last_move": turns_since_last_move,
                         **choices.action_masks,
                         **choices.prev_choices,
                         "targeting": choices.targeting,
@@ -150,9 +152,9 @@ class EvalWorker:
                 if outgoing_message:
                     player.room.pop_outgoing()
                     if "move" in outgoing_message:
-                        turns_since_last_move *= 0
+                        turns_since_last_move = turns_since_last_move * 0
                     else:
-                        turns_since_last_move += 1
+                        turns_since_last_move = turns_since_last_move + 1
                     await player.client.websocket.send(
                         player.room.battle_tag + "|" + outgoing_message
                     )
@@ -160,21 +162,7 @@ class EvalWorker:
                 if ended:
                     break
 
-                if turns_since_last_move > 50:
-                    print(f"{username}: forfeit by repetition!")
-
-                    await player.client.websocket.send(
-                        player.room.battle_tag + "|" + "/forfeit"
-                    )
-                    while True:
-                        message = await player.client.receive_message()
-                        action_required = await player.recieve(message)
-                        ended = player.room.get_js_attr("battle?.ended")
-                        if ended:
-                            break
-                    break
-
-                if turn > 200:
+                if turn > DRAW_BY_TURNS:
                     print(f"{username}: draw by turn > {DRAW_BY_TURNS}!")
 
                     await player.client.websocket.send(

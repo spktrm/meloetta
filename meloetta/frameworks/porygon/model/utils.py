@@ -29,35 +29,12 @@ def power_one_hot_matrix(num_embeddings: int, power: float):
 def _legal_policy(logits: torch.Tensor, legal_actions: torch.Tensor) -> torch.Tensor:
     """A soft-max policy that respects legal_actions."""
     # Fiddle a bit to make sure we don't generate NaNs or Inf in the middle.
-    l_min = logits.min(axis=-1, keepdim=True).values
-    logits = torch.where(legal_actions, logits, l_min)
-    logits -= logits.max(axis=-1, keepdim=True).values
-    logits *= legal_actions
-    exp_logits = torch.where(
-        legal_actions, torch.exp(logits), 0
-    )  # Illegal actions become 0.
-    exp_logits_sum = torch.sum(exp_logits, axis=-1, keepdim=True)
-    policy = exp_logits / exp_logits_sum
+    policy = torch.masked_fill(logits, ~legal_actions, float("-inf")).softmax(-1)
     return policy
 
 
 def _log_policy(logits: torch.Tensor, legal_actions: torch.Tensor) -> torch.Tensor:
-    """Return the log of the policy on legal action, 0 on illegal action."""
-    # logits_masked has illegal actions set to -inf.
-    logits_masked = logits + torch.log(legal_actions)
-    max_legal_logit = logits_masked.max(axis=-1, keepdim=True).values
-    logits_masked = logits_masked - max_legal_logit
-    # exp_logits_masked is 0 for illegal actions.
-    exp_logits_masked = torch.exp(logits_masked)
-
-    baseline = torch.log(torch.sum(exp_logits_masked, axis=-1, keepdim=True))
-    # Subtract baseline from logits. We do not simply return
-    #     logits_masked - baseline
-    # because that has -inf for illegal actions, or
-    #     legal_actions * (logits_masked - baseline)
-    # because that leads to 0 * -inf == nan for illegal actions.
-    log_policy = torch.multiply(legal_actions, (logits - max_legal_logit - baseline))
-    return log_policy
+    return F.log_softmax(torch.masked_fill(logits, ~legal_actions, -1e9), dim=-1)
 
 
 def gather_along_rows(
@@ -325,30 +302,21 @@ class AttentionPool(nn.Module):
 class ToVector(nn.Module):
     """Per-unit processing then average over the units dimension."""
 
-    def __init__(self, input_dim: int, output_dim: int, hidden_dim: int = None):
+    def __init__(self, input_dim: int, output_dim: int):
         super().__init__()
-        if hidden_dim is None:
-            hidden_dim = 4 * input_dim
 
-        self.ln1 = nn.LayerNorm(input_dim)
-        self.ln2 = nn.LayerNorm(hidden_dim)
-        self.lin1 = nn.Linear(input_dim, hidden_dim // 2)
-        self.lin2 = nn.Linear(hidden_dim, output_dim)
+        self.ln = nn.LayerNorm(2 * input_dim)
+        self.lin = nn.Linear(2 * input_dim, output_dim)
 
     def forward(self, x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-        x = self.ln1(x)
-        x = F.relu(x)
-        x = self.lin1(x)
-        # x = x * mask
-
         x = torch.cat(
             (
-                x[..., :1, :].max(1).values,
-                x[..., 1:, :].max(1).values,
+                x[..., :1, :].sum(1) / mask[..., :1, None].sum(1).clamp(min=1),
+                x[..., 1:, :].sum(1) / mask[..., 1:, None].sum(1).clamp(min=1),
             ),
             dim=-1,
         )
-        x = self.ln2(x)
+        x = self.ln(x)
         x = F.relu(x)
-        x = self.lin2(x)
+        x = self.lin(x)
         return x

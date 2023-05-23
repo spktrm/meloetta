@@ -20,8 +20,8 @@ class ValueHead(nn.Module):
         self.lin_out = nn.Linear(config.hidden_dim, 1)
 
     def forward(self, x: torch.Tensor):
-        x = F.relu(self.lin_in(x))
+        x = self.lin_in(x)
         for resblock in self.resblock_stack:
             x = resblock(x)
-        x = torch.tanh(self.lin_out(x))
+        x = (2 / torch.pi) * torch.atan((torch.pi / 2) * self.lin_out(x))
         return x

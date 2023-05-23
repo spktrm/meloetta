@@ -12,6 +12,7 @@ from meloetta.frameworks.porygon.model.interfaces import (
     State,
 )
 from meloetta.frameworks.porygon.model.heads import (
+    ActionTypeHead,
     MoveHead,
     FlagsHead,
     SwitchHead,
@@ -31,6 +32,7 @@ class PolicyHeads(nn.Module):
         self.gametype = gametype
         self.gen = gen
 
+        self.action_type_head = ActionTypeHead(config.action_type_head_config)
         self.move_head = MoveHead(config.move_head_config)
         self.switch_head = SwitchHead(config.switch_head_config)
 
@@ -58,30 +60,42 @@ class PolicyHeads(nn.Module):
 
         T, B, *_ = state_emb.shape
 
-        moves = encoder_output.moves.squeeze(2)
-        switches = encoder_output.switches
+        moves = encoder_output.side_embs.moves.squeeze(2)
+        switches = encoder_output.side_embs.switches
 
-        move_mask = state["move_mask"]
-        switch_mask = state["switch_mask"]
-
-        move_logits, move_keys = self.move_head(state_emb, moves)
-        switch_logits, switch_keys = self.switch_head(state_emb, switches)
-
-        action_keys = torch.cat((move_keys, switch_keys), dim=-2)
-        action_mask = torch.cat((move_mask, switch_mask), dim=-1)
-
-        action_logits = torch.cat((move_logits, switch_logits), dim=-1)
-        action_logits = action_logits / (action_logits.shape[-1] ** 0.5)
-
-        action_policy = _legal_policy(action_logits, action_mask)
-        embedding_index = torch.multinomial(action_policy.view(T * B, -1), 1)
-        action_index = embedding_index.view(T, B, -1)
-
-        action_embedding = gather_along_rows(
-            action_keys.flatten(0, -3), embedding_index, 1
+        (
+            action_type_logits,
+            action_type_policy,
+            action_type_index,
+            at_autoregressive_embedding,
+        ) = self.action_type_head(
+            state_emb,
+            state["action_type_mask"],
         )
-        action_embedding = action_embedding.view(T, B, -1)
-        autoregressive_embedding = state_emb + self.proj_key(action_embedding)
+
+        (
+            move_logits,
+            move_policy,
+            move_index,
+            autoregressive_embedding,
+        ) = self.move_head(
+            action_type_index,
+            at_autoregressive_embedding,
+            moves,
+            state["move_mask"],
+        )
+
+        (
+            switch_logits,
+            switch_policy,
+            switch_index,
+            autoregressive_embedding,
+        ) = self.switch_head(
+            action_type_index,
+            autoregressive_embedding,
+            switches,
+            state["switch_mask"],
+        )
 
         if self.gen >= 6:
             (
@@ -90,7 +104,7 @@ class PolicyHeads(nn.Module):
                 flag_index,
                 autoregressive_embedding,
             ) = self.flag_head(
-                action_index,
+                action_type_index,
                 autoregressive_embedding,
                 state["flag_mask"],
             )
@@ -101,7 +115,7 @@ class PolicyHeads(nn.Module):
 
         if self.gen == 8:
             max_move_logits, max_move_policy, max_move_index = self.max_move_head(
-                action_index,
+                action_type_index,
                 autoregressive_embedding,
                 moves,
                 state["max_move_mask"],
@@ -116,7 +130,7 @@ class PolicyHeads(nn.Module):
                 state["prev_choices"],
                 moves,
                 switches,
-                action_index,
+                action_type_index,
             )
         else:
             target_index = None
@@ -124,20 +138,26 @@ class PolicyHeads(nn.Module):
             target_policy = None
 
         indices = Indices(
-            action_index=action_index,
+            action_type_index=action_type_index,
+            move_index=move_index,
             max_move_index=max_move_index,
+            switch_index=switch_index,
             flag_index=flag_index,
             target_index=target_index,
         )
         logits = Logits(
-            action_logits=action_logits,
+            action_type_logits=action_type_logits,
+            move_logits=move_logits,
             max_move_logits=max_move_logits,
+            switch_logits=switch_logits,
             flag_logits=flag_logits,
             target_logits=target_logits,
         )
         policy = Policy(
-            action_policy=action_policy,
+            action_type_policy=action_type_policy,
+            move_policy=move_policy,
             max_move_policy=max_move_policy,
+            switch_policy=switch_policy,
             flag_policy=flag_policy,
             target_policy=target_policy,
         )

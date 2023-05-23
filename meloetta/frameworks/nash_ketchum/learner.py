@@ -1,28 +1,30 @@
-import math
+import os
 import time
 import wandb
+import cProfile, pstats
 import traceback
 import threading
 
 import torch
+import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from typing import Tuple
+from typing import Tuple, Dict
 
-from meloetta.frameworks.nash_ketchum import utils
 from meloetta.frameworks.nash_ketchum.buffer import ReplayBuffer
 from meloetta.frameworks.nash_ketchum.config import NAshKetchumConfig
 from meloetta.frameworks.nash_ketchum.entropy import EntropySchedule
 from meloetta.frameworks.nash_ketchum.model import (
     NAshKetchumModel,
-    TrainingOutput,
+    ModelOutput,
     Batch,
     Targets,
     Loss,
-    Policy,
+    Indices,
 )
 from meloetta.frameworks.nash_ketchum.utils import (
+    FineTuning,
     _player_others,
     v_trace,
     get_loss_nerd,
@@ -40,59 +42,71 @@ class TargetNetSGD:
         self.lr = lr
         self.target_model = target_model
         self.learner_model = learner_model
-        self.param_groups = []
 
-        for (name, param1), param2 in zip(
-            self.target_model.named_parameters(), self.learner_model.parameters()
+    @torch.no_grad()
+    def step(self):
+        for param1, param2 in zip(
+            self.target_model.parameters(), self.learner_model.parameters()
         ):
             if param2.requires_grad:
-                self.param_groups.append({"params": param1, "name": name})
-
-    def step(self):
-        learner_state_dict = self.learner_model.state_dict()
-        for group in self.param_groups:
-            name = group["name"]
-            param = group["params"]
-            diff = learner_state_dict[name] - param.data
-            param.data += self.lr * diff
+                new = param1 + self.lr * (param2 - param1)
+                param1[...] = new.clone().detach()
 
 
 class NAshKetchumLearner:
     def __init__(
         self,
-        learner_model: NAshKetchumModel,
-        actor_model: NAshKetchumModel,
-        target_model: NAshKetchumModel,
-        model_prev: NAshKetchumModel,
-        model_prev_: NAshKetchumModel,
-        replay_buffer: ReplayBuffer,
+        learner_model: NAshKetchumModel = None,
+        actor_model: NAshKetchumModel = None,
+        target_model: NAshKetchumModel = None,
+        model_prev: NAshKetchumModel = None,
+        model_prev_: NAshKetchumModel = None,
+        replay_buffer: ReplayBuffer = None,
+        load_devices: bool = True,
+        init_optimizers: bool = True,
         config: NAshKetchumConfig = NAshKetchumConfig(),
     ):
-        self.learner_model = learner_model
-        self.actor_model = actor_model
-        self.target_model = target_model
-        self.model_prev = model_prev
-        self.model_prev_ = model_prev_
-
-        self.replay_buffer = replay_buffer
-
         self.config = config
+
+        self.learner_model = (
+            learner_model if learner_model is not None else self._init_model(train=True)
+        )
+        self.actor_model = (
+            actor_model if actor_model is not None else self._init_model()
+        )
+        self.target_model = (
+            target_model if target_model is not None else self._init_model()
+        )
+        self.model_prev = model_prev if model_prev is not None else self._init_model()
+        self.model_prev_ = (
+            model_prev_ if model_prev_ is not None else self._init_model()
+        )
+
+        self.actor_model.load_state_dict(self.learner_model.state_dict())
+        self.target_model.load_state_dict(self.learner_model.state_dict())
+        self.model_prev.load_state_dict(self.learner_model.state_dict())
+        self.model_prev_.load_state_dict(self.learner_model.state_dict())
+
+        self.actor_model.share_memory()
+
+        if load_devices:
+            self._to_devices()
+
+        if init_optimizers:
+            self._init_optimizers()
+
+        self.replay_buffer = replay_buffer if replay_buffer else self._init_buffer()
+
         self._entropy_schedule = EntropySchedule(
             sizes=self.config.entropy_schedule_size,
             repeats=self.config.entropy_schedule_repeats,
         )
-        self.optimizer = optim.Adam(
-            self.learner_model.parameters(),
-            lr=config.learning_rate,
-            betas=(config.adam.b1, config.adam.b2),
-            eps=config.adam.eps,
-        )
-        self.optimizer_target = TargetNetSGD(
-            config.target_network_avg,
-            self.target_model,
-            self.learner_model,
-        )
+        self.scaler = torch.cuda.amp.GradScaler()
+
         self.learner_steps = 0
+        self.finetune = FineTuning()
+
+        print(f"learnabled params: {self.learner_model.get_learnable_params():,}")
 
     def get_config(self):
         return {
@@ -113,102 +127,108 @@ class NAshKetchumLearner:
                 "optimizer": self.optimizer.state_dict(),
                 "learner_steps": self.learner_steps,
             },
-            f"cpkts/cpkt-{self.learner_steps:05}.tar",
+            f"cpkts/cpkt-{self.learner_steps:08}.tar",
         )
+
+    def _init_model(self, train: bool = False):
+        model = NAshKetchumModel(
+            gen=self.config.gen,
+            gametype=self.config.gametype,
+            config=self.config.model_config,
+        ).float()
+        if train:
+            model.train()
+        else:
+            model.eval()
+        return model
+
+    def _init_buffer(self):
+        return ReplayBuffer(
+            self.config.trajectory_length,
+            self.config.gen,
+            self.config.gametype,
+            self.config.num_buffers,
+            self.config.learner_device,
+        )
+
+    def _init_optimizers(self):
+        self.optimizer = optim.Adam(
+            self.learner_model.parameters(),
+            lr=self.config.learning_rate,
+            betas=(self.config.adam.b1, self.config.adam.b2),
+            eps=self.config.adam.eps,
+        )
+        self.optimizer_target = TargetNetSGD(
+            self.config.target_network_avg,
+            self.target_model,
+            self.learner_model,
+        )
+
+    def _to_devices(self):
+        self.learner_model = self.learner_model.to(self.config.learner_device)
+        self.actor_model = self.actor_model.to(self.config.actor_device)
+        self.target_model = self.target_model.to(self.config.learner_device)
+        self.model_prev = self.model_prev.to(self.config.learner_device)
+        self.model_prev_ = self.model_prev_.to(self.config.learner_device)
 
     @classmethod
     def from_config(self, config: NAshKetchumConfig = None):
-        return NAshKetchumLearner.from_pretrained(config_override=config)
+        return NAshKetchumLearner.from_fpath(config_override=config)
 
     @classmethod
-    def from_pretrained(
-        self, fpath: str = None, config_override: NAshKetchumConfig = None
-    ):
-        assert not (
-            fpath is None and config_override is None
-        ), "please set one of `fpath` or `config`"
+    def from_latest(self):
+        cpkts = list(
+            sorted(
+                os.listdir("cpkts"),
+                key=lambda f: int(f.split("-")[-1].split(".")[0]),
+            )
+        )
+        fpath = os.path.join("cpkts", cpkts[-1])
+        return self.from_fpath(fpath, NAshKetchumConfig())
 
-        if fpath is not None:
-            datum = torch.load(fpath)
+    @classmethod
+    def from_fpath(self, fpath: str, config: NAshKetchumConfig = None):
+        try:
+            print(f"Using fpath: {fpath}")
+            datum: dict = torch.load(fpath)
+        except Exception as e:
+            raise ValueError(f"cpkt at {fpath} not found")
         else:
-            datum = {}
-
-        if datum.get("config"):
-            print("Found config!")
-            config: NAshKetchumConfig = datum["config"]
-
-        if config_override is not None:
-            config = config_override
-
-        gen, gametype = utils.get_gen_and_gametype(config.battle_format)
-        learner_model = NAshKetchumModel(
-            gen=gen, gametype=gametype, config=config.model_config
-        )
-        learner_model.train()
-
-        print(f"learnabled params: {learner_model.get_learnable_params():,}")
-
-        actor_model = NAshKetchumModel(
-            gen=gen, gametype=gametype, config=config.model_config
-        )
-        actor_model.load_state_dict(learner_model.state_dict())
-        actor_model.share_memory()
-        actor_model.eval()
-
-        target_model = NAshKetchumModel(
-            gen=gen, gametype=gametype, config=config.model_config
-        )
-        target_model.load_state_dict(learner_model.state_dict())
-        target_model.eval()
-
-        model_prev = NAshKetchumModel(
-            gen=gen, gametype=gametype, config=config.model_config
-        )
-        model_prev.load_state_dict(learner_model.state_dict())
-        model_prev.eval()
-
-        model_prev_ = NAshKetchumModel(
-            gen=gen, gametype=gametype, config=config.model_config
-        )
-        model_prev_.load_state_dict(learner_model.state_dict())
-        model_prev_.eval()
-
-        if datum.get("learner_model"):
-            try:
-                learner_model.load_state_dict(datum["learner_model"], strict=False)
-                actor_model.load_state_dict(datum["actor_model"], strict=False)
-                target_model.load_state_dict(datum["target_model"], strict=False)
-                model_prev.load_state_dict(datum["model_prev"], strict=False)
-                model_prev_.load_state_dict(datum["model_prev_"], strict=False)
-            except Exception as e:
-                traceback.print_exc()
-
-        learner_model = learner_model.to(config.learner_device, non_blocking=True)
-        actor_model = actor_model.to(config.actor_device, non_blocking=True)
-        target_model = target_model.to(config.learner_device, non_blocking=True)
-        model_prev = model_prev.to(config.learner_device, non_blocking=True)
-        model_prev_ = model_prev_.to(config.learner_device, non_blocking=True)
+            if config:
+                print("Using new config!")
+            else:
+                print("Found config!")
+                config: NAshKetchumConfig = datum["config"]
 
         learner = NAshKetchumLearner(
-            learner_model,
-            actor_model,
-            target_model,
-            model_prev,
-            model_prev_,
-            replay_buffer=ReplayBuffer(
-                config.trajectory_length,
-                gen,
-                gametype,
-                config.num_buffers,
-                config.learner_device,
-            ),
-            config=config,
+            config=config, load_devices=False, init_optimizers=False
         )
 
-        if datum.get("optimizer"):
+        for obj, model in [
+            (learner.learner_model, "learner_model"),
+            (learner.actor_model, "actor_model"),
+            (learner.target_model, "target_model"),
+            (learner.model_prev, "model_prev"),
+            (learner.model_prev_, "model_prev_"),
+        ]:
+            try:
+                obj.load_state_dict(datum[model], strict=False)
+            except Exception as e:
+                print(f"Error loading `{model}`")
+                traceback.print_exc()
+            else:
+                print(f"Sucessfully loaded `{model}`")
+
+        learner._to_devices()
+        learner._init_optimizers()
+
+        try:
             learner.optimizer.load_state_dict(datum["optimizer"])
-        else:
+        except Exception as e:
             print("Optimizer not loaded")
+            traceback.print_exc()
+        else:
+            print(f"Optimizer loaded sucessfully!")
 
         if datum.get("learner_steps"):
             learner.learner_steps = datum["learner_steps"]
@@ -218,289 +238,419 @@ class NAshKetchumLearner:
         return learner
 
     def collect_batch_trajectory(self):
-        hidden_state = self.learner_model.core.initial_state(self.config.batch_size)
-        hidden_state = (
-            hidden_state[0].to(self.config.learner_device, non_blocking=True),
-            hidden_state[1].to(self.config.learner_device, non_blocking=True),
-        )
-        batch = None
-        while batch is None:
-            time.sleep(1)
-            batch = self.replay_buffer.get_batch(self.config.batch_size)
-        return batch, hidden_state
+        return self.replay_buffer.get_batch(self.config.batch_size)
 
     def step(self):
-        batch, hidden_state = self.collect_batch_trajectory()
+        batch = self.collect_batch_trajectory()
         alpha, update_target_net = self._entropy_schedule(self.learner_steps)
-        self.update_paramters(batch, hidden_state, alpha, update_target_net)
-        self.learner_steps += 1
-        if self.learner_steps % 500 == 0:
-            self.save()
+
+        if self.learner_steps < int(1e9):
+            # if self.learner_steps < 10:
+            self.update_paramters(batch, alpha, update_target_net)
+        else:
+            profiler = cProfile.Profile()
+            profiler.enable()
+            self.update_paramters(batch, alpha, update_target_net)
+            profiler.disable()
+            stats = pstats.Stats(profiler).sort_stats("ncalls")
+            fpath = f"cprofile_{self.learner_steps}"
+            stats.dump_stats(fpath)
 
     def update_paramters(
         self,
         batch: Batch,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
         alpha: float,
-        update_target_net: bool,
+        indices: Indices,
+    ):
+        batch_cpu = batch
+        batch_gpu = batch.to(self.replay_buffer.device)
+
+        indices = Indices(
+            action_type_index=getattr(batch_cpu, "action_type_index", None),
+            move_index=getattr(batch_cpu, "move_index", None),
+            max_move_index=getattr(batch_cpu, "max_move_index", None),
+            switch_index=getattr(batch_cpu, "switch_index", None),
+            flag_index=getattr(batch_cpu, "flag_index", None),
+            target_index=getattr(batch_cpu, "target_index", None),
+        )
+
+        targets = self._get_targets(batch_cpu, batch_gpu, alpha, indices)
+        self.backprop(batch_cpu, targets, indices)
+
+    def backprop(
+        self,
+        batch_cpu: Batch,
+        targets: Targets,
+        indices: Indices,
         lock=threading.Lock(),
     ):
+        _, update_target_net = self._entropy_schedule(self.learner_steps)
+
+        losses = self._backpropagate(batch_cpu, targets, indices)
+
+        static_loss_dict = losses._asdict()
+        static_loss_dict["s"] = self.learner_steps
+        static_loss_dict["final_turn"] = (
+            batch_cpu.scalars[..., 0].max(0).values.float().mean()
+        ).item()
+
+        wandb.log(static_loss_dict)
+
+        self.scaler.unscale_(self.optimizer)
+
+        torch.nn.utils.clip_grad_value_(
+            self.learner_model.parameters(), self.config.clip_gradient
+        )
+
+        self.scaler.step(self.optimizer)
+        self.scaler.update()
+        self.optimizer.zero_grad()
+
+        self.optimizer_target.step()
+
+        if update_target_net:
+            print(f"Updating Regularization Policy @ Step: {self.learner_steps:,}")
+            self.model_prev_.load_state_dict(self.model_prev.state_dict())
+            self.model_prev.load_state_dict(self.target_model.state_dict())
+
+        self.learner_steps += 1
+        if self.learner_steps % 1000 == 0:
+            self.save()
+
         with lock:
-            self.optimizer.zero_grad(set_to_none=True)
-
-            targets = self._get_targets(batch, hidden_state, alpha)
-            losses = self._backpropagate(batch, hidden_state, targets)
-
-            static_loss_dict = losses.to_log(batch)
-            static_loss_dict["s"] = self.learner_steps
-            wandb.log(static_loss_dict)
-
-            torch.nn.utils.clip_grad_value_(
-                self.learner_model.parameters(), self.config.clip_gradient
-            )
-
-            self.optimizer.step()
-            with torch.no_grad():
-                self.optimizer_target.step()
-
-            if update_target_net:
-                self.model_prev_.load_state_dict(self.model_prev.state_dict())
-                self.model_prev.load_state_dict(self.learner_model.state_dict())
-
             self.actor_model.load_state_dict(self.learner_model.state_dict())
 
+    @torch.no_grad()
+    def _learning_forward(
+        self, batch: Batch, indices: Indices, size: int = 4096
+    ) -> Tuple[ModelOutput, ModelOutput, ModelOutput, ModelOutput,]:
+
+        B, T = batch.batch_size, batch.trajectory_length
+        if B * T >= size:
+
+            learner = []
+            target = []
+            prev = []
+            prev_ = []
+
+            def _iterate(
+                batch: Dict[str, torch.Tensor],
+                indices: Dict[str, torch.Tensor],
+                size: int,
+            ):
+                n = batch["valid"].shape[1] // size
+                if batch["valid"].shape[1] / size != n:
+                    n += 1
+
+                for i in range(n):
+                    start, end = i * size, (i + 1) * size
+                    yield (
+                        {k: v[:, start:end] for k, v in batch.items()},
+                        {k: v[:, start:end] for k, v in indices.items()},
+                    )
+
+            for minibatch, minindex in _iterate(
+                batch.flatten(0, 1), indices.flatten(0, 1), size
+            ):
+                minindex = Indices(**minindex)
+                learner.append(self.learner_model.learning_forward(minibatch, minindex))
+                target.append(self.target_model.learning_forward(minibatch, minindex))
+                prev.append(self.model_prev.learning_forward(minibatch, minindex))
+                prev_.append(self.model_prev_.learning_forward(minibatch, minindex))
+
+            learner = ModelOutput.from_list(learner)
+            target = ModelOutput.from_list(target)
+            prev = ModelOutput.from_list(prev)
+            prev_ = ModelOutput.from_list(prev_)
+
+            learner = learner.view(T, B)
+            target = target.view(T, B)
+            prev = prev.view(T, B)
+            prev_ = prev_.view(T, B)
+
+        else:
+            batch = batch._asdict()
+            learner = self.learner_model.learning_forward(batch, indices)
+            target = self.target_model.learning_forward(batch, indices)
+            prev = self.model_prev.learning_forward(batch, indices)
+            prev_ = self.model_prev_.learning_forward(batch, indices)
+
+        return learner, target, prev, prev_
+
     def _get_targets(
-        self,
-        batch: Batch,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
-        alpha: float,
+        self, batch_cpu: Batch, batch_gpu: Batch, alpha: float, indices: Indices
     ) -> Targets:
-        bidx = torch.arange(
-            batch.batch_size, device=next(self.learner_model.parameters()).device
+        learner, target, prev, prev_ = self._learning_forward(
+            batch_gpu, indices.to(self.replay_buffer.device)
         )
-        lengths = batch.valid.sum(0)
-        final_reward = batch.rewards[lengths.squeeze() - 1, bidx]
-        assert torch.all(final_reward.sum(-1) == 0).item(), "Env should be zero-sum!"
 
-        learner: TrainingOutput
-        target: TrainingOutput
-        prev: TrainingOutput
-        prev_: TrainingOutput
+        learner = learner.to("cpu")
+        target = target.to("cpu")
+        prev = prev.to("cpu")
+        prev_ = prev_.to("cpu")
 
-        with torch.no_grad():
-            learner = self.learner_model.learning_forward(batch, hidden_state)
-            target = self.target_model.learning_forward(batch, hidden_state)
-            prev = self.model_prev.learning_forward(batch, hidden_state)
-            prev_ = self.model_prev_.learning_forward(batch, hidden_state)
+        targets_dict = {"importance_sampling_corrections": []}
 
-        is_vector = torch.unsqueeze(torch.ones_like(batch.valid), dim=-1)
-        importance_sampling_corrections = [is_vector] * 2
+        acting_policies = []
+        policies_valid = []
+        policies_pprocessed = []
+        log_policies_reg = []
+        action_ohs = []
+        fields = []
 
-        targets_dict = {
-            "importance_sampling_corrections": importance_sampling_corrections
-        }
+        for field in sorted(learner.pi._fields):
 
-        for policy_field, pi, log_pi, prev_log_pi, prev_log_pi_ in zip(
-            *zip(*learner.pi._asdict().items()),
-            learner.log_pi,
-            prev.log_pi,
-            prev_.log_pi,
-        ):
-            pi: torch.Tensor
-            policy_field: str
+            pi = getattr(learner.pi, field)
             if pi is None:
                 continue
 
+            fields.append(field)
+
+            log_pi = getattr(target.log_pi, field)
+            prev_log_pi = getattr(prev.log_pi, field)
+            prev_log_pi_ = getattr(prev_.log_pi, field)
+
+            # mask_field = policy_field.replace("_policy", "_mask")
+            # policy_mask = getattr(batch_cpu, mask_field)
+            # policy_pprocessed = self.finetune(pi, policy_mask, self.learner_steps)
+
+            if field == "move" or field == "flag":
+                policy_valid = batch_cpu.valid & (batch_cpu.action_type_index == 0)
+
+            elif field == "switch":
+                policy_valid = batch_cpu.valid & (batch_cpu.action_type_index == 1)
+
+            else:
+                policy_valid = batch_cpu.valid
+            policy_valid = policy_valid.clone()
+
+            policy_pprocessed = pi
+            acting_policy = getattr(batch_cpu, field + "_policy")
+
             log_policy_reg = log_pi - (alpha * prev_log_pi + (1 - alpha) * prev_log_pi_)
+            # log_policy_reg = log_policy_reg * policy_valid.unsqueeze(-1)
 
-            v_target_list, has_played_list, v_trace_policy_target_list = [], [], []
+            action_index = getattr(batch_cpu, field + "_index")
+            action_oh = F.one_hot(action_index, pi.shape[-1])
 
-            for player in range(2):
-                reward = batch.rewards[:, :, player]  # [T, B, Player]
+            policies_valid.append(policy_valid)
+            acting_policies.append(acting_policy)
+            policies_pprocessed.append(policy_pprocessed)
+            log_policies_reg.append(log_policy_reg)
+            action_ohs.append(action_oh)
 
-                action_index = batch.get_index_from_policy(policy_field)
-                action_oh = F.one_hot(action_index, pi.shape[-1])
+        (
+            v_target_list,
+            has_played_list,
+            v_trace_policy_target_list,
+            importance_sampling_corrections,
+        ) = ([], [], [], [])
 
-                v_target_, has_played, policy_target_ = v_trace(
-                    target.v,
-                    batch.valid,
-                    batch.player_id,
-                    pi,
-                    pi,
-                    log_policy_reg,
-                    _player_others(batch.player_id, batch.valid, player),
-                    action_oh,
-                    reward,
-                    player,
-                    lambda_=1.0,
-                    c=self.config.c_vtrace,
-                    rho=torch.inf,
-                    eta=self.config.eta_reward_transform,
-                    gamma=self.config.gamma,
-                )
-                v_target_list.append(v_target_)
-                has_played_list.append(has_played)
-                v_trace_policy_target_list.append(policy_target_)
+        for player in range(2):
+            reward = batch_cpu.rewards[:, :, player]  # [T, B, Player]
 
-            targets_dict[
-                policy_field.replace("_policy", "_value_target")
-            ] = v_target_list
-            targets_dict[
-                policy_field.replace("_policy", "_has_played")
-            ] = has_played_list
-            targets_dict[
-                policy_field.replace("_policy", "_policy_target")
-            ] = v_trace_policy_target_list
+            v_target_, has_played, policy_targets_, policy_ratios = v_trace(
+                target.v,
+                batch_cpu.valid,
+                policies_valid,
+                batch_cpu.player_id,
+                acting_policies,
+                policies_pprocessed,
+                log_policies_reg,
+                _player_others(batch_cpu.player_id, batch_cpu.valid, player),
+                action_ohs,
+                reward,
+                player,
+                lambda_=self.config.lambda_vtrace,
+                c=self.config.c_vtrace,
+                rho=self.config.rho_vtrace,
+                eta=self.config.eta_reward_transform,
+                gamma=self.config.gamma,
+            )
+            v_target_list.append(v_target_)
+            has_played_list.append(has_played)
+            v_trace_policy_target_list.append(
+                {
+                    key: policy_target_
+                    for key, policy_target_ in zip(fields, policy_targets_)
+                }
+            )
+            importance_sampling_corrections.append(
+                {
+                    key: policy_ratio.unsqueeze(-1)
+                    for key, policy_ratio in zip(fields, policy_ratios)
+                }
+            )
 
-        return Targets(**targets_dict)
+        targets_dict["value_targets"] = v_target_list
+        targets_dict["has_played"] = has_played_list
+
+        for field in fields:
+            targets_dict[f"{field}_policy_target"] = [
+                targ[field] for targ in v_trace_policy_target_list if field in targ
+            ]
+            targets_dict[f"{field}_is"] = [
+                targ[field] for targ in importance_sampling_corrections if field in targ
+            ]
+
+        return Targets(**{key: value for key, value in targets_dict.items() if value})
 
     def _backpropagate(
         self,
         batch: Batch,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
         targets: Targets,
+        indices: Indices,
+        remove_padding: bool = True,
     ) -> Loss:
 
-        loss_dict = {key + "_loss": 0 for key in Policy._fields}
-        loss_dict.update({key.replace("policy", "value"): 0 for key in loss_dict})
+        loss_dict = {
+            key + "_loss": 0
+            for key in batch._fields
+            if "_policy" in key and getattr(batch, key) is not None
+        }
+        loss_dict["value_loss"] = 0
 
-        fields = (
-            "action_type",
-            "move",
-            "switch",
-        )
-        if self.actor_model.gen >= 6:
-            fields += ("flag",)
+        batch_size = batch.batch_size * batch.trajectory_length
+
+        if remove_padding:
+            t = batch.valid.sum(0)
+            # old_size = batch.trajectory_length * batch.batch_size
+            # reduced_size = batch.valid.sum().item()
+            # reduction = 100 * (1 - (reduced_size / old_size))
+            # print(
+            #     f"\n{reduction:.2f} % reduction - bs_eff = {old_size}, true_bs = {reduced_size}"
+            # )
+
+            batch = batch.flatten_without_padding(t)
+            targets = targets.flatten_without_padding(t)
+            indices = indices.flatten_without_padding(t)
+
         else:
-            loss_dict.pop("flag_policy_loss")
-            loss_dict.pop("flag_value_loss")
+            batch = batch.flatten(0, 1)
+            targets = targets.flatten(0, 1)
+            indices = indices.flatten(0, 1)
 
-        if self.actor_model.gen == 8:
-            fields += ("max_move",)
-        else:
-            loss_dict.pop("max_move_policy_loss")
-            loss_dict.pop("max_move_value_loss")
+        batch = {k: v.to(self.replay_buffer.device) for k, v in batch.items()}
+        indices = {k: v.to(self.replay_buffer.device) for k, v in indices.items()}
+        targets = {
+            k: [v.to(self.replay_buffer.device) for v in vt]
+            for k, vt in targets.items()
+        }
 
-        if self.actor_model.gametype != "singles":
-            fields += ("target",)
-        else:
-            loss_dict.pop("target_policy_loss")
-            loss_dict.pop("target_value_loss")
+        minibatch_size = 4096
 
-        global_action_type = batch.action_type_index
+        value_loss_field = "value_loss"
 
-        total_valid = batch.valid.sum().clamp(min=1).item()
+        n = batch_size // minibatch_size
+        if batch["valid"].shape[1] / minibatch_size != n:
+            n += 1
 
-        total_move_valid = batch.valid * (global_action_type == 0)
-        total_move_valid *= batch.move_mask.sum(-1) > 1
-        total_move_valid = total_move_valid.sum().clamp(min=1).item()
+        for i in range(n):
 
-        total_switch_valid = batch.valid * (global_action_type == 1)
-        total_switch_valid *= batch.switch_mask.sum(-1) > 1
-        total_switch_valid = total_switch_valid.sum().clamp(min=1).item()
+            start, end = i * minibatch_size, (i + 1) * minibatch_size
 
-        if batch.flag_mask is not None:
-            total_flag_valid = batch.valid * (global_action_type == 0)
-            total_flag_valid *= batch.flag_mask.sum(-1) > 1
-            total_flag_valid = total_flag_valid.sum().clamp(min=1).item()
+            minibatch = {k: v[:, start:end] for k, v in batch.items()}
 
-        minibatch_size = min(128, (4096 // batch.trajectory_length) + 1)
-
-        for batch_index in range(math.ceil(batch.batch_size / minibatch_size)):
-            mini_state_h, mini_state_c = hidden_state
-
-            batch_start = minibatch_size * batch_index
-            batch_end = minibatch_size * (batch_index + 1)
-
-            mini_state_h = mini_state_h[:, batch_start:batch_end].contiguous()
-            mini_state_c = mini_state_c[:, batch_start:batch_end].contiguous()
+            if torch.all(~minibatch["valid"]):
+                continue
 
             loss = 0
+            minitarget = {k: [v[:, start:end] for v in vt] for k, vt in targets.items()}
+            minindices = Indices(**{k: vt[:, start:end] for k, vt in indices.items()})
 
-            max_length = batch.valid[:, batch_start:batch_end].sum(0).max()
-            minibatch = batch.slice(batch_start, batch_end, max_length=max_length)
-            targ = targets.slice(batch_start, batch_end, max_length=max_length)
+            with torch.autocast(device_type="cuda", dtype=torch.float16):
+                model_output = self.learner_model.forward(minibatch, indices=minindices)
 
-            output, (mini_state_c, mini_state_h) = self.learner_model.forward(
-                minibatch._asdict(),
-                (mini_state_c, mini_state_h),
-                training=True,
-                need_log_policy=False,
-            )
+            for pi_field in model_output.pi._fields:
 
-            for field in fields:
-                pi_field = field + "_policy"
-                logit_field = field + "_logits"
-
-                pi = getattr(output.pi, pi_field)
-                logit = getattr(output.logit, logit_field)
+                field = pi_field.replace("_policy", "")
+                pi = getattr(model_output.pi, pi_field)
 
                 if pi is None:
                     continue
 
-                action_type_index = minibatch.action_type_index
-                policy_mask = minibatch.get_mask_from_policy(pi_field)
+                mask_field = field + "_mask"
+                logit = getattr(model_output.logit, field)
 
-                if field == "action_type":
-                    valid = torch.ones_like(action_type_index)
+                if field == "move" or field == "flag":
+                    valid = minibatch["valid"] * (minibatch["action_type_index"] == 0)
+                    normalization = batch["valid"] * (batch["action_type_index"] == 0)
+
                 elif field == "switch":
-                    valid = action_type_index == 1
-                elif field == "target":
-                    valid = action_type_index == 2
+                    valid = minibatch["valid"] * (minibatch["action_type_index"] == 1)
+                    normalization = batch["valid"] * (batch["action_type_index"] == 1)
+
                 else:
-                    valid = action_type_index == 0
+                    valid = minibatch["valid"]
+                    normalization = batch["valid"]
 
-                valid *= policy_mask.sum(-1) > 1
+                policy_mask = minibatch[mask_field]
 
-                value_loss = get_loss_v(
-                    [output.v] * 2,
-                    targ.get_value_target(pi_field),
-                    targ.get_has_played(pi_field, valid),
-                )
+                policy_loss_field = field + "_policy_loss"
 
                 # Uses v-trace to define q-values for Nerd
                 policy_loss = get_loss_nerd(
                     [logit] * 2,
                     [pi] * 2,
-                    targ.get_policy_target(pi_field),
-                    minibatch.valid * valid,
-                    minibatch.player_id,
+                    minitarget[f"{field}_policy_target"],
+                    valid,
+                    minibatch["player_id"],
                     policy_mask,
-                    targ.importance_sampling_corrections,
+                    minitarget[f"{field}_is"],
+                    normalization=normalization,
                     clip=self.config.nerd.clip,
                     threshold=self.config.nerd.beta,
                 )
-
-                policy_loss_field = field + "_policy_loss"
-                value_loss_field = field + "_value_loss"
-
                 loss_dict[policy_loss_field] += policy_loss.item()
-                loss_dict[value_loss_field] += value_loss.item()
 
-                if "action_type" in field:
-                    policy_valid = total_valid
-                elif "move" in field:
-                    policy_valid = total_move_valid
-                elif "flag" in field:
-                    policy_valid = total_flag_valid
-                elif "switch" in field:
-                    policy_valid = total_switch_valid
+                loss += policy_loss
 
-                loss += (value_loss + policy_loss) / policy_valid
+            # repr_loss = self._get_repr_loss(
+            #     model_output.state_action_emb,
+            #     model_output.state_emb,
+            #     (batch["valid"][:-1] * batch["valid"][1:]).flatten(0, 1),
+            # )
+            # loss_dict["repr_loss"] = repr_loss.item()
+            # loss = loss + repr_loss
 
-            loss.backward()
+            has_played = minitarget["has_played"]
+            value_loss = get_loss_v(
+                [model_output.v] * 2,
+                minitarget["value_targets"],
+                has_played,
+                normalization=targets["has_played"],
+            )
+            loss_dict[value_loss_field] += value_loss.item()
 
-        for key in loss_dict:
-            if "action_type" in key:
-                loss_dict[key] /= total_valid
-            elif "move" in key:
-                loss_dict[key] /= total_move_valid
-            elif "flag" in key:
-                loss_dict[key] /= total_flag_valid
-            elif "switch" in key:
-                loss_dict[key] /= total_switch_valid
+            loss += value_loss
+
+            self.scaler.scale(loss).backward()
 
         return Loss(**loss_dict)
+
+    def _get_repr_loss(
+        self,
+        state_action_emb: torch.Tensor,
+        state_emb: torch.Tensor,
+        valid: torch.Tensor,
+    ) -> torch.Tensor:
+        criterion = nn.CrossEntropyLoss(reduction="none")
+
+        n = state_action_emb[:-1].flatten(0, 1).shape[0]
+        labels = torch.arange(n, device=self.replay_buffer.device)
+
+        logits = torch.einsum(
+            "ik,jk->ij",
+            state_action_emb[:-1].flatten(0, 1),
+            state_emb[1:].flatten(0, 1),
+        )
+        loss = criterion(logits, labels)
+        loss = torch.maximum(loss, torch.tensor(1))
+
+        loss = loss * valid
+        loss = loss.sum() / valid.sum().clamp(min=1)
+
+        return loss
 
     def run(self):
         while True:

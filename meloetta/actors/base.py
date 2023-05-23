@@ -31,17 +31,22 @@ class Actor(ABC):
             state = room.get_state()
             side = state["side"]
             print(f"{battle_tag}: Error Occured")
+            trace = traceback.format_exc()
+            print(trace)
             datum = {
                 "state": state,
                 "choices": {
                     k: {sk: sv[1:] for sk, sv in v.items()} for k, v in choices.items()
                 },
-                "traceback": traceback.format_exc(),
+                "traceback": trace.split("\n"),
+                "state_dict": self.model.state_dict(),
+                "tensors": {k: v for k, v in env_output.items() if v is not None},
             }
+
             if not os.path.exists("errors"):
                 os.mkdir("errors")
-            with open(f"errors/{battle_tag}-{side}.json", "w") as f:
-                json.dump(datum, f)
+
+            torch.save(datum, f"errors/{battle_tag}-{side}.pt")
 
     @abstractmethod
     def choose_action(
