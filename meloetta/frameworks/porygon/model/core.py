@@ -165,8 +165,8 @@ class Core(nn.Module):
         self.config = config
 
         self.mlp1 = CoreResblock(config.raw_embedding_dim, config.hidden_dim)
-        self.mlp2 = CoreResblock(config.hidden_dim, config.hidden_dim)
-        self.mlp3 = CoreResblock(config.hidden_dim, config.hidden_dim)
+        # self.mlp2 = CoreResblock(config.hidden_dim, config.hidden_dim)
+        # self.mlp3 = CoreResblock(config.hidden_dim, config.hidden_dim)
 
         # self.rnn = script_lnlstm(
         #     config.raw_embedding_dim,
@@ -193,15 +193,19 @@ class Core(nn.Module):
         encoder_output: EncoderOutput,
         hidden_state: Tuple[torch.Tensor, torch.Tensor],
     ):
-        state_embedding = (
-            encoder_output.side_embedding.flatten(2)
-            + encoder_output.weather_emb
-            + encoder_output.scalar_emb
+        state_embedding = torch.cat(
+            (
+                encoder_output.side_embs.side_embedding.flatten(2),
+                encoder_output.side_embs.side_context,
+                encoder_output.weather_emb,
+                encoder_output.scalar_emb,
+            ),
+            dim=-1,
         )
 
         state_embedding = self.mlp1(state_embedding)
-        state_embedding = self.mlp2(state_embedding)
-        state_embedding = self.mlp3(state_embedding)
+        # state_embedding = self.mlp2(state_embedding)
+        # state_embedding = self.mlp3(state_embedding)
 
         # state_embedding, hidden_state = self.rnn(state_embedding, hidden_state)
 

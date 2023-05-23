@@ -154,8 +154,16 @@ def get_buffer_specs(
     # add policy...
     buffer_specs.update(
         {
-            "action_policy": {
-                "size": (trajectory_length, 10),
+            "action_type_policy": {
+                "size": (trajectory_length, 3),
+                "dtype": torch.float32,
+            },
+            "move_policy": {
+                "size": (trajectory_length, 4),
+                "dtype": torch.float32,
+            },
+            "switch_policy": {
+                "size": (trajectory_length, 6),
                 "dtype": torch.float32,
             },
             "flag_policy": {
@@ -168,7 +176,15 @@ def get_buffer_specs(
     # ...and indices
     buffer_specs.update(
         {
-            "action_index": {
+            "action_type_index": {
+                "size": (trajectory_length,),
+                "dtype": torch.int64,
+            },
+            "move_index": {
+                "size": (trajectory_length,),
+                "dtype": torch.int64,
+            },
+            "switch_index": {
                 "size": (trajectory_length,),
                 "dtype": torch.int64,
             },

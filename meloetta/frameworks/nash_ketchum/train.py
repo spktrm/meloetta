@@ -14,11 +14,7 @@ from meloetta.workers import SelfPlayWorker, EvalWorker
 
 from meloetta.frameworks.random import RandomActor
 from meloetta.frameworks.max_damage import MaxDamageActor
-from meloetta.frameworks.nash_ketchum import (
-    NAshKetchumActor,
-    NAshKetchumLearner,
-    NAshKetchumConfig,
-)
+from meloetta.frameworks.nash_ketchum import NAshKetchumActor, NAshKetchumLearner
 
 
 def start_frame_monitor(queue: mp.Queue):
@@ -46,15 +42,17 @@ def start_eval_monitor(queue: mp.Queue):
         wandb.log({f"{baseline}n": n, baseline: 1 - res})
 
 
-def main(fpath: str = None):
-    config = NAshKetchumConfig()
+def main(fpath: str = None, latest: bool = False):
+    if latest:
+        print("Using latest save checkpoint")
+        learner = NAshKetchumLearner.from_latest()
 
-    if fpath is None:
-        print(f"Starting run with config:\n{repr(config)}")
-        learner = NAshKetchumLearner.from_config(config)
-    else:
+    elif fpath:
         print(f"Loading run from: {fpath}")
-        learner = NAshKetchumLearner.from_pretrained(fpath, config)
+        learner = NAshKetchumLearner.from_fpath(fpath)
+
+    else:
+        learner = NAshKetchumLearner()
 
     wandb.init(
         project="meloetta",
@@ -69,10 +67,18 @@ def main(fpath: str = None):
 
     procs: List[mp.Process] = []
 
-    if config.eval:
+    if learner.config.eval:
         evals = [
-            ("eval0", "random", random_actor, (eval_queue,)),
-            ("eval1", "maxdmg", maxdmg_actor, (config.gen, eval_queue)),
+            (f"random_eval{i}", f"random{i}", random_actor, (eval_queue,))
+            for i in range(0)
+        ] + [
+            (
+                f"maxdmg_eval{i}",
+                f"maxdmg{i}",
+                maxdmg_actor,
+                (learner.config.gen, eval_queue),
+            )
+            for i in range(1)
         ]
         for i, (
             eval_username,
@@ -88,6 +94,7 @@ def main(fpath: str = None):
                 eval_actor_fn=main_actor,
                 eval_actor_kwargs={
                     "model": learner.actor_model,
+                    # "replay_buffer": learner.replay_buffer,
                 },
                 baseline_actor_fn=opponent_actor,
                 baseline_actor_args=opponent_actor_args,
@@ -100,39 +107,46 @@ def main(fpath: str = None):
             procs.append(process)
 
     threads: List[threading.Thread] = []
-    for i in range(1):
-        learner_thread = threading.Thread(
-            target=learner.run,
-            name=f"Learning Thread{i}",
-        )
-        threads.append(learner_thread)
-        learner_thread.start()
-
-    for i in range(config.num_actors):
-        worker = SelfPlayWorker(
-            worker_index=i,
-            num_players=2,  # 2 is players per worker
-            battle_format=learner.config.battle_format,
-            team=learner.config.team,
-            actor_fn=main_actor,
-            actor_kwargs={
-                "model": learner.actor_model,
-                "replay_buffer": learner.replay_buffer,
-            },
-        )
-
-        process = mp.Process(
-            target=worker.run,
-            name=repr(worker) + str(i),
-        )
-        process.start()
-        procs.append(process)
 
     frame_monitor_thread = threading.Thread(
         target=start_frame_monitor, args=(learner.replay_buffer.finish_queue,)
     )
     frame_monitor_thread.start()
     threads.append(frame_monitor_thread)
+
+    if not learner.config.eval_mode:
+        for i in range(1):
+            learner_thread = threading.Thread(
+                target=learner.run,
+                name=f"Learning Thread{i}",
+            )
+            threads.append(learner_thread)
+            learner_thread.start()
+
+        if learner.config.debug_mode:
+            num_players = 2
+        else:
+            num_players = max(learner.config.batch_size // learner.config.num_actors, 2)
+
+        for i in range(learner.config.num_actors):
+            worker = SelfPlayWorker(
+                worker_index=i,
+                num_players=num_players,  # 2 is players per worker
+                battle_format=learner.config.battle_format,
+                team=learner.config.team,
+                actor_fn=main_actor,
+                actor_kwargs={
+                    "model": learner.actor_model,
+                    "replay_buffer": learner.replay_buffer,
+                },
+            )
+
+            process = mp.Process(
+                target=worker.run,
+                name=repr(worker) + str(i),
+            )
+            process.start()
+            procs.append(process)
 
     eval_monitor_thread = threading.Thread(
         target=start_eval_monitor, args=(eval_queue,)
@@ -150,7 +164,9 @@ def main(fpath: str = None):
 if __name__ == "__main__":
     mp.set_start_method("spawn")
 
-    fpath = "cpkts/cpkt-02000.tar"
-    main(fpath)
+    # fpath = "cpkts/cpkt-101000.tar"
+    # main(fpath)
+
+    # main(latest=True)
 
     main()

@@ -49,7 +49,7 @@ class Encoder(nn.Module):
         max_move_mask = state.get("max_move_mask")
         target_mask = state.get("target_mask")
 
-        side_encoder_output = self.side_encoder.forward(
+        side_embs = self.side_encoder.forward(
             sides,
             boosts,
             volatiles,
@@ -77,11 +77,7 @@ class Encoder(nn.Module):
         )
 
         return EncoderOutput(
-            moves=side_encoder_output.moves,
-            switches=side_encoder_output.switches,
-            side_embedding=side_encoder_output.side_embedding,
-            private_entity=side_encoder_output.private_entity,
-            public_entity=side_encoder_output.public_entity,
+            side_embs=side_embs,
             weather_emb=weather_emb,
             scalar_emb=scalar_emb,
         )

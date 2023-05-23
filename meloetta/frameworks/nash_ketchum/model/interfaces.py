@@ -1,87 +1,183 @@
 import math
 import torch
 
-from typing import NamedTuple, Iterator, Tuple, Dict, List
+from typing import NamedTuple, Dict, List
 
 from meloetta.actors.types import State, Choices
 
 
-class EncoderOutput(NamedTuple):
-    private_entity_emb: torch.Tensor
+class SideEncoderOutput(NamedTuple):
+    pokemon_embedding: torch.Tensor
+    boosts: torch.Tensor
+    volatiles: torch.Tensor
+    side_conditions: torch.Tensor
     moves: torch.Tensor
     switches: torch.Tensor
-    public_entity_emb: torch.Tensor
-    public_spatial: torch.Tensor
-    private_spatial: torch.Tensor
+
+
+class EncoderOutput(NamedTuple):
+    pokemon_embedding: torch.Tensor
+    boosts: torch.Tensor
+    volatiles: torch.Tensor
+    side_conditions: torch.Tensor
+    moves: torch.Tensor
+    switches: torch.Tensor
     weather_emb: torch.Tensor
     scalar_emb: torch.Tensor
 
 
 class Indices(NamedTuple):
-    action_type_index: torch.Tensor
-    move_index: torch.Tensor
-    max_move_index: torch.Tensor
-    switch_index: torch.Tensor
-    flag_index: torch.Tensor
-    target_index: torch.Tensor
+    action_type_index: torch.Tensor = None
+    move_index: torch.Tensor = None
+    max_move_index: torch.Tensor = None
+    switch_index: torch.Tensor = None
+    flag_index: torch.Tensor = None
+    target_index: torch.Tensor = None
 
+    @classmethod
+    def from_list(self, outputs: List[Dict[str, torch.Tensor]]):
+        buckets = {k: [] for k in self._fields}
+        for output in outputs:
+            for key in buckets:
+                value = getattr(output, key, None)
+                if value is not None:
+                    buckets[key].append(value)
+        for key, value in buckets.items():
+            if buckets[key]:
+                buckets[key] = torch.cat(buckets[key], dim=1)
+            else:
+                buckets[key] = None
+        return self(**buckets)
 
-class Logits(NamedTuple):
-    action_type_logits: torch.Tensor = None
-    move_logits: torch.Tensor = None
-    max_move_logits: torch.Tensor = None
-    switch_logits: torch.Tensor = None
-    flag_logits: torch.Tensor = None
-    target_logits: torch.Tensor = None
+    def to_json(self):
+        return {
+            k: v.squeeze().tolist() for k, v in self._asdict().items() if v is not None
+        }
+
+    def to(self, device):
+        return Indices(
+            **{k: v.to(device) for k, v in self._asdict().items() if v is not None}
+        )
+
+    def flatten(self, *args, **kwargs) -> Dict[str, torch.Tensor]:
+        return {
+            k: v.flatten(*args, *kwargs).unsqueeze(0)
+            for k, v in self._asdict().items()
+            if v is not None
+        }
+
+    def flatten_without_padding(self, t: torch.Tensor):
+        return {
+            k: torch.cat([v[: t[i], i] for i in range(v.shape[1])]).unsqueeze(0)
+            for k, v in self._asdict().items()
+            if v is not None
+        }
+
+    def view(self, t, b):
+        return Indices(
+            **{
+                k: v.view(t, b, *v.shape[2:])
+                for k, v in self._asdict().items()
+                if v is not None
+            }
+        )
 
 
 class Policy(NamedTuple):
-    action_type_policy: torch.Tensor = None
-    move_policy: torch.Tensor = None
-    max_move_policy: torch.Tensor = None
-    switch_policy: torch.Tensor = None
-    flag_policy: torch.Tensor = None
-    target_policy: torch.Tensor = None
+    action_type: torch.Tensor = None
+    move: torch.Tensor = None
+    max_move: torch.Tensor = None
+    switch: torch.Tensor = None
+    flag: torch.Tensor = None
+    target: torch.Tensor = None
+
+    @classmethod
+    def from_list(self, outputs: List[Dict[str, torch.Tensor]]):
+        buckets = {k: [] for k in self._fields}
+        for output in outputs:
+            for key in buckets:
+                value = getattr(output, key, None)
+                if value is not None:
+                    buckets[key].append(value)
+        for key, value in buckets.items():
+            if buckets[key]:
+                buckets[key] = torch.cat(buckets[key], dim=1)
+            else:
+                buckets[key] = None
+        return self(**buckets)
+
+    def to_json(self):
+        return {
+            k: v.squeeze().tolist() for k, v in self._asdict().items() if v is not None
+        }
+
+    def to(self, device):
+        return Policy(
+            **{k: v.to(device) for k, v in self._asdict().items() if v is not None}
+        )
+
+    def view(self, t, b):
+        return Policy(
+            **{
+                k: v.view(t, b, *v.shape[2:])
+                for k, v in self._asdict().items()
+                if v is not None
+            }
+        )
 
 
-class LogPolicy(NamedTuple):
-    action_type_log_policy: torch.Tensor = None
-    move_log_policy: torch.Tensor = None
-    max_move_log_policy: torch.Tensor = None
-    switch_log_policy: torch.Tensor = None
-    flag_log_policy: torch.Tensor = None
-    target_log_policy: torch.Tensor = None
-
-
-class TrainingOutput(NamedTuple):
+class ModelOutput(NamedTuple):
     pi: Policy
-    v: torch.Tensor
-    logit: Logits
-    log_pi: LogPolicy = None
-
-
-class EnvStep(NamedTuple):
+    logit: Policy
     indices: Indices
-    policy: Policy
-    logits: Logits
+    v: torch.Tensor = None
+    log_pi: Policy = None
+
+    state_emb: torch.Tensor = None
+    state_action_emb: torch.Tensor = None
+
+    @classmethod
+    def from_list(self, outputs: List[Dict[str, torch.Tensor]]):
+        buckets = {k: [] for k in self._fields}
+        for output in outputs:
+            for key in buckets:
+                value = getattr(output, key, None)
+                if value is not None:
+                    buckets[key].append(value)
+        buckets["pi"] = Policy.from_list(buckets["pi"])
+        buckets["logit"] = Policy.from_list(buckets["logit"])
+        buckets["log_pi"] = Policy.from_list(buckets["log_pi"])
+        buckets["indices"] = Indices.from_list(buckets["indices"])
+        buckets["v"] = torch.cat(buckets["v"], dim=1).unsqueeze(-1)
+        return self(**buckets)
 
     def to_store(self, state: State) -> Dict[str, torch.Tensor]:
         to_store = {k: v for k, v in state.items() if isinstance(v, torch.Tensor)}
         to_store.update(
-            {
-                k: v.squeeze()
-                for k, v in self.indices._asdict().items()
-                if isinstance(v, torch.Tensor)
-            }
+            {k: v.squeeze() for k, v in self.indices._asdict().items() if v is not None}
         )
         to_store.update(
             {
-                k: v.squeeze()
-                for k, v in self.policy._asdict().items()
-                if isinstance(v, torch.Tensor)
+                k + "_policy": v.squeeze()
+                for k, v in self.pi._asdict().items()
+                if v is not None
             }
         )
         return to_store
+
+    def to(self, device):
+        return ModelOutput(
+            **{k: v.to(device) for k, v in self._asdict().items() if v is not None}
+        )
+
+    def view(self, t, b):
+        return ModelOutput(
+            pi=self.pi.view(t, b),
+            logit=self.logit.view(t, b),
+            log_pi=self.log_pi.view(t, b),
+            indices=self.indices.view(t, b),
+            v=self.v.view(t, b, -1),
+        )
 
 
 class PostProcess(NamedTuple):
@@ -90,23 +186,14 @@ class PostProcess(NamedTuple):
 
 
 class Batch(NamedTuple):
-    private_reserve: torch.Tensor = None
-    public_n: torch.Tensor = None
-    public_total_pokemon: torch.Tensor = None
-    public_faint_counter: torch.Tensor = None
-    public_side_conditions: torch.Tensor = None
-    public_wisher: torch.Tensor = None
-    public_active: torch.Tensor = None
-    public_reserve: torch.Tensor = None
-    public_stealthrock: torch.Tensor = None
-    public_spikes: torch.Tensor = None
-    public_toxicspikes: torch.Tensor = None
-    public_stickyweb: torch.Tensor = None
+    sides: torch.Tensor = None
+    boosts: torch.Tensor = None
+    volatiles: torch.Tensor = None
+    side_conditions: torch.Tensor = None
+    pseudoweathers: torch.Tensor = None
     weather: torch.Tensor = None
-    weather_time_left: torch.Tensor = None
-    weather_min_time_left: torch.Tensor = None
-    pseudo_weather: torch.Tensor = None
-    turn: torch.Tensor = None
+    wisher: torch.Tensor = None
+    scalars: torch.Tensor = None
     turns_since_last_move: torch.Tensor = None
     action_type_mask: torch.Tensor = None
     move_mask: torch.Tensor = None
@@ -125,13 +212,8 @@ class Batch(NamedTuple):
     max_move_index: torch.Tensor = None
     switch_index: torch.Tensor = None
     flag_index: torch.Tensor = None
+    value: torch.Tensor = None
     valid: torch.Tensor = None
-
-    def get_index_from_policy(self, policy_field: str):
-        return getattr(self, policy_field.replace("policy", "index"))
-
-    def get_mask_from_policy(self, policy_field: str):
-        return getattr(self, policy_field.replace("policy", "mask"))
 
     @property
     def batch_size(self):
@@ -145,14 +227,30 @@ class Batch(NamedTuple):
     def trajectory_length(self):
         return self.valid.shape[0]
 
-    def slice(self, start: int, end: int, max_length: int = None) -> "Batch":
-        return Batch(
-            **{
-                key: value[:max_length, start:end].contiguous()
-                for key, value in self._asdict().items()
-                if value is not None
-            }
-        )
+    def to(self, device: str, non_blocking: bool = False):
+        batch = {
+            k: t.to(
+                device=device,
+                non_blocking=non_blocking,
+            )
+            for k, t in self._asdict().items()
+            if t is not None
+        }
+        return Batch(**batch)
+
+    def flatten(self, *args, **kwargs) -> Dict[str, torch.Tensor]:
+        return {
+            k: v.flatten(*args, *kwargs).unsqueeze(0)
+            for k, v in self._asdict().items()
+            if v is not None
+        }
+
+    def flatten_without_padding(self, t: torch.Tensor):
+        return {
+            k: torch.cat([v[: t[i], i] for i in range(v.shape[1])]).unsqueeze(0)
+            for k, v in self._asdict().items()
+            if v is not None
+        }
 
 
 class Loss(NamedTuple):
@@ -163,108 +261,64 @@ class Loss(NamedTuple):
     flag_policy_loss: float = 0
     target_policy_loss: float = 0
 
-    action_type_value_loss: float = 0
-    move_value_loss: float = 0
-    max_move_value_loss: float = 0
-    switch_value_loss: float = 0
-    flag_value_loss: float = 0
-    target_value_loss: float = 0
-
-    def to_log(self, batch: Batch):
-        logs = {
-            key: value for key, value in self._asdict().items() if value is not None
-        }
-        logs["traj_len"] = batch.valid.sum(0).float().mean().item()
-        logs["final_turn"] = (
-            (batch.turn * batch.valid).max(0).values.float().mean().item()
-        )
-        return logs
-
-    def entropy(self):
-        return
+    value_loss: float = 0
+    repr_loss: float = 0
 
 
 class Targets(NamedTuple):
-    action_type_value_target: List[torch.Tensor] = None
-    action_type_policy_target: List[torch.Tensor] = None
-    action_type_has_played: List[torch.Tensor] = None
+    value_targets: List[torch.Tensor] = None
+    has_played: List[torch.Tensor] = None
 
-    move_value_target: List[torch.Tensor] = None
-    move_policy_target: List[torch.Tensor] = None
-    move_has_played: List[torch.Tensor] = None
+    action_type_policy_target: torch.Tensor = None
+    move_policy_target: torch.Tensor = None
+    switch_policy_target: torch.Tensor = None
+    max_move_policy_target: torch.Tensor = None
+    flag_policy_target: torch.Tensor = None
+    target_policy_target: torch.Tensor = None
 
-    max_move_value_target: List[torch.Tensor] = None
-    max_move_policy_target: List[torch.Tensor] = None
-    max_move_has_played: List[torch.Tensor] = None
-
-    switch_value_target: List[torch.Tensor] = None
-    switch_policy_target: List[torch.Tensor] = None
-    switch_has_played: List[torch.Tensor] = None
-
-    flag_value_target: List[torch.Tensor] = None
-    flag_policy_target: List[torch.Tensor] = None
-    flag_has_played: List[torch.Tensor] = None
-
-    target_value_target: List[torch.Tensor] = None
-    target_policy_target: List[torch.Tensor] = None
-    target_has_played: List[torch.Tensor] = None
-
-    importance_sampling_corrections: List[torch.Tensor] = None
+    action_type_is: torch.Tensor = None
+    move_is: torch.Tensor = None
+    switch_is: torch.Tensor = None
+    max_move_is: torch.Tensor = None
+    flag_is: torch.Tensor = None
+    target_is: torch.Tensor = None
 
     @property
     def batch_size(self):
-        return self.action_type_value_target[0].shape[1]
+        return self.value_targets[0].shape[1]
 
     @property
     def trajectory_length(self):
-        return self.action_type_value_target[0].shape[0]
+        return self.value_targets[0].shape[0]
 
-    def iterate(
-        self, minibatch_size: int = 16, minitraj_size: int = 16
-    ) -> Iterator["Targets"]:
-        for batch_index in range(math.ceil(self.batch_size / minibatch_size)):
-            for traj_index in range(math.ceil(self.trajectory_length / minitraj_size)):
-                batch_start = minibatch_size * batch_index
-                batch_end = minibatch_size * (batch_index + 1)
+    def flatten(self, *args, **kwargs) -> Dict[str, List[torch.Tensor]]:
+        return {
+            k: [
+                [v.flatten(*args, *kwargs).unsqueeze(0) for v in vi]
+                if isinstance(vi, list)
+                else vi.flatten(*args, *kwargs).unsqueeze(0)
+                for vi in vl
+            ]
+            for k, vl in self._asdict().items()
+            if vl is not None
+        }
 
-                traj_start = minitraj_size * traj_index
-                traj_end = minitraj_size * (traj_index + 1)
+    def flatten_without_padding(self, t: torch.Tensor):
+        return {
+            k: [
+                torch.cat([v[: t[i], i] for i in range(v.shape[1])]).unsqueeze(0)
+                for v in vt
+            ]
+            for k, vt in self._asdict().items()
+            if vt is not None
+        }
 
-                minibatch = {}
-                for key, lst in self._asdict().items():
-                    if lst is not None:
-                        value1, value2 = lst
-                        minibatch[key] = [
-                            value1[
-                                traj_start:traj_end, batch_start:batch_end
-                            ].contiguous(),
-                            value2[
-                                traj_start:traj_end, batch_start:batch_end
-                            ].contiguous(),
-                        ]
-
-                yield Targets(**minibatch)
-
-    def get_value_target(self, policy_field: str):
-        return getattr(self, policy_field.replace("_policy", "_value_target"))
-
-    def get_policy_target(self, policy_field: str):
-        return getattr(self, policy_field + "_target")
-
-    def get_has_played(self, policy_field: str, mask: torch.Tensor):
-        has_played = [
-            hp * mask
-            for hp in getattr(self, policy_field.replace("_policy", "_has_played"))
-        ]
-        return has_played
-
-    def slice(self, start: int, end: int, max_length: int = None) -> "Targets":
-        targets_dict = {}
-        for key, lst in self._asdict().items():
-            if lst is not None:
-                value1, value2 = lst
-                targets_dict[key] = [
-                    value1[:max_length, start:end].contiguous(),
-                    value2[:max_length, start:end].contiguous(),
-                ]
-        return Targets(**targets_dict)
+    def to(self, device: str, non_blocking: bool = False):
+        batch = {
+            k: t.to(
+                device=device,
+                non_blocking=non_blocking,
+            )
+            for k, t in self._asdict().items()
+            if t is not None
+        }

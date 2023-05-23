@@ -9,6 +9,7 @@ var BattleSceneStub = (function () {
         this.interruptionCount = NaN;
         this.messagebarOpen = false;
         this.log = { add: function (args, kwargs) {} };
+        this.$frame = void 0;
     }
     var _proto = BattleSceneStub.prototype;
     _proto.abilityActivateAnim = function abilityActivateAnim(

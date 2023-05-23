@@ -11,7 +11,7 @@ from meloetta.workers.barrier import Barrier
 from meloetta.room import BattleRoom
 from meloetta.utils import expand_bt
 
-DRAW_BY_TURNS = 200
+DRAW_BY_TURNS = 300
 
 
 def waiting_for_opp(room: BattleRoom):
@@ -78,9 +78,11 @@ class SelfPlayWorker:
                 await player.client.accept_challenge(self.battle_format, self.team)
 
             turn = 0
-            turns_since_last_move = expand_bt(torch.tensor(0))
+            turns_since_last_move = expand_bt(torch.tensor(0, dtype=torch.long))
             actor = self.actor_fn(
-                *self.actor_args, **self.actor_kwargs, username=username
+                *self.actor_args,
+                **self.actor_kwargs,
+                pid=(0 if player_index % 2 == 0 else 1),
             )
 
             while True:
@@ -114,10 +116,9 @@ class SelfPlayWorker:
                 while (
                     action_required and not waiting_for_opp(player.room) and not ended
                 ):
-                    choices = player.get_choices()
+                    choices = player.get_choices(turns_since_last_move)
                     state = {
                         **vstate,
-                        "turns_since_last_move": turns_since_last_move,
                         **choices.action_masks,
                         **choices.prev_choices,
                         "targeting": choices.targeting,
@@ -130,9 +131,9 @@ class SelfPlayWorker:
                 if outgoing_message:
                     player.room.pop_outgoing()
                     if "move" in outgoing_message:
-                        turns_since_last_move *= 0
+                        turns_since_last_move = turns_since_last_move * 0
                     else:
-                        turns_since_last_move += 1
+                        turns_since_last_move = turns_since_last_move + 1
                     await player.client.websocket.send(
                         player.room.battle_tag + "|" + outgoing_message
                     )
@@ -140,21 +141,7 @@ class SelfPlayWorker:
                 if ended:
                     break
 
-                if turns_since_last_move > 50:
-                    print(f"{username}: forfeit by repetition!")
-
-                    await player.client.websocket.send(
-                        player.room.battle_tag + "|" + "/forfeit"
-                    )
-                    while True:
-                        message = await player.client.receive_message()
-                        action_required = await player.recieve(message)
-                        ended = player.room.get_js_attr("battle?.ended")
-                        if ended:
-                            break
-                    break
-
-                if turn > 200:
+                if turn > DRAW_BY_TURNS:
                     print(f"{username}: draw by turn > {DRAW_BY_TURNS}!")
 
                     await player.client.websocket.send(

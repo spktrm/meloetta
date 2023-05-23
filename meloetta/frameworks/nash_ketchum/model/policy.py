@@ -7,7 +7,6 @@ from meloetta.frameworks.nash_ketchum.model import config
 from meloetta.frameworks.nash_ketchum.model.interfaces import (
     EncoderOutput,
     Indices,
-    Logits,
     Policy,
     State,
 )
@@ -16,7 +15,6 @@ from meloetta.frameworks.nash_ketchum.model.heads import (
     MoveHead,
     FlagsHead,
     SwitchHead,
-    MaxMoveHead,
 )
 
 
@@ -33,7 +31,7 @@ class PolicyHeads(nn.Module):
         self.switch_head = SwitchHead(config.switch_head_config)
 
         if gen == 8:
-            self.max_move_head = MaxMoveHead(config.move_head_config)
+            self.max_move_head = MoveHead(config.move_head_config)
 
         if gen >= 6:
             self.flag_head = FlagsHead(config.flag_head_config)
@@ -46,18 +44,24 @@ class PolicyHeads(nn.Module):
         state_emb: torch.Tensor,
         encoder_output: EncoderOutput,
         state: State,
-    ) -> Tuple[Indices, Logits, Policy]:
-        moves = encoder_output.moves
+        indices: Indices = None,
+    ) -> Tuple[Indices, Policy, Policy]:
+
+        moves = encoder_output.moves.squeeze(2)
         switches = encoder_output.switches
+
+        if not indices:
+            indices = Indices()
 
         (
             action_type_logits,
             action_type_policy,
             action_type_index,
-            at_autoregressive_embedding,
+            autoregressive_embedding,
         ) = self.action_type_head(
             state_emb,
             state["action_type_mask"],
+            indices.action_type_index,
         )
 
         (
@@ -67,9 +71,10 @@ class PolicyHeads(nn.Module):
             autoregressive_embedding,
         ) = self.move_head(
             action_type_index,
-            at_autoregressive_embedding,
+            autoregressive_embedding,
             moves,
             state["move_mask"],
+            indices.move_index,
         )
 
         (
@@ -82,6 +87,7 @@ class PolicyHeads(nn.Module):
             autoregressive_embedding,
             switches,
             state["switch_mask"],
+            indices.switch_index,
         )
 
         if self.gen >= 6:
@@ -94,6 +100,7 @@ class PolicyHeads(nn.Module):
                 action_type_index,
                 autoregressive_embedding,
                 state["flag_mask"],
+                indices.flag_index,
             )
         else:
             flag_logits = None
@@ -106,6 +113,7 @@ class PolicyHeads(nn.Module):
                 autoregressive_embedding,
                 moves,
                 state["max_move_mask"],
+                indices.max_move_index,
             )
         else:
             max_move_index = None
@@ -117,7 +125,8 @@ class PolicyHeads(nn.Module):
                 state["prev_choices"],
                 moves,
                 switches,
-                at_autoregressive_embedding,
+                action_type_index,
+                indices.target_index,
             )
         else:
             target_index = None
@@ -132,21 +141,21 @@ class PolicyHeads(nn.Module):
             flag_index=flag_index,
             target_index=target_index,
         )
-        logits = Logits(
-            action_type_logits=action_type_logits,
-            move_logits=move_logits,
-            max_move_logits=max_move_logits,
-            switch_logits=switch_logits,
-            flag_logits=flag_logits,
-            target_logits=target_logits,
+        logits = Policy(
+            action_type=action_type_logits,
+            move=move_logits,
+            max_move=max_move_logits,
+            switch=switch_logits,
+            flag=flag_logits,
+            target=target_logits,
         )
         policy = Policy(
-            action_type_policy=action_type_policy,
-            move_policy=move_policy,
-            max_move_policy=max_move_policy,
-            switch_policy=switch_policy,
-            flag_policy=flag_policy,
-            target_policy=target_policy,
+            action_type=action_type_policy,
+            move=move_policy,
+            max_move=max_move_policy,
+            switch=switch_policy,
+            flag=flag_policy,
+            target=target_policy,
         )
 
-        return indices, logits, policy
+        return indices, logits, policy, autoregressive_embedding

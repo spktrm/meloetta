@@ -1,4 +1,5 @@
 import json
+import torch
 
 from dataclasses import dataclass
 
@@ -38,44 +39,49 @@ class NAshKetchumConfig:
     """Learning pararms"""
 
     # The batch size to use when learning/improving parameters.
-    batch_size: int = 16
+    batch_size: int = 8
     # The learning rate for `params`.
-    learning_rate: float = 3e-5
+    learning_rate: float = 5e-5
     # The config related to the ADAM optimizer used for updating `params`.
     adam: AdamConfig = AdamConfig()
     # All gradients values are clipped to [-clip_gradient, clip_gradient].
-    clip_gradient: float = 10_000
+    clip_gradient: float = 10000
     # The "speed" at which `params_target` is following `params`.
-    target_network_avg: float = 0.01
+    target_network_avg: float = 1e-3
 
     # RNaD algorithm configuration.
     # Entropy schedule configuration. See EntropySchedule class documentation.
     entropy_schedule_repeats: Sequence[int] = (
-        # 20,
+        10,
+        9,
         1,
     )
     entropy_schedule_size: Sequence[int] = (
-        50,
-        # 100,
+        100,
+        1000,
+        10000,
     )
     # The weight of the reward regularisation term in RNaD.
     eta_reward_transform: float = 0.2
     gamma: float = 1.0
     nerd: NerdConfig = NerdConfig()
+
+    lambda_vtrace: float = 1.0
     c_vtrace: float = 1.0
+    rho_vtrace: float = torch.inf
 
-    trajectory_length: int = 512
+    trajectory_length: int = 768
 
-    # battle_format = "gen8randomdoublesbattle"
-    # battle_format = "gen8randombattle"
     battle_format: str = "gen9randombattle"
-    # battle_format = "gen8ou"
-    # battle_format = "gen9ou"
-    # battle_format = "gen8doublesou"
     # battle_format: str = "gen3randombattle"
-    # battle_format = "gen9doublesou"
+    # battle_format: str = "gen8randomdoublesbattle"
+    # battle_format: str = "gen8randombattle"
+    # battle_format: str = "gen8ou"
+    # battle_format: str = "gen9ou"
+    # battle_format: str = "gen8doublesou"
+    # battle_format: str = "gen9doublesou"
 
-    gen, format = utils.get_gen_and_gametype(battle_format)
+    gen, gametype = utils.get_gen_and_gametype(battle_format)
 
     team: str = "null"
     # team = "charizard||heavydutyboots|blaze|furyswipes,scaleshot,toxic,roost||85,,85,85,85,85||,0,,,,||88|"
@@ -87,6 +93,7 @@ class NAshKetchumConfig:
     learner_device: str = "cuda"
 
     debug_mode = False
+    eval_mode = False
 
     # This config will spawn 20 workers with 2 players each
     # for a total of 40 players, playing 20 games.
@@ -96,7 +103,7 @@ class NAshKetchumConfig:
 
     model_config: config.NAshKetchumModelConfig = config.NAshKetchumModelConfig()
 
-    eval: bool = not debug_mode
+    eval: bool = (not debug_mode) or eval_mode
 
     def __getindex__(self, key: str):
         return self.__dict__[key]

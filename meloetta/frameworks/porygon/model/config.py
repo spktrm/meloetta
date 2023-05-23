@@ -1,6 +1,9 @@
 from typing import NamedTuple
 
 
+from meloetta.data import VOLATILES, SIDE_CONDITIONS, WEATHERS, PSEUDOWEATHERS
+
+
 class _Config(NamedTuple):
     @classmethod
     def from_dict(self, d: dict):
@@ -12,7 +15,7 @@ class SideEncoderConfig(_Config):
 
     transformer_input_size: int = entity_embedding_dim
     transformer_num_heads: int = 2
-    transformer_num_layers: int = 1
+    transformer_num_layers: int = 3
     resblocks_num_before: int = 1
     resblocks_num_after: int = 1
     resblocks_hidden_size: int = 256
@@ -21,18 +24,32 @@ class SideEncoderConfig(_Config):
 
 
 class ScalarEncoderConfig(_Config):
-    embedding_dim: int = 2 * SideEncoderConfig.output_dim
+    embedding_dim: int = 64
 
 
 class WeatherEncoderConfig(_Config):
-    embedding_dim: int = 2 * SideEncoderConfig.output_dim
+    embedding_dim: int = 64
 
 
 class EncoderConfig(_Config):
     side_encoder_config: SideEncoderConfig = SideEncoderConfig()
     scalar_encoder_config: ScalarEncoderConfig = ScalarEncoderConfig()
     weather_encoder_config: WeatherEncoderConfig = WeatherEncoderConfig()
-    output_dim: int = 2 * side_encoder_config.output_dim
+    output_dim: int = (
+        3 * side_encoder_config.output_dim
+        # + 2 * (8 * 6 + len(VOLATILES) + (2 + 2 + 3 + (len(SIDE_CONDITIONS) - 4)))
+        + 444
+        # + 3
+        # + (
+        #     (len(WEATHERS) + 1)
+        #     + 10
+        #     + 7
+        #     + 8 * len(PSEUDOWEATHERS)
+        #     + 10 * len(PSEUDOWEATHERS)
+        # )
+        + 85
+        + 242
+    )
 
 
 class CoreConfig(_Config):
@@ -44,7 +61,16 @@ class CoreConfig(_Config):
 class ValueHeadConfig(_Config):
     state_embedding_dim: int = CoreConfig.hidden_dim
     hidden_dim: int = 256
-    num_resblocks: int = 3
+    num_resblocks: int = 1
+
+
+class ActionTypeHeadConfig(_Config):
+    state_embedding_dim: int = CoreConfig.hidden_dim
+    num_action_types: int = 3
+    context_dim: int = ScalarEncoderConfig.embedding_dim
+    residual_dim: int = 256
+    action_map_dim: int = 256
+    autoregressive_embedding_dim: int = 256
 
 
 class FlagHeadConfig(_Config):
@@ -81,6 +107,7 @@ class TargetHeadConfig(_Config):
 
 
 class PolicyHeadsConfig(_Config):
+    action_type_head_config: ActionTypeHeadConfig = ActionTypeHeadConfig()
     flag_head_config: FlagHeadConfig = FlagHeadConfig()
     max_move_head_config: MaxMoveHeadConfig = MaxMoveHeadConfig()
     move_head_config: MoveHeadConfig = MoveHeadConfig()

@@ -191,7 +191,7 @@ const Abilities = {
             }
         },
         name: "Anger Shell",
-        rating: 4,
+        rating: 3,
         num: 271,
     },
     anticipation: {
@@ -706,6 +706,12 @@ const Abilities = {
             if (!pokemon.getVolatile("commanding")) {
                 if (ally.getVolatile("commanded")) return;
                 this.queue.cancelAction(pokemon);
+                this.add(
+                    "-activate",
+                    pokemon,
+                    "ability: Commander",
+                    "[of] " + ally
+                );
                 pokemon.addVolatile("commanding");
                 ally.addVolatile("commanded", pokemon);
             } else {
@@ -874,7 +880,11 @@ const Abilities = {
     cursedbody: {
         onDamagingHit(damage, target, source, move) {
             if (source.volatiles["disable"]) return;
-            if (!move.isMax && !move.isFutureMove && move.id !== "struggle") {
+            if (
+                !move.isMax &&
+                !move.flags["futuremove"] &&
+                move.id !== "struggle"
+            ) {
                 if (this.randomChance(3, 10)) {
                     source.addVolatile("disable", this.effectState.target);
                 }
@@ -1342,7 +1352,7 @@ const Abilities = {
             target.addVolatile("charge");
         },
         name: "Electromorphosis",
-        rating: 2,
+        rating: 2.5,
         num: 280,
     },
     emergencyexit: {
@@ -1999,6 +2009,7 @@ const Abilities = {
                 return this.chainModify([5461, 4096]);
             }
         },
+        isPermanent: true,
         name: "Hadron Engine",
         rating: 4.5,
         num: 289,
@@ -2560,7 +2571,7 @@ const Abilities = {
             if (this.effectState.libero) return;
             if (
                 move.hasBounced ||
-                move.isFutureMove ||
+                move.flags["futuremove"] ||
                 move.sourceEffect === "snatch"
             )
                 return;
@@ -2607,11 +2618,7 @@ const Abilities = {
             }
         },
         onAnyRedirectTarget(target, source, source2, move) {
-            if (
-                move.type !== "Electric" ||
-                ["firepledge", "grasspledge", "waterpledge"].includes(move.id)
-            )
-                return;
+            if (move.type !== "Electric" || move.flags["pledgecombo"]) return;
             const redirectTarget = ["randomNormal", "adjacentFoe"].includes(
                 move.target
             )
@@ -2942,7 +2949,12 @@ const Abilities = {
     },
     mirrorarmor: {
         onTryBoost(boost, target, source, effect) {
-            if (target === source || !boost || effect.name === "Mirror Armor")
+            if (
+                !source ||
+                target === source ||
+                !boost ||
+                effect.name === "Mirror Armor"
+            )
                 return;
             let b;
             for (b in boost) {
@@ -3405,6 +3417,7 @@ const Abilities = {
                 return this.chainModify([5461, 4096]);
             }
         },
+        isPermanent: true,
         name: "Orichalcum Pulse",
         rating: 4.5,
         num: 288,
@@ -3491,29 +3504,17 @@ const Abilities = {
         onPrepareHit(source, target, move) {
             if (
                 move.category === "Status" ||
-                move.selfdestruct ||
-                move.multihit
+                move.multihit ||
+                move.flags["noparentalbond"] ||
+                move.flags["charge"] ||
+                move.flags["futuremove"] ||
+                move.spreadHit ||
+                move.isZ ||
+                move.isMax
             )
                 return;
-            if (
-                [
-                    "dynamaxcannon",
-                    "endeavor",
-                    "fling",
-                    "iceball",
-                    "rollout",
-                ].includes(move.id)
-            )
-                return;
-            if (
-                !move.flags["charge"] &&
-                !move.spreadHit &&
-                !move.isZ &&
-                !move.isMax
-            ) {
-                move.multihit = 2;
-                move.multihitType = "parentalbond";
-            }
+            move.multihit = 2;
+            move.multihitType = "parentalbond";
         },
         // Damage modifier implemented in BattleActions#modifyDamage()
         onSourceModifySecondaries(secondaries, target, source, move) {
@@ -3916,7 +3917,7 @@ const Abilities = {
             if (this.effectState.protean) return;
             if (
                 move.hasBounced ||
-                move.isFutureMove ||
+                move.flags["futuremove"] ||
                 move.sourceEffect === "snatch"
             )
                 return;
@@ -5172,11 +5173,7 @@ const Abilities = {
             }
         },
         onAnyRedirectTarget(target, source, source2, move) {
-            if (
-                move.type !== "Water" ||
-                ["firepledge", "grasspledge", "waterpledge"].includes(move.id)
-            )
-                return;
+            if (move.type !== "Water" || move.flags["pledgecombo"]) return;
             const redirectTarget = ["randomNormal", "adjacentFoe"].includes(
                 move.target
             )
@@ -5292,7 +5289,7 @@ const Abilities = {
             }
         },
         name: "Supreme Overlord",
-        rating: 3.5,
+        rating: 4,
         num: 293,
     },
     surgesurfer: {

@@ -620,73 +620,22 @@ const Moves = {
         name: "Assist",
         pp: 20,
         priority: 0,
-        flags: {},
+        flags: {
+            failencore: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onHit(target) {
-            const noAssist = [
-                "assist",
-                "banefulbunker",
-                "beakblast",
-                "belch",
-                "bestow",
-                "blazingtorque",
-                "bounce",
-                "celebrate",
-                "chatter",
-                "circlethrow",
-                "combattorque",
-                "copycat",
-                "counter",
-                "covet",
-                "destinybond",
-                "detect",
-                "dig",
-                "dive",
-                "dragontail",
-                "endure",
-                "feint",
-                "fly",
-                "focuspunch",
-                "followme",
-                "helpinghand",
-                "holdhands",
-                "kingsshield",
-                "magicaltorque",
-                "matblock",
-                "mefirst",
-                "metronome",
-                "mimic",
-                "mirrorcoat",
-                "mirrormove",
-                "naturepower",
-                "noxioustorque",
-                "phantomforce",
-                "protect",
-                "ragepowder",
-                "roar",
-                "shadowforce",
-                "shelltrap",
-                "sketch",
-                "skydrop",
-                "sleeptalk",
-                "snatch",
-                "spikyshield",
-                "spotlight",
-                "struggle",
-                "switcheroo",
-                "thief",
-                "transform",
-                "trick",
-                "whirlwind",
-                "wickedtorque",
-            ];
             const moves = [];
             for (const pokemon of target.side.pokemon) {
                 if (pokemon === target) continue;
                 for (const moveSlot of pokemon.moveSlots) {
                     const moveid = moveSlot.id;
-                    if (noAssist.includes(moveid)) continue;
                     const move = this.dex.moves.get(moveid);
-                    if (move.isZ || move.isMax) {
+                    if (move.flags["noassist"] || move.isZ || move.isMax) {
                         continue;
                     }
                     moves.push(moveid);
@@ -1096,7 +1045,7 @@ const Moves = {
         name: "Baddy Bad",
         pp: 15,
         priority: 0,
-        flags: { protect: 1 },
+        flags: { protect: 1, mirror: 1 },
         self: {
             sideCondition: "reflect",
         },
@@ -1113,7 +1062,7 @@ const Moves = {
         name: "Baneful Bunker",
         pp: 10,
         priority: 4,
-        flags: {},
+        flags: { noassist: 1, failcopycat: 1 },
         stallingMove: true,
         volatileStatus: "banefulbunker",
         onPrepareHit(pokemon) {
@@ -1263,7 +1212,15 @@ const Moves = {
         name: "Beak Blast",
         pp: 15,
         priority: -3,
-        flags: { bullet: 1, protect: 1 },
+        flags: {
+            bullet: 1,
+            protect: 1,
+            noassist: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+        },
         priorityChargeCallback(pokemon) {
             pokemon.addVolatile("beakblast");
         },
@@ -1321,7 +1278,13 @@ const Moves = {
         name: "Behemoth Bash",
         pp: 5,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1,
+            failcopycat: 1,
+            failmimic: 1,
+        },
         secondary: null,
         target: "normal",
         type: "Steel",
@@ -1334,7 +1297,14 @@ const Moves = {
         name: "Behemoth Blade",
         pp: 5,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1, slicing: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1,
+            slicing: 1,
+            failcopycat: 1,
+            failmimic: 1,
+        },
         secondary: null,
         target: "normal",
         type: "Steel",
@@ -1347,7 +1317,15 @@ const Moves = {
         name: "Belch",
         pp: 10,
         priority: 0,
-        flags: { protect: 1 },
+        flags: {
+            protect: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onDisableMove(pokemon) {
             if (!pokemon.ateBerry) pokemon.disableMove("belch");
         },
@@ -1391,7 +1369,13 @@ const Moves = {
         name: "Bestow",
         pp: 15,
         priority: 0,
-        flags: { mirror: 1, bypasssub: 1, allyanim: 1 },
+        flags: {
+            mirror: 1,
+            bypasssub: 1,
+            allyanim: 1,
+            noassist: 1,
+            failcopycat: 1,
+        },
         onHit(target, source, move) {
             if (target.item) {
                 return false;
@@ -1436,7 +1420,7 @@ const Moves = {
         name: "Bide",
         pp: 10,
         priority: 1,
-        flags: { contact: 1, protect: 1 },
+        flags: { contact: 1, protect: 1, nosleeptalk: 1, failinstruct: 1 },
         volatileStatus: "bide",
         ignoreImmunity: true,
         beforeMoveCallback(pokemon) {
@@ -1555,7 +1539,6 @@ const Moves = {
         accuracy: 100,
         basePower: 75,
         category: "Special",
-        isNonstandard: "Unobtainable",
         name: "Bitter Malice",
         pp: 10,
         priority: 0,
@@ -1629,7 +1612,16 @@ const Moves = {
         name: "Blazing Torque",
         pp: 10,
         priority: 0,
-        flags: { protect: 1 },
+        flags: {
+            protect: 1,
+            failencore: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         secondary: {
             chance: 30,
             status: "brn",
@@ -1880,6 +1872,9 @@ const Moves = {
             mirror: 1,
             gravity: 1,
             distance: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failinstruct: 1,
         },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
@@ -1933,7 +1928,7 @@ const Moves = {
         name: "Bouncy Bubble",
         pp: 20,
         priority: 0,
-        flags: { protect: 1, heal: 1 },
+        flags: { protect: 1, mirror: 1, heal: 1 },
         drain: [1, 2],
         secondary: null,
         target: "normal",
@@ -2279,7 +2274,7 @@ const Moves = {
         name: "Buzzy Buzz",
         pp: 20,
         priority: 0,
-        flags: { protect: 1 },
+        flags: { protect: 1, mirror: 1 },
         secondary: {
             chance: 100,
             status: "par",
@@ -2412,7 +2407,13 @@ const Moves = {
         name: "Celebrate",
         pp: 40,
         priority: 0,
-        flags: {},
+        flags: {
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onTryHit(target, source) {
             this.add("-activate", target, "move: Celebrate");
         },
@@ -2543,7 +2544,18 @@ const Moves = {
         name: "Chatter",
         pp: 20,
         priority: 0,
-        flags: { protect: 1, mirror: 1, sound: 1, distance: 1, bypasssub: 1 },
+        flags: {
+            protect: 1,
+            mirror: 1,
+            sound: 1,
+            distance: 1,
+            bypasssub: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         noSketch: true,
         secondary: {
             chance: 100,
@@ -2647,7 +2659,13 @@ const Moves = {
         name: "Circle Throw",
         pp: 10,
         priority: -6,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1,
+            noassist: 1,
+            failcopycat: 1,
+        },
         forceSwitch: true,
         target: "normal",
         type: "Fighting",
@@ -2852,7 +2870,16 @@ const Moves = {
         name: "Combat Torque",
         pp: 10,
         priority: 0,
-        flags: { protect: 1 },
+        flags: {
+            protect: 1,
+            failencore: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         secondary: {
             chance: 30,
             status: "par",
@@ -2892,7 +2919,7 @@ const Moves = {
         name: "Comeuppance",
         pp: 10,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1, failmefirst: 1 },
         onTry(source) {
             const lastDamagedBy = source.getLastDamagedBy(true);
             if (lastDamagedBy === void 0 || !lastDamagedBy.thisTurn)
@@ -3062,63 +3089,20 @@ const Moves = {
         name: "Copycat",
         pp: 20,
         priority: 0,
-        flags: {},
+        flags: {
+            failencore: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onHit(pokemon) {
-            const noCopycat = [
-                "assist",
-                "banefulbunker",
-                "beakblast",
-                "behemothbash",
-                "behemothblade",
-                "belch",
-                "bestow",
-                "celebrate",
-                "chatter",
-                "circlethrow",
-                "copycat",
-                "counter",
-                "covet",
-                "craftyshield",
-                "destinybond",
-                "detect",
-                "dragontail",
-                "dynamaxcannon",
-                "endure",
-                "feint",
-                "focuspunch",
-                "followme",
-                "helpinghand",
-                "holdhands",
-                "kingsshield",
-                "matblock",
-                "mefirst",
-                "metronome",
-                "mimic",
-                "mirrorcoat",
-                "mirrormove",
-                "naturepower",
-                "obstruct",
-                "protect",
-                "ragepowder",
-                "roar",
-                "shelltrap",
-                "sketch",
-                "sleeptalk",
-                "snatch",
-                "spikyshield",
-                "spotlight",
-                "struggle",
-                "switcheroo",
-                "thief",
-                "transform",
-                "trick",
-                "whirlwind",
-            ];
             let move = this.lastMove;
             if (!move) return;
             if (move.isMax && move.baseMove)
                 move = this.dex.moves.get(move.baseMove);
-            if (noCopycat.includes(move.id) || move.isZ || move.isMax) {
+            if (move.flags["failcopycat"] || move.isZ || move.isMax) {
                 return false;
             }
             this.actions.useMove(move.id, pokemon);
@@ -3266,7 +3250,13 @@ const Moves = {
         name: "Counter",
         pp: 20,
         priority: -5,
-        flags: { contact: 1, protect: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            failmefirst: 1,
+            noassist: 1,
+            failcopycat: 1,
+        },
         beforeTurnCallback(pokemon) {
             pokemon.addVolatile("counter");
         },
@@ -3413,7 +3403,14 @@ const Moves = {
         name: "Covet",
         pp: 25,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1,
+            failmefirst: 1,
+            noassist: 1,
+            failcopycat: 1,
+        },
         onAfterHit(target, source, move) {
             if (source.item || source.volatiles["gem"]) {
                 return;
@@ -3871,7 +3868,7 @@ const Moves = {
         name: "Destiny Bond",
         pp: 5,
         priority: 0,
-        flags: { bypasssub: 1 },
+        flags: { bypasssub: 1, noassist: 1, failcopycat: 1 },
         volatileStatus: "destinybond",
         onPrepareHit(pokemon) {
             return !pokemon.removeVolatile("destinybond");
@@ -3882,7 +3879,10 @@ const Moves = {
             },
             onFaint(target, source, effect) {
                 if (!source || !effect || target.isAlly(source)) return;
-                if (effect.effectType === "Move" && !effect.isFutureMove) {
+                if (
+                    effect.effectType === "Move" &&
+                    !effect.flags["futuremove"]
+                ) {
                     if (source.volatiles["dynamax"]) {
                         this.add(
                             "-hint",
@@ -3918,7 +3918,7 @@ const Moves = {
         name: "Detect",
         pp: 5,
         priority: 4,
-        flags: {},
+        flags: { noassist: 1, failcopycat: 1 },
         stallingMove: true,
         volatileStatus: "protect",
         onPrepareHit(pokemon) {
@@ -3981,7 +3981,16 @@ const Moves = {
         name: "Dig",
         pp: 10,
         priority: 0,
-        flags: { contact: 1, charge: 1, protect: 1, mirror: 1, nonsky: 1 },
+        flags: {
+            contact: 1,
+            charge: 1,
+            protect: 1,
+            mirror: 1,
+            nonsky: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failinstruct: 1,
+        },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
                 return;
@@ -4176,6 +4185,9 @@ const Moves = {
             mirror: 1,
             nonsky: 1,
             allyanim: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failinstruct: 1,
         },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
@@ -4286,8 +4298,7 @@ const Moves = {
         name: "Doom Desire",
         pp: 5,
         priority: 0,
-        flags: {},
-        isFutureMove: true,
+        flags: { futuremove: 1 },
         onTry(source, target) {
             if (!target.side.addSlotCondition(target, "futuremove"))
                 return false;
@@ -4303,9 +4314,8 @@ const Moves = {
                         basePower: 140,
                         category: "Special",
                         priority: 0,
-                        flags: {},
+                        flags: { futuremove: 1 },
                         effectType: "Move",
-                        isFutureMove: true,
                         type: "Steel",
                     },
                 }
@@ -4553,7 +4563,7 @@ const Moves = {
         name: "Dragon Darts",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1 },
+        flags: { protect: 1, mirror: 1, noparentalbond: 1 },
         multihit: 2,
         smartTarget: true,
         secondary: null,
@@ -4649,7 +4659,13 @@ const Moves = {
         name: "Dragon Tail",
         pp: 10,
         priority: -6,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1,
+            noassist: 1,
+            failcopycat: 1,
+        },
         forceSwitch: true,
         target: "normal",
         type: "Dragon",
@@ -4790,7 +4806,15 @@ const Moves = {
         name: "Dynamax Cannon",
         pp: 5,
         priority: 0,
-        flags: { protect: 1 },
+        flags: {
+            protect: 1,
+            failencore: 1,
+            nosleeptalk: 1,
+            noparentalbond: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         secondary: null,
         target: "normal",
         type: "Dragon",
@@ -5182,28 +5206,19 @@ const Moves = {
         name: "Encore",
         pp: 5,
         priority: 0,
-        flags: { protect: 1, reflectable: 1, mirror: 1, bypasssub: 1 },
+        flags: {
+            protect: 1,
+            reflectable: 1,
+            mirror: 1,
+            bypasssub: 1,
+            failencore: 1,
+        },
         volatileStatus: "encore",
         condition: {
             duration: 3,
             noCopy: true,
             // doesn't get copied by Z-Baton Pass
             onStart(target) {
-                const noEncore = [
-                    "assist",
-                    "copycat",
-                    "dynamaxcannon",
-                    "encore",
-                    "mefirst",
-                    "metronome",
-                    "mimic",
-                    "mirrormove",
-                    "naturepower",
-                    "sketch",
-                    "sleeptalk",
-                    "struggle",
-                    "transform",
-                ];
                 let move = target.lastMove;
                 if (!move || target.volatiles["dynamax"]) return false;
                 if (move.isMax && move.baseMove)
@@ -5211,7 +5226,7 @@ const Moves = {
                 const moveIndex = target.moves.indexOf(move.id);
                 if (
                     move.isZ ||
-                    noEncore.includes(move.id) ||
+                    move.flags["failencore"] ||
                     !target.moveSlots[moveIndex] ||
                     target.moveSlots[moveIndex].pp <= 0
                 ) {
@@ -5272,7 +5287,7 @@ const Moves = {
         name: "Endeavor",
         pp: 5,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1, noparentalbond: 1 },
         onTryImmunity(target, pokemon) {
             return pokemon.hp < target.hp;
         },
@@ -5291,7 +5306,7 @@ const Moves = {
         name: "Endure",
         pp: 10,
         priority: 4,
-        flags: {},
+        flags: { noassist: 1, failcopycat: 1 },
         stallingMove: true,
         volatileStatus: "endure",
         onPrepareHit(pokemon) {
@@ -5485,7 +5500,7 @@ const Moves = {
         name: "Explosion",
         pp: 5,
         priority: 0,
-        flags: { protect: 1, mirror: 1 },
+        flags: { protect: 1, mirror: 1, noparentalbond: 1 },
         selfdestruct: "always",
         secondary: null,
         target: "allAdjacent",
@@ -5702,7 +5717,7 @@ const Moves = {
         name: "Feint",
         pp: 10,
         priority: 2,
-        flags: { mirror: 1 },
+        flags: { mirror: 1, noassist: 1, failcopycat: 1 },
         breaksProtect: true,
         // Breaking protection implemented in scripts.js
         secondary: null,
@@ -5822,7 +5837,7 @@ const Moves = {
         name: "Final Gambit",
         pp: 5,
         priority: 0,
-        flags: { protect: 1 },
+        flags: { protect: 1, noparentalbond: 1 },
         secondary: null,
         target: "normal",
         type: "Fighting",
@@ -5903,7 +5918,7 @@ const Moves = {
         name: "Fire Pledge",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1, nonsky: 1 },
+        flags: { protect: 1, mirror: 1, nonsky: 1, pledgecombo: 1 },
         onPrepareHit(target, source, move) {
             for (const action of this.queue.list) {
                 if (
@@ -6282,7 +6297,7 @@ const Moves = {
         name: "Fling",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1, allyanim: 1 },
+        flags: { protect: 1, mirror: 1, allyanim: 1, noparentalbond: 1 },
         onPrepareHit(target, source, move) {
             if (source.ignoringItem()) return false;
             const item = source.getItem();
@@ -6363,7 +6378,7 @@ const Moves = {
         name: "Floaty Fall",
         pp: 15,
         priority: 0,
-        flags: { contact: 1, protect: 1, gravity: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1, gravity: 1 },
         secondary: {
             chance: 30,
             volatileStatus: "flinch",
@@ -6467,6 +6482,9 @@ const Moves = {
             mirror: 1,
             gravity: 1,
             distance: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failinstruct: 1,
         },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
@@ -6605,7 +6623,16 @@ const Moves = {
         name: "Focus Punch",
         pp: 20,
         priority: -3,
-        flags: { contact: 1, protect: 1, punch: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            punch: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+        },
         priorityChargeCallback(pokemon) {
             pokemon.addVolatile("focuspunch");
         },
@@ -6642,7 +6669,7 @@ const Moves = {
         name: "Follow Me",
         pp: 20,
         priority: 2,
-        flags: {},
+        flags: { noassist: 1, failcopycat: 1 },
         volatileStatus: "followme",
         onTry(source) {
             return this.activePerHalf > 1;
@@ -6809,7 +6836,13 @@ const Moves = {
         name: "Freeze Shock",
         pp: 5,
         priority: 0,
-        flags: { charge: 1, protect: 1, mirror: 1 },
+        flags: {
+            charge: 1,
+            protect: 1,
+            mirror: 1,
+            nosleeptalk: 1,
+            failinstruct: 1,
+        },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
                 return;
@@ -6854,7 +6887,7 @@ const Moves = {
         name: "Freezy Frost",
         pp: 10,
         priority: 0,
-        flags: { protect: 1 },
+        flags: { protect: 1, mirror: 1 },
         onHit() {
             this.add("-clearallboost");
             for (const pokemon of this.getAllActive()) {
@@ -7037,9 +7070,8 @@ const Moves = {
         name: "Future Sight",
         pp: 10,
         priority: 0,
-        flags: {},
+        flags: { allyanim: 1, futuremove: 1 },
         ignoreImmunity: true,
-        isFutureMove: true,
         onTry(source, target) {
             if (!target.side.addSlotCondition(target, "futuremove"))
                 return false;
@@ -7056,10 +7088,9 @@ const Moves = {
                         basePower: 120,
                         category: "Special",
                         priority: 0,
-                        flags: {},
+                        flags: { allyanim: 1, futuremove: 1 },
                         ignoreImmunity: false,
                         effectType: "Move",
-                        isFutureMove: true,
                         type: "Psychic",
                     },
                 }
@@ -7206,7 +7237,7 @@ const Moves = {
         name: "Geomancy",
         pp: 10,
         priority: 0,
-        flags: { charge: 1, nonsky: 1 },
+        flags: { charge: 1, nonsky: 1, nosleeptalk: 1, failinstruct: 1 },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
                 return;
@@ -7398,7 +7429,7 @@ const Moves = {
         name: "Glitzy Glow",
         pp: 15,
         priority: 0,
-        flags: { protect: 1 },
+        flags: { protect: 1, mirror: 1 },
         self: {
             sideCondition: "lightscreen",
         },
@@ -8386,7 +8417,7 @@ const Moves = {
         name: "Grass Pledge",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1, nonsky: 1 },
+        flags: { protect: 1, mirror: 1, nonsky: 1, pledgecombo: 1 },
         onPrepareHit(target, source, move) {
             for (const action of this.queue.list) {
                 if (
@@ -8470,7 +8501,7 @@ const Moves = {
         name: "Grassy Glide",
         pp: 20,
         priority: 0,
-        flags: { contact: 1, protect: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1 },
         onModifyPriority(priority, source, target, move) {
             if (this.field.isTerrain("grassyterrain") && source.isGrounded()) {
                 return priority + 1;
@@ -8746,7 +8777,7 @@ const Moves = {
                 if (!source || source.fainted || !effect) return;
                 if (
                     effect.effectType === "Move" &&
-                    !effect.isFutureMove &&
+                    !effect.flags["futuremove"] &&
                     source.lastMove
                 ) {
                     let move = source.lastMove;
@@ -9454,7 +9485,7 @@ const Moves = {
         name: "Helping Hand",
         pp: 20,
         priority: 5,
-        flags: { bypasssub: 1 },
+        flags: { bypasssub: 1, noassist: 1, failcopycat: 1 },
         volatileStatus: "helpinghand",
         onTryHit(target) {
             if (!target.newlySwitched && !this.queue.willMove(target))
@@ -9853,7 +9884,14 @@ const Moves = {
         name: "Hold Hands",
         pp: 40,
         priority: 0,
-        flags: { bypasssub: 1 },
+        flags: {
+            bypasssub: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         secondary: null,
         target: "adjacentAlly",
         type: "Normal",
@@ -10002,6 +10040,21 @@ const Moves = {
         target: "normal",
         type: "Water",
         contestType: "Beautiful",
+    },
+    hydrosteam: {
+        num: 876,
+        accuracy: 100,
+        basePower: 80,
+        category: "Special",
+        name: "Hydro Steam",
+        pp: 15,
+        priority: 0,
+        flags: { protect: 1, mirror: 1, defrost: 1 },
+        // Damage boost in Sun applied in conditions.ts
+        thawsTarget: true,
+        secondary: null,
+        target: "normal",
+        type: "Water",
     },
     hydrovortex: {
         num: 642,
@@ -10177,7 +10230,14 @@ const Moves = {
         name: "Ice Ball",
         pp: 20,
         priority: 0,
-        flags: { bullet: 1, contact: 1, protect: 1, mirror: 1 },
+        flags: {
+            bullet: 1,
+            contact: 1,
+            protect: 1,
+            mirror: 1,
+            noparentalbond: 1,
+            failinstruct: 1,
+        },
         onModifyMove(move, pokemon, target) {
             if (
                 pokemon.volatiles["iceball"] ||
@@ -10246,7 +10306,13 @@ const Moves = {
         name: "Ice Burn",
         pp: 5,
         priority: 0,
-        flags: { charge: 1, protect: 1, mirror: 1 },
+        flags: {
+            charge: 1,
+            protect: 1,
+            mirror: 1,
+            nosleeptalk: 1,
+            failinstruct: 1,
+        },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
                 return;
@@ -10419,7 +10485,7 @@ const Moves = {
         name: "Imprison",
         pp: 10,
         priority: 0,
-        flags: { snatch: 1, bypasssub: 1 },
+        flags: { snatch: 1, bypasssub: 1, mustpressure: 1 },
         volatileStatus: "imprison",
         condition: {
             noCopy: true,
@@ -10447,7 +10513,6 @@ const Moves = {
             },
         },
         secondary: null,
-        pressureTarget: "foeSide",
         target: "self",
         type: "Psychic",
         zMove: { boost: { spd: 2 } },
@@ -10589,42 +10654,13 @@ const Moves = {
         name: "Instruct",
         pp: 15,
         priority: 0,
-        flags: { protect: 1, bypasssub: 1, allyanim: 1 },
+        flags: { protect: 1, bypasssub: 1, allyanim: 1, failinstruct: 1 },
         onHit(target, source) {
             if (!target.lastMove || target.volatiles["dynamax"]) return false;
             const lastMove = target.lastMove;
             const moveIndex = target.moves.indexOf(lastMove.id);
-            const noInstruct = [
-                "assist",
-                "beakblast",
-                "belch",
-                "bide",
-                "celebrate",
-                "copycat",
-                "dynamaxcannon",
-                "focuspunch",
-                "iceball",
-                "instruct",
-                "kingsshield",
-                "mefirst",
-                "metronome",
-                "mimic",
-                "mirrormove",
-                "naturepower",
-                "obstruct",
-                "outrage",
-                "petaldance",
-                "rollout",
-                "shelltrap",
-                "sketch",
-                "sleeptalk",
-                "struggle",
-                "thrash",
-                "transform",
-                "uproar",
-            ];
             if (
-                noInstruct.includes(lastMove.id) ||
+                lastMove.flags["failinstruct"] ||
                 lastMove.isZ ||
                 lastMove.isMax ||
                 lastMove.flags["charge"] ||
@@ -10878,7 +10914,7 @@ const Moves = {
         name: "King's Shield",
         pp: 10,
         priority: 4,
-        flags: {},
+        flags: { noassist: 1, failcopycat: 1, failinstruct: 1 },
         stallingMove: true,
         volatileStatus: "kingsshield",
         onPrepareHit(pokemon) {
@@ -11753,7 +11789,16 @@ const Moves = {
         name: "Magical Torque",
         pp: 10,
         priority: 0,
-        flags: { protect: 1 },
+        flags: {
+            protect: 1,
+            failencore: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         secondary: {
             chance: 30,
             volatileStatus: "confusion",
@@ -12101,7 +12146,7 @@ const Moves = {
         name: "Mat Block",
         pp: 10,
         priority: 0,
-        flags: { snatch: 1, nonsky: 1 },
+        flags: { snatch: 1, nonsky: 1, noassist: 1, failcopycat: 1 },
         stallingMove: true,
         sideCondition: "matblock",
         onTry(source) {
@@ -12667,27 +12712,24 @@ const Moves = {
         name: "Me First",
         pp: 20,
         priority: 0,
-        flags: { protect: 1, bypasssub: 1 },
+        flags: {
+            protect: 1,
+            bypasssub: 1,
+            failencore: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onTryHit(target, pokemon) {
             const action = this.queue.willMove(target);
             if (!action) return false;
-            const noMeFirst = [
-                "beakblast",
-                "chatter",
-                "counter",
-                "covet",
-                "focuspunch",
-                "mefirst",
-                "metalburst",
-                "mirrorcoat",
-                "shelltrap",
-                "struggle",
-                "thief",
-            ];
             const move = this.dex.getActiveMove(action.move.id);
             if (action.zmove || move.isZ || move.isMax) return false;
             if (target.volatiles["mustrecharge"]) return false;
-            if (move.category === "Status" || noMeFirst.includes(move.id))
+            if (move.category === "Status" || move.flags["failmefirst"])
                 return false;
             pokemon.addVolatile("mefirst");
             this.actions.useMove(move, pokemon, target);
@@ -12816,7 +12858,7 @@ const Moves = {
         name: "Metal Burst",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1 },
+        flags: { protect: 1, mirror: 1, failmefirst: 1 },
         onTry(source) {
             const lastDamagedBy = source.getLastDamagedBy(true);
             if (lastDamagedBy === void 0 || !lastDamagedBy.thisTurn)
@@ -12888,7 +12930,7 @@ const Moves = {
         name: "Meteor Assault",
         pp: 5,
         priority: 0,
-        flags: { protect: 1, recharge: 1, mirror: 1 },
+        flags: { protect: 1, recharge: 1, mirror: 1, failinstruct: 1 },
         self: {
             volatileStatus: "mustrecharge",
         },
@@ -12950,7 +12992,14 @@ const Moves = {
         name: "Metronome",
         pp: 10,
         priority: 0,
-        flags: {},
+        flags: {
+            failencore: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         noMetronome: [
             "After You",
             "Apple Acid",
@@ -13145,23 +13194,23 @@ const Moves = {
         name: "Mimic",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, bypasssub: 1, allyanim: 1 },
+        flags: {
+            protect: 1,
+            bypasssub: 1,
+            allyanim: 1,
+            failencore: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onHit(target, source) {
-            const disallowedMoves = [
-                "behemothbash",
-                "behemothblade",
-                "chatter",
-                "dynamaxcannon",
-                "mimic",
-                "sketch",
-                "struggle",
-                "transform",
-            ];
             const move = target.lastMove;
             if (
                 source.transformed ||
                 !move ||
-                disallowedMoves.includes(move.id) ||
+                move.flags["failmimic"] ||
                 source.moves.includes(move.id)
             ) {
                 return false;
@@ -13349,7 +13398,7 @@ const Moves = {
         name: "Mirror Coat",
         pp: 20,
         priority: -5,
-        flags: { protect: 1 },
+        flags: { protect: 1, failmefirst: 1, noassist: 1 },
         beforeTurnCallback(pokemon) {
             pokemon.addVolatile("mirrorcoat");
         },
@@ -13398,7 +13447,14 @@ const Moves = {
         name: "Mirror Move",
         pp: 20,
         priority: 0,
-        flags: {},
+        flags: {
+            failencore: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onTryHit(target, pokemon) {
             const move = target.lastMove;
             if (!move?.flags["mirror"] || move.isZ || move.isMax) {
@@ -14029,7 +14085,14 @@ const Moves = {
         name: "Nature Power",
         pp: 20,
         priority: 0,
-        flags: {},
+        flags: {
+            failencore: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onTryHit(target, pokemon) {
             let move = "triattack";
             if (this.field.isTerrain("electricterrain")) {
@@ -14255,7 +14318,16 @@ const Moves = {
         name: "Noxious Torque",
         pp: 10,
         priority: 0,
-        flags: { protect: 1 },
+        flags: {
+            protect: 1,
+            failencore: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         secondary: {
             chance: 30,
             status: "psn",
@@ -14305,7 +14377,7 @@ const Moves = {
         name: "Obstruct",
         pp: 10,
         priority: 4,
-        flags: {},
+        flags: { failinstruct: 1 },
         stallingMove: true,
         volatileStatus: "obstruct",
         onPrepareHit(pokemon) {
@@ -14517,11 +14589,8 @@ const Moves = {
         pp: 10,
         priority: 0,
         flags: { protect: 1 },
-        onUseMoveMessage(source, target, move) {
-            move.orderUpBoost = true;
-        },
-        onAfterMove(pokemon, target, move) {
-            if (!pokemon.volatiles["commanded"] || !move.orderUpBoost) return;
+        onAfterMoveSecondarySelf(pokemon, target, move) {
+            if (!pokemon.volatiles["commanded"]) return;
             const tatsugiri = pokemon.volatiles["commanded"].source;
             if (tatsugiri.baseSpecies.baseSpecies !== "Tatsugiri") return;
             switch (tatsugiri.baseSpecies.forme) {
@@ -14562,7 +14631,7 @@ const Moves = {
         name: "Outrage",
         pp: 10,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1, failinstruct: 1 },
         self: {
             volatileStatus: "lockedmove",
         },
@@ -14832,7 +14901,7 @@ const Moves = {
         name: "Petal Dance",
         pp: 10,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1, dance: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1, dance: 1, failinstruct: 1 },
         self: {
             volatileStatus: "lockedmove",
         },
@@ -14857,7 +14926,14 @@ const Moves = {
         name: "Phantom Force",
         pp: 10,
         priority: 0,
-        flags: { contact: 1, charge: 1, mirror: 1 },
+        flags: {
+            contact: 1,
+            charge: 1,
+            mirror: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failinstruct: 1,
+        },
         breaksProtect: true,
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
@@ -14916,7 +14992,7 @@ const Moves = {
         name: "Pika Papow",
         pp: 20,
         priority: 0,
-        flags: { protect: 1 },
+        flags: { protect: 1, mirror: 1 },
         secondary: null,
         target: "normal",
         type: "Electric",
@@ -15587,7 +15663,7 @@ const Moves = {
         name: "Protect",
         pp: 10,
         priority: 4,
-        flags: {},
+        flags: { noassist: 1, failcopycat: 1 },
         stallingMove: true,
         volatileStatus: "protect",
         onPrepareHit(pokemon) {
@@ -15648,6 +15724,25 @@ const Moves = {
         target: "normal",
         type: "Psychic",
         contestType: "Beautiful",
+    },
+    psyblade: {
+        num: 875,
+        accuracy: 100,
+        basePower: 80,
+        category: "Physical",
+        name: "Psyblade",
+        pp: 15,
+        priority: 0,
+        flags: { contact: 1, protect: 1, mirror: 1, slicing: 1 },
+        secondary: null,
+        onBasePower(basePower, source) {
+            if (this.field.isTerrain("electricterrain")) {
+                this.debug("psyblade electric terrain boost");
+                return this.chainModify(1.5);
+            }
+        },
+        target: "normal",
+        type: "Psychic",
     },
     psychup: {
         num: 244,
@@ -16247,7 +16342,7 @@ const Moves = {
         name: "Rage Powder",
         pp: 20,
         priority: 2,
-        flags: { powder: 1 },
+        flags: { powder: 1, noassist: 1, failcopycat: 1 },
         volatileStatus: "ragepowder",
         onTry(source) {
             return this.activePerHalf > 1;
@@ -16474,7 +16569,13 @@ const Moves = {
         name: "Razor Wind",
         pp: 10,
         priority: 0,
-        flags: { charge: 1, protect: 1, mirror: 1 },
+        flags: {
+            charge: 1,
+            protect: 1,
+            mirror: 1,
+            nosleeptalk: 1,
+            failinstruct: 1,
+        },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
                 return;
@@ -16916,6 +17017,8 @@ const Moves = {
             sound: 1,
             bypasssub: 1,
             allyanim: 1,
+            noassist: 1,
+            failcopycat: 1,
         },
         forceSwitch: true,
         secondary: null,
@@ -17179,7 +17282,13 @@ const Moves = {
         name: "Rollout",
         pp: 20,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1,
+            noparentalbond: 1,
+            failinstruct: 1,
+        },
         onModifyMove(move, pokemon, target) {
             if (
                 pokemon.volatiles["rollout"] ||
@@ -17571,7 +17680,7 @@ const Moves = {
         name: "Sappy Seed",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, reflectable: 1 },
+        flags: { protect: 1, reflectable: 1, mirror: 1 },
         onHit(target, source) {
             if (target.hasType("Grass")) return null;
             target.addVolatile("leechseed", source);
@@ -17867,7 +17976,7 @@ const Moves = {
         name: "Self-Destruct",
         pp: 5,
         priority: 0,
-        flags: { protect: 1, mirror: 1 },
+        flags: { protect: 1, mirror: 1, noparentalbond: 1 },
         selfdestruct: "always",
         secondary: null,
         target: "allAdjacent",
@@ -17936,7 +18045,14 @@ const Moves = {
         name: "Shadow Force",
         pp: 5,
         priority: 0,
-        flags: { contact: 1, charge: 1, mirror: 1 },
+        flags: {
+            contact: 1,
+            charge: 1,
+            mirror: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failinstruct: 1,
+        },
         breaksProtect: true,
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
@@ -18184,7 +18300,14 @@ const Moves = {
         name: "Shell Trap",
         pp: 5,
         priority: -3,
-        flags: { protect: 1 },
+        flags: {
+            protect: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+        },
         priorityChargeCallback(pokemon) {
             pokemon.addVolatile("shelltrap");
         },
@@ -18490,7 +18613,7 @@ const Moves = {
         name: "Sizzly Slide",
         pp: 20,
         priority: 0,
-        flags: { contact: 1, protect: 1, defrost: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1, defrost: 1 },
         secondary: {
             chance: 100,
             status: "brn",
@@ -18509,7 +18632,16 @@ const Moves = {
         pp: 1,
         noPPBoosts: true,
         priority: 0,
-        flags: { bypasssub: 1, allyanim: 1 },
+        flags: {
+            bypasssub: 1,
+            allyanim: 1,
+            failencore: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onHit(target, source) {
             const disallowedMoves = ["chatter", "sketch", "struggle"];
             const move = target.lastMove;
@@ -18661,7 +18793,14 @@ const Moves = {
         name: "Skull Bash",
         pp: 10,
         priority: 0,
-        flags: { contact: 1, charge: 1, protect: 1, mirror: 1 },
+        flags: {
+            contact: 1,
+            charge: 1,
+            protect: 1,
+            mirror: 1,
+            nosleeptalk: 1,
+            failinstruct: 1,
+        },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
                 return;
@@ -18687,7 +18826,14 @@ const Moves = {
         name: "Sky Attack",
         pp: 5,
         priority: 0,
-        flags: { charge: 1, protect: 1, mirror: 1, distance: 1 },
+        flags: {
+            charge: 1,
+            protect: 1,
+            mirror: 1,
+            distance: 1,
+            nosleeptalk: 1,
+            failinstruct: 1,
+        },
         critRatio: 2,
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
@@ -18724,6 +18870,9 @@ const Moves = {
             mirror: 1,
             gravity: 1,
             distance: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failinstruct: 1,
         },
         onModifyMove(move, source) {
             if (!source.volatiles["skydrop"]) {
@@ -18947,39 +19096,26 @@ const Moves = {
         name: "Sleep Talk",
         pp: 10,
         priority: 0,
-        flags: {},
+        flags: {
+            failencore: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         sleepUsable: true,
         onTry(source) {
             return source.status === "slp" || source.hasAbility("comatose");
         },
         onHit(pokemon) {
-            const noSleepTalk = [
-                "assist",
-                "beakblast",
-                "belch",
-                "bide",
-                "celebrate",
-                "chatter",
-                "copycat",
-                "dynamaxcannon",
-                "focuspunch",
-                "mefirst",
-                "metronome",
-                "mimic",
-                "mirrormove",
-                "naturepower",
-                "shelltrap",
-                "sketch",
-                "sleeptalk",
-                "uproar",
-            ];
             const moves = [];
             for (const moveSlot of pokemon.moveSlots) {
                 const moveid = moveSlot.id;
                 if (!moveid) continue;
                 const move = this.dex.moves.get(moveid);
                 if (
-                    noSleepTalk.includes(moveid) ||
+                    move.flags["nosleeptalk"] ||
                     move.flags["charge"] ||
                     (move.isZ && move.basePower !== 1) ||
                     move.isMax
@@ -19227,7 +19363,7 @@ const Moves = {
         name: "Snatch",
         pp: 10,
         priority: 4,
-        flags: { bypasssub: 1 },
+        flags: { bypasssub: 1, mustpressure: 1, noassist: 1, failcopycat: 1 },
         volatileStatus: "snatch",
         condition: {
             duration: 1,
@@ -19259,7 +19395,6 @@ const Moves = {
             },
         },
         secondary: null,
-        pressureTarget: "foeSide",
         target: "self",
         type: "Dark",
         zMove: { boost: { spe: 2 } },
@@ -19364,7 +19499,13 @@ const Moves = {
         name: "Solar Beam",
         pp: 10,
         priority: 0,
-        flags: { charge: 1, protect: 1, mirror: 1 },
+        flags: {
+            charge: 1,
+            protect: 1,
+            mirror: 1,
+            nosleeptalk: 1,
+            failinstruct: 1,
+        },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
                 return;
@@ -19411,7 +19552,15 @@ const Moves = {
         name: "Solar Blade",
         pp: 10,
         priority: 0,
-        flags: { contact: 1, charge: 1, protect: 1, mirror: 1, slicing: 1 },
+        flags: {
+            contact: 1,
+            charge: 1,
+            protect: 1,
+            mirror: 1,
+            slicing: 1,
+            nosleeptalk: 1,
+            failinstruct: 1,
+        },
         onTryMove(attacker, defender, move) {
             if (attacker.removeVolatile(move.id)) {
                 return;
@@ -19554,7 +19703,7 @@ const Moves = {
         name: "Sparkly Swirl",
         pp: 5,
         priority: 0,
-        flags: { protect: 1 },
+        flags: { protect: 1, mirror: 1 },
         self: {
             onHit(pokemon, source, move) {
                 this.add("-activate", source, "move: Aromatherapy");
@@ -19674,7 +19823,7 @@ const Moves = {
         name: "Spikes",
         pp: 20,
         priority: 0,
-        flags: { reflectable: 1, nonsky: 1 },
+        flags: { reflectable: 1, nonsky: 1, mustpressure: 1 },
         sideCondition: "spikes",
         condition: {
             // this is a side condition
@@ -19711,7 +19860,7 @@ const Moves = {
         name: "Spiky Shield",
         pp: 10,
         priority: 4,
-        flags: {},
+        flags: { noassist: 1, failcopycat: 1 },
         stallingMove: true,
         volatileStatus: "spikyshield",
         onPrepareHit(pokemon) {
@@ -19926,7 +20075,7 @@ const Moves = {
         name: "Splishy Splash",
         pp: 15,
         priority: 0,
-        flags: { protect: 1 },
+        flags: { protect: 1, mirror: 1 },
         secondary: {
             chance: 30,
             status: "par",
@@ -19960,7 +20109,13 @@ const Moves = {
         name: "Spotlight",
         pp: 15,
         priority: 3,
-        flags: { protect: 1, reflectable: 1, allyanim: 1 },
+        flags: {
+            protect: 1,
+            reflectable: 1,
+            allyanim: 1,
+            noassist: 1,
+            failcopycat: 1,
+        },
         volatileStatus: "spotlight",
         onTryHit(target) {
             if (this.activePerHalf === 1) return false;
@@ -20017,7 +20172,7 @@ const Moves = {
         name: "Stealth Rock",
         pp: 20,
         priority: 0,
-        flags: { reflectable: 1 },
+        flags: { reflectable: 1, mustpressure: 1 },
         sideCondition: "stealthrock",
         condition: {
             // this is a side condition
@@ -20180,7 +20335,6 @@ const Moves = {
             },
         },
         secondary: null,
-        pressureTarget: "self",
         target: "foeSide",
         type: "Bug",
         zMove: { boost: { spe: 1 } },
@@ -20476,7 +20630,17 @@ const Moves = {
         pp: 1,
         noPPBoosts: true,
         priority: 0,
-        flags: { contact: 1, protect: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            failencore: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         noSketch: true,
         onModifyMove(move, pokemon, target) {
             move.type = "???";
@@ -20972,7 +21136,13 @@ const Moves = {
         name: "Switcheroo",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1, allyanim: 1 },
+        flags: {
+            protect: 1,
+            mirror: 1,
+            allyanim: 1,
+            noassist: 1,
+            failcopycat: 1,
+        },
         onTryImmunity(target) {
             return !target.hasAbility("stickyhold");
         },
@@ -21547,7 +21717,7 @@ const Moves = {
         name: "Tera Blast",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1 },
+        flags: { protect: 1, mirror: 1, mustpressure: 1 },
         onModifyType(move, pokemon, target) {
             if (pokemon.terastallized) {
                 move.type = pokemon.teraType;
@@ -21612,7 +21782,14 @@ const Moves = {
         name: "Thief",
         pp: 25,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1,
+            failmefirst: 1,
+            noassist: 1,
+            failcopycat: 1,
+        },
         onAfterHit(target, source, move) {
             if (source.item || source.volatiles["gem"]) {
                 return;
@@ -21709,7 +21886,7 @@ const Moves = {
         name: "Thrash",
         pp: 10,
         priority: 0,
-        flags: { contact: 1, protect: 1, mirror: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1, failinstruct: 1 },
         self: {
             volatileStatus: "lockedmove",
         },
@@ -22107,7 +22284,7 @@ const Moves = {
         name: "Toxic Spikes",
         pp: 20,
         priority: 0,
-        flags: { reflectable: 1, nonsky: 1 },
+        flags: { reflectable: 1, nonsky: 1, mustpressure: 1 },
         sideCondition: "toxicspikes",
         condition: {
             // this is a side condition
@@ -22197,7 +22374,14 @@ const Moves = {
         name: "Transform",
         pp: 10,
         priority: 0,
-        flags: { allyanim: 1 },
+        flags: {
+            allyanim: 1,
+            failencore: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         onHit(target, pokemon) {
             if (!pokemon.transformInto(target)) {
                 return false;
@@ -22243,7 +22427,13 @@ const Moves = {
         name: "Trick",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1, allyanim: 1 },
+        flags: {
+            protect: 1,
+            mirror: 1,
+            allyanim: 1,
+            noassist: 1,
+            failcopycat: 1,
+        },
         onTryImmunity(target) {
             return !target.hasAbility("stickyhold");
         },
@@ -22643,7 +22833,14 @@ const Moves = {
         name: "Uproar",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1, sound: 1, bypasssub: 1 },
+        flags: {
+            protect: 1,
+            mirror: 1,
+            sound: 1,
+            bypasssub: 1,
+            nosleeptalk: 1,
+            failinstruct: 1,
+        },
         self: {
             volatileStatus: "uproar",
         },
@@ -22751,7 +22948,7 @@ const Moves = {
         name: "Veevee Volley",
         pp: 20,
         priority: 0,
-        flags: { contact: 1, protect: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1 },
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -22969,7 +23166,7 @@ const Moves = {
         name: "Water Pledge",
         pp: 10,
         priority: 0,
-        flags: { protect: 1, mirror: 1, nonsky: 1 },
+        flags: { protect: 1, mirror: 1, nonsky: 1, pledgecombo: 1 },
         onPrepareHit(target, source, move) {
             for (const action of this.queue) {
                 if (action.choice !== "move") continue;
@@ -23231,6 +23428,8 @@ const Moves = {
             bypasssub: 1,
             allyanim: 1,
             wind: 1,
+            noassist: 1,
+            failcopycat: 1,
         },
         forceSwitch: true,
         secondary: null,
@@ -23262,7 +23461,16 @@ const Moves = {
         name: "Wicked Torque",
         pp: 10,
         priority: 0,
-        flags: { protect: 1 },
+        flags: {
+            protect: 1,
+            failencore: 1,
+            failmefirst: 1,
+            nosleeptalk: 1,
+            noassist: 1,
+            failcopycat: 1,
+            failinstruct: 1,
+            failmimic: 1,
+        },
         secondary: {
             chance: 10,
             status: "slp",
@@ -23740,7 +23948,7 @@ const Moves = {
         name: "Zippy Zap",
         pp: 10,
         priority: 2,
-        flags: { contact: 1, protect: 1 },
+        flags: { contact: 1, protect: 1, mirror: 1 },
         secondary: {
             chance: 100,
             self: {

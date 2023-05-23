@@ -174,11 +174,12 @@ class Dex(ABC):
 
 class Pokedex(Dex):
     FEATURES = {
-        # "id": one_hot_enc,
+        "id": one_hot_enc,
         # "baseSpecies": one_hot_enc,
         "formeid": one_hot_enc,
         "types": bow_enc,
-        "abilities.S": one_hot_enc,
+        "evos": lambda v: one_hot_enc(int(True if v else False), 2),
+        # "abilities.S": one_hot_enc,
         "baseStats.hp": z_score,
         "baseStats.atk": z_score,
         "baseStats.def": z_score,
@@ -188,7 +189,6 @@ class Pokedex(Dex):
         "bst": z_score,
         "weightkg": z_score,
         # "heightm": bin_enc,
-        "evos": lambda v: one_hot_enc(int(True if v else False), 2),
     }
 
     def __init__(self, battle: BattleRoom, table: Dict[str, Any], gen: int):
@@ -284,7 +284,7 @@ class Movedex(Dex):
         "flags.wind": single_enc,
         "hasCrashDamage": one_hot_enc,
         "heal": one_hot_enc,
-        # "id": one_hot_enc,
+        "id": one_hot_enc,
         # "maxMove.basePower": bin_enc,
         "multihit": one_hot_enc,
         "noPPBoosts": one_hot_enc,
@@ -298,7 +298,7 @@ class Movedex(Dex):
         # "secondaries": secondary_enc,
         "target": one_hot_enc,
         "type": one_hot_enc,
-        "desc": vectorize_text,
+        # "desc": vectorize_text,
         # "zMove.basePower": bin_enc,
         # "zMove.boost.accuracy": one_hot_enc,
         # "zMove.boost.atk": one_hot_enc,
@@ -319,8 +319,8 @@ class Movedex(Dex):
             self.raw_json = json.load(f)
 
         for k in data:
-            data[k]["shortDesc"] = self.raw_json[k]["shortDesc"]
-            data[k]["desc"] = self.raw_json[k]["desc"]
+            data[k]["shortDesc"] = self.raw_json[k].get("shortDesc", "")
+            data[k]["desc"] = self.raw_json[k].get("desc", "")
 
         self.data = {k: v for k, v in data.items() if v.get("exists", False)}
 
@@ -347,15 +347,15 @@ class Movedex(Dex):
 
 class Itemdex(Dex):
     FEATURES = {
+        "id": one_hot_enc,
         "fling.basePower": one_hot_enc,
         "fling.status": one_hot_enc,
         "fling.volatileStatus": one_hot_enc,
-        # "id": one_hot_enc,
         "isPokeball": one_hot_enc,
         "naturalGift.basePower": bin_enc,
         "naturalGift.type": one_hot_enc,
         "onPlate": one_hot_enc,
-        "desc": vectorize_text,
+        # "desc": vectorize_text,
     }
 
     def __init__(self, battle: BattleRoom, table: Dict[str, Any], gen: int):
@@ -383,9 +383,9 @@ class Itemdex(Dex):
 
 class Abilitydex(Dex):
     FEATURES = {
-        # "id": one_hot_enc,
-        "isPermanent": one_hot_enc,
-        "desc": vectorize_text,
+        "id": one_hot_enc,
+        # "isPermanent": one_hot_enc,
+        # "desc": vectorize_text,
     }
 
     def __init__(self, battle: BattleRoom, abilities: List[str], gen: int):
@@ -407,7 +407,7 @@ def main():
     # os.system("npx prettier -w --tab-width 4 pokemon-showdown-client")
 
     schema = {}
-    for gen in range(8, 10):
+    for gen in range(1, 10):
         battle = BattleRoom()
         battle.set_gen(gen)
 

@@ -1,5 +1,9 @@
 import math
+import json
 import torch
+import random
+import traceback
+
 import torch.nn as nn
 
 from copy import deepcopy
@@ -68,35 +72,67 @@ class PorygonModel(nn.Module):
     def forward(
         self,
         state: State,
-        hidden_state: Tuple[torch.Tensor, torch.Tensor],
+        hidden_state: Tuple[torch.Tensor, torch.Tensor] = None,
         choices: Choices = None,
         need_log_policy: bool = True,
+        battle_tag: str = None,
     ):
         encoder_output = self.encoder.forward(state)
         state_emb, hidden_state = self.core.forward(encoder_output, hidden_state)
         value = self.value_Head.forward(state_emb)
-        indices, logits, policy = self.policy_heads.forward(
-            state_emb,
-            encoder_output,
-            state,
-        )
-        return self._postprocess(
-            state=state,
-            encoder_output=encoder_output,
-            hidden_state=hidden_state,
-            indices=indices,
-            logits=logits,
-            policy=policy,
-            value=value,
-            choices=choices,
-            need_log_policy=need_log_policy,
-        )
+        while True:
+            indices, logits, policy = self.policy_heads.forward(
+                state_emb,
+                encoder_output,
+                state,
+            )
+            try:
+                post_process = self._postprocess(
+                    state=state,
+                    encoder_output=encoder_output,
+                    hidden_state=hidden_state,
+                    indices=indices,
+                    logits=logits,
+                    policy=policy,
+                    value=value,
+                    choices=choices,
+                    need_log_policy=need_log_policy,
+                )
+            except Exception:
+                traceback.print_exc()
+
+                with open(
+                    f"{battle_tag}_model_error"
+                    + str(random.randint(0, 9999999))
+                    + ".json",
+                    "w",
+                ) as f:
+                    json.dump(
+                        {
+                            "logits": {
+                                k: torch.squeeze(v).tolist()
+                                for k, v in logits._asdict().items()
+                                if v is not None
+                            },
+                            "policy": {
+                                k: torch.squeeze(v).tolist()
+                                for k, v in policy._asdict().items()
+                                if v is not None
+                            },
+                            "indices": {
+                                k: torch.squeeze(v).tolist()
+                                for k, v in indices._asdict().items()
+                                if v is not None
+                            },
+                        },
+                        f,
+                    )
+            else:
+                return post_process
 
     def learning_forward(
         self,
         batch: Batch,
-        # hidden_state: Tuple[torch.Tensor, torch.Tensor],
-        hidden_state: torch.Tensor,
     ):
         T, B = batch.trajectory_length, batch.batch_size
 
@@ -108,22 +144,12 @@ class PorygonModel(nn.Module):
             batch_start = minibatch_size * batch_index
             batch_end = minibatch_size * (batch_index + 1)
 
-            # mini_state_h, mini_state_c = hidden_state
-
-            # mini_state_h = mini_state_h[:, batch_start:batch_end].contiguous()
-            # mini_state_c = mini_state_c[:, batch_start:batch_end].contiguous()
-
-            mini_hidden_state = hidden_state[:, batch_start:batch_end].contiguous()
-
             minibatch = {
                 key: value[:, batch_start:batch_end].contiguous()
                 for key, value in batch._asdict().items()
                 if value is not None
             }
-            output, _, decoder = self.forward(
-                minibatch,
-                mini_hidden_state,
-            )
+            output, _, decoder = self.forward(minibatch, None)
             outputs.append(output)
 
         pi_dict: Dict[str, List[torch.Tensor]] = {}
@@ -253,16 +279,11 @@ class PorygonModel(nn.Module):
             flag_log_policy = None
 
         return LogPolicy(
-            action_log_policy=_log_policy(
-                logits.action_logits,
-                torch.cat(
-                    (
-                        state["move_mask"],
-                        state["switch_mask"],
-                    ),
-                    dim=-1,
-                ),
+            action_type_log_policy=_log_policy(
+                logits.action_type_logits, state["action_type_mask"]
             ),
+            move_log_policy=_log_policy(logits.move_logits, state["move_mask"]),
+            switch_log_policy=_log_policy(logits.switch_logits, state["switch_mask"]),
             max_move_log_policy=max_move_log_policy,
             flag_log_policy=flag_log_policy,
             target_log_policy=target_log_policy,
@@ -274,19 +295,17 @@ class PorygonModel(nn.Module):
         indices: Indices,
         choices: Optional[Dict[str, Any]] = None,
     ):
-        action_type_index = indices.action_index >= 4
-        move_index = indices.action_index
-        switch_index = indices.action_index - 4
-
-        max_move_index = indices.max_move_index
-        flag_index = indices.flag_index
-        target_index = indices.target_index
+        action_type_index = indices.action_type_index.item()
+        move_index = indices.move_index.item()
+        switch_index = indices.switch_index.item()
 
         if not targeting:
             index = action_type_index
 
             if action_type_index == 0:
+                flag_index = (indices.flag_index).item()
                 if flag_index == 3:
+                    max_move_index = (indices.max_move_index).item()
                     index = max_move_index
                 else:
                     index = move_index
@@ -319,6 +338,8 @@ class PorygonModel(nn.Module):
                 data = choices["targets"]
             else:
                 data = None
+
+            target_index = (indices.target_index).item()
             index = target_index
 
         return PostProcess(data, index)
