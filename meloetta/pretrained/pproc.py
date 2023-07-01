@@ -21,7 +21,6 @@ descriptors = [
 
 
 def main():
-
     model_id = "princeton-nlp/sup-simcse-roberta-large"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tokenizer = AutoTokenizer.from_pretrained(model_id)

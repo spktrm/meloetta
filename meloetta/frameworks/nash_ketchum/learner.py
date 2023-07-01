@@ -1,35 +1,29 @@
 import os
-import time
 import wandb
-import cProfile, pstats
 import traceback
 import threading
 
 import torch
-import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from typing import Tuple, Dict
+from typing import List, Dict, Tuple
 
+from meloetta.actors.types import TensorDict
 from meloetta.frameworks.nash_ketchum.buffer import ReplayBuffer
 from meloetta.frameworks.nash_ketchum.config import NAshKetchumConfig
 from meloetta.frameworks.nash_ketchum.entropy import EntropySchedule
-from meloetta.frameworks.nash_ketchum.model import (
-    NAshKetchumModel,
-    ModelOutput,
-    Batch,
-    Targets,
-    Loss,
-    Indices,
-)
+from meloetta.frameworks.nash_ketchum.modelv2 import NAshKetchumModel
 from meloetta.frameworks.nash_ketchum.utils import (
     FineTuning,
     _player_others,
+    _get_leading_dims,
     v_trace,
     get_loss_nerd,
     get_loss_v,
 )
+
+_FIELDS = ["action_type", "flag", "move", "switch"]
 
 
 class TargetNetSGD:
@@ -82,10 +76,14 @@ class NAshKetchumLearner:
             model_prev_ if model_prev_ is not None else self._init_model()
         )
 
-        self.actor_model.load_state_dict(self.learner_model.state_dict())
-        self.target_model.load_state_dict(self.learner_model.state_dict())
-        self.model_prev.load_state_dict(self.learner_model.state_dict())
-        self.model_prev_.load_state_dict(self.learner_model.state_dict())
+        for model in [
+            self.actor_model,
+            self.target_model,
+            self.model_prev,
+            self.model_prev_,
+        ]:
+            model.load_state_dict(self.learner_model.state_dict())
+            model.requires_grad_(False)
 
         self.actor_model.share_memory()
 
@@ -101,7 +99,6 @@ class NAshKetchumLearner:
             sizes=self.config.entropy_schedule_size,
             repeats=self.config.entropy_schedule_repeats,
         )
-        self.scaler = torch.cuda.amp.GradScaler()
 
         self.learner_steps = 0
         self.finetune = FineTuning()
@@ -152,7 +149,28 @@ class NAshKetchumLearner:
         )
 
     def _init_optimizers(self):
+        def _get_trainable_params(model: NAshKetchumModel, weight_decay: float):
+            grad_groups = {
+                pn: p for pn, p in model.named_parameters() if p.requires_grad
+            }
+            decay_params = [p for n, p in grad_groups.items() if p.dim() >= 2]
+            nodecay_params = [p for n, p in grad_groups.items() if p.dim() < 2]
+            optim_groups = [
+                {"params": decay_params, "weight_decay": weight_decay},
+                {"params": nodecay_params, "weight_decay": 0.0},
+            ]
+            num_decay_params = sum(p.numel() for p in decay_params)
+            num_nodecay_params = sum(p.numel() for p in nodecay_params)
+            print(
+                f"num decayed parameter tensors: {len(decay_params)}, with {num_decay_params:,} parameters"
+            )
+            print(
+                f"num non-decayed parameter tensors: {len(nodecay_params)}, with {num_nodecay_params:,} parameters"
+            )
+            return optim_groups
+
         self.optimizer = optim.Adam(
+            # _get_trainable_params(self.learner_model, self.config.adam.weight_decay),
             self.learner_model.parameters(),
             lr=self.config.learning_rate,
             betas=(self.config.adam.b1, self.config.adam.b2),
@@ -237,75 +255,45 @@ class NAshKetchumLearner:
 
         return learner
 
-    def collect_batch_trajectory(self):
+    def collect_batch_trajectory(self) -> Tuple[List[int], TensorDict]:
         return self.replay_buffer.get_batch(self.config.batch_size)
 
-    def step(self):
-        batch = self.collect_batch_trajectory()
+    def step(self, lock: threading.Lock = threading.Lock()):
+        _, batch = self.collect_batch_trajectory()
         alpha, update_target_net = self._entropy_schedule(self.learner_steps)
 
-        if self.learner_steps < int(1e9):
-            # if self.learner_steps < 10:
-            self.update_paramters(batch, alpha, update_target_net)
-        else:
-            profiler = cProfile.Profile()
-            profiler.enable()
-            self.update_paramters(batch, alpha, update_target_net)
-            profiler.disable()
-            stats = pstats.Stats(profiler).sort_stats("ncalls")
-            fpath = f"cprofile_{self.learner_steps}"
-            stats.dump_stats(fpath)
-
-    def update_paramters(
-        self,
-        batch: Batch,
-        alpha: float,
-        indices: Indices,
-    ):
-        batch_cpu = batch
-        batch_gpu = batch.to(self.replay_buffer.device)
-
-        indices = Indices(
-            action_type_index=getattr(batch_cpu, "action_type_index", None),
-            move_index=getattr(batch_cpu, "move_index", None),
-            max_move_index=getattr(batch_cpu, "max_move_index", None),
-            switch_index=getattr(batch_cpu, "switch_index", None),
-            flag_index=getattr(batch_cpu, "flag_index", None),
-            target_index=getattr(batch_cpu, "target_index", None),
-        )
-
-        targets = self._get_targets(batch_cpu, batch_gpu, alpha, indices)
-        self.backprop(batch_cpu, targets, indices)
-
-    def backprop(
-        self,
-        batch_cpu: Batch,
-        targets: Targets,
-        indices: Indices,
-        lock=threading.Lock(),
-    ):
-        _, update_target_net = self._entropy_schedule(self.learner_steps)
-
-        losses = self._backpropagate(batch_cpu, targets, indices)
-
-        static_loss_dict = losses._asdict()
-        static_loss_dict["s"] = self.learner_steps
-        static_loss_dict["final_turn"] = (
-            batch_cpu.scalars[..., 0].max(0).values.float().mean()
-        ).item()
-
-        wandb.log(static_loss_dict)
-
-        self.scaler.unscale_(self.optimizer)
-
-        torch.nn.utils.clip_grad_value_(
-            self.learner_model.parameters(), self.config.clip_gradient
-        )
-
-        self.scaler.step(self.optimizer)
-        self.scaler.update()
         self.optimizer.zero_grad()
 
+        targets = self._get_targets(batch, alpha)
+        loss_dict = self._update_params(batch, targets)
+
+        loss_dict["s"] = self.learner_steps
+        loss_dict["final_turn"] = (
+            batch["scalars"][..., 0].max(0).values.float().mean()
+        ).item()
+
+        move_available = batch["action_type_policy"][..., 0] > 0
+        loss_dict["move_prob"] = (
+            batch["action_type_policy"][..., 0].sum() / move_available.sum()
+        ).item()
+
+        switch_available = batch["action_type_policy"][..., 1] > 0
+        loss_dict["switch_prob"] = (
+            batch["action_type_policy"][..., 1].sum() / switch_available.sum()
+        ).item()
+
+        for k, v in loss_dict.items():
+            if isinstance(v, list):
+                loss_dict[k] = sum(v)
+
+        norm = torch.nn.utils.clip_grad_value_(
+            self.learner_model.parameters(), self.config.clip_gradient
+        )
+        # loss_dict["gradient_norm"] = norm.item()
+
+        wandb.log(loss_dict)
+
+        self.optimizer.step()
         self.optimizer_target.step()
 
         if update_target_net:
@@ -313,81 +301,95 @@ class NAshKetchumLearner:
             self.model_prev_.load_state_dict(self.model_prev.state_dict())
             self.model_prev.load_state_dict(self.target_model.state_dict())
 
-        self.learner_steps += 1
         if self.learner_steps % 1000 == 0:
             self.save()
 
         with lock:
             self.actor_model.load_state_dict(self.learner_model.state_dict())
 
+        self.learner_steps += 1
+
     @torch.no_grad()
     def _learning_forward(
-        self, batch: Batch, indices: Indices, size: int = 4096
-    ) -> Tuple[ModelOutput, ModelOutput, ModelOutput, ModelOutput,]:
+        self, batch: TensorDict, size: int = 1024
+    ) -> List[TensorDict]:
+        T, B = _get_leading_dims(batch)
+        TB = T * B
 
-        B, T = batch.batch_size, batch.trajectory_length
-        if B * T >= size:
+        if TB <= size:
+            batch = {
+                k: v.to(self.replay_buffer.device, non_blocking=True)
+                for k, v in batch.items()
+            }
+            learner_model_output = self.learner_model.forward(
+                batch, compute_value=False
+            )
+            target_model_output = self.target_model.forward(
+                batch, compute_log_policy=False
+            )
+            model_prev_output = self.model_prev.forward(batch, compute_value=False)
+            model_prev_output_ = self.model_prev_.forward(batch, compute_value=False)
+            return [
+                {k: v.cpu() for k, v in model_output.items() if v is not None}
+                for model_output in [
+                    learner_model_output,
+                    target_model_output,
+                    model_prev_output,
+                    model_prev_output_,
+                ]
+            ]
 
-            learner = []
-            target = []
-            prev = []
-            prev_ = []
+        num_iters = TB // size
+        if num_iters != TB / size:
+            num_iters += 1
 
-            def _iterate(
-                batch: Dict[str, torch.Tensor],
-                indices: Dict[str, torch.Tensor],
-                size: int,
+        buckets = [{} for _ in range(4)]
+        lagging_shape = {}
+
+        flat_batch = {k: v.flatten(0, 1).unsqueeze(1) for k, v in batch.items()}
+
+        for i in range(num_iters):
+            start, end = i * size, (i + 1) * size
+
+            minibatch = {
+                k: v[start:end].to(self.replay_buffer.device, non_blocking=True)
+                for k, v in flat_batch.items()
+            }
+            learner_model_output = self.learner_model(minibatch, compute_value=False)
+            target_model_output = self.target_model(minibatch, compute_log_policy=False)
+            model_prev_output = self.model_prev(minibatch, compute_value=False)
+            model_prev_output_ = self.model_prev_(minibatch, compute_value=False)
+
+            for midx, model_output in enumerate(
+                [
+                    learner_model_output,
+                    target_model_output,
+                    model_prev_output,
+                    model_prev_output_,
+                ]
             ):
-                n = batch["valid"].shape[1] // size
-                if batch["valid"].shape[1] / size != n:
-                    n += 1
+                for k, v in model_output.items():
+                    if i == 0 and v is not None:
+                        buckets[midx][k] = []
+                        lagging_shape[k] = v.shape[2:]
 
-                for i in range(n):
-                    start, end = i * size, (i + 1) * size
-                    yield (
-                        {k: v[:, start:end] for k, v in batch.items()},
-                        {k: v[:, start:end] for k, v in indices.items()},
-                    )
+                    if k in buckets[midx]:
+                        buckets[midx][k].append(v.cpu())
 
-            for minibatch, minindex in _iterate(
-                batch.flatten(0, 1), indices.flatten(0, 1), size
-            ):
-                minindex = Indices(**minindex)
-                learner.append(self.learner_model.learning_forward(minibatch, minindex))
-                target.append(self.target_model.learning_forward(minibatch, minindex))
-                prev.append(self.model_prev.learning_forward(minibatch, minindex))
-                prev_.append(self.model_prev_.learning_forward(minibatch, minindex))
+        return [
+            {
+                k: torch.cat(bucket[k]).view(T, B, *lagging_shape[k])
+                for k in bucket
+                if bucket[k]
+            }
+            for bucket in buckets
+        ]
 
-            learner = ModelOutput.from_list(learner)
-            target = ModelOutput.from_list(target)
-            prev = ModelOutput.from_list(prev)
-            prev_ = ModelOutput.from_list(prev_)
-
-            learner = learner.view(T, B)
-            target = target.view(T, B)
-            prev = prev.view(T, B)
-            prev_ = prev_.view(T, B)
-
-        else:
-            batch = batch._asdict()
-            learner = self.learner_model.learning_forward(batch, indices)
-            target = self.target_model.learning_forward(batch, indices)
-            prev = self.model_prev.learning_forward(batch, indices)
-            prev_ = self.model_prev_.learning_forward(batch, indices)
-
-        return learner, target, prev, prev_
-
+    @torch.no_grad()
     def _get_targets(
-        self, batch_cpu: Batch, batch_gpu: Batch, alpha: float, indices: Indices
-    ) -> Targets:
-        learner, target, prev, prev_ = self._learning_forward(
-            batch_gpu, indices.to(self.replay_buffer.device)
-        )
-
-        learner = learner.to("cpu")
-        target = target.to("cpu")
-        prev = prev.to("cpu")
-        prev_ = prev_.to("cpu")
+        self, batch: TensorDict, alpha: float
+    ) -> Dict[str, List[torch.Tensor]]:
+        learner, target, prev, prev_ = self._learning_forward(batch)
 
         targets_dict = {"importance_sampling_corrections": []}
 
@@ -396,44 +398,25 @@ class NAshKetchumLearner:
         policies_pprocessed = []
         log_policies_reg = []
         action_ohs = []
-        fields = []
 
-        for field in sorted(learner.pi._fields):
+        for policy_select, field in enumerate(_FIELDS):
+            pi = learner[f"{field}_policy"]
+            log_pi = learner[f"{field}_log_policy"]
+            prev_log_pi = prev[f"{field}_log_policy"]
+            prev_log_pi_ = prev_[f"{field}_log_policy"]
 
-            pi = getattr(learner.pi, field)
-            if pi is None:
-                continue
-
-            fields.append(field)
-
-            log_pi = getattr(target.log_pi, field)
-            prev_log_pi = getattr(prev.log_pi, field)
-            prev_log_pi_ = getattr(prev_.log_pi, field)
-
-            # mask_field = policy_field.replace("_policy", "_mask")
-            # policy_mask = getattr(batch_cpu, mask_field)
-            # policy_pprocessed = self.finetune(pi, policy_mask, self.learner_steps)
-
-            if field == "move" or field == "flag":
-                policy_valid = batch_cpu.valid & (batch_cpu.action_type_index == 0)
-
-            elif field == "switch":
-                policy_valid = batch_cpu.valid & (batch_cpu.action_type_index == 1)
-
-            else:
-                policy_valid = batch_cpu.valid
-            policy_valid = policy_valid.clone()
+            policy_valid = batch["valid"]
+            trajectory_mask = (batch["policy_select"] == policy_select).squeeze(-1)
 
             policy_pprocessed = pi
-            acting_policy = getattr(batch_cpu, field + "_policy")
+            acting_policy = batch[f"{field}_policy"]
 
             log_policy_reg = log_pi - (alpha * prev_log_pi + (1 - alpha) * prev_log_pi_)
-            # log_policy_reg = log_policy_reg * policy_valid.unsqueeze(-1)
 
-            action_index = getattr(batch_cpu, field + "_index")
+            action_index = batch[f"{field}_index"]
             action_oh = F.one_hot(action_index, pi.shape[-1])
 
-            policies_valid.append(policy_valid)
+            policies_valid.append(policy_valid & trajectory_mask)
             acting_policies.append(acting_policy)
             policies_pprocessed.append(policy_pprocessed)
             log_policies_reg.append(log_policy_reg)
@@ -446,18 +429,20 @@ class NAshKetchumLearner:
             importance_sampling_corrections,
         ) = ([], [], [], [])
 
+        values = [target[f"{field}_value"] for field in _FIELDS]
         for player in range(2):
-            reward = batch_cpu.rewards[:, :, player]  # [T, B, Player]
+            reward = batch["rewards"][:, :, player]  # [T, B, Player]
 
             v_target_, has_played, policy_targets_, policy_ratios = v_trace(
-                target.v,
-                batch_cpu.valid,
+                values,
+                batch["policy_select"],
+                batch["valid"],
                 policies_valid,
-                batch_cpu.player_id,
+                batch["player_id"],
                 acting_policies,
                 policies_pprocessed,
                 log_policies_reg,
-                _player_others(batch_cpu.player_id, batch_cpu.valid, player),
+                _player_others(batch["player_id"], batch["valid"], player),
                 action_ohs,
                 reward,
                 player,
@@ -469,188 +454,136 @@ class NAshKetchumLearner:
             )
             v_target_list.append(v_target_)
             has_played_list.append(has_played)
-            v_trace_policy_target_list.append(
-                {
-                    key: policy_target_
-                    for key, policy_target_ in zip(fields, policy_targets_)
-                }
-            )
-            importance_sampling_corrections.append(
-                {
-                    key: policy_ratio.unsqueeze(-1)
-                    for key, policy_ratio in zip(fields, policy_ratios)
-                }
-            )
+            v_trace_policy_target_list.append(policy_targets_)
+            importance_sampling_corrections.append(policy_ratios)
 
         targets_dict["value_targets"] = v_target_list
         targets_dict["has_played"] = has_played_list
 
-        for field in fields:
-            targets_dict[f"{field}_policy_target"] = [
-                targ[field] for targ in v_trace_policy_target_list if field in targ
-            ]
-            targets_dict[f"{field}_is"] = [
-                targ[field] for targ in importance_sampling_corrections if field in targ
-            ]
+        for f, field in enumerate(_FIELDS):
+            for k in range(2):
+                if k == 0:
+                    targets_dict[f"{field}_policy_target"] = []
+                    targets_dict[f"{field}_is"] = []
 
-        return Targets(**{key: value for key, value in targets_dict.items() if value})
+                targets_dict[f"{field}_policy_target"].append(
+                    v_trace_policy_target_list[k][f]
+                )
+                targets_dict[f"{field}_is"].append(
+                    importance_sampling_corrections[k][f].unsqueeze(-1)
+                )
 
-    def _backpropagate(
+        return targets_dict
+
+    def _update_params(
         self,
-        batch: Batch,
-        targets: Targets,
-        indices: Indices,
-        remove_padding: bool = True,
-    ) -> Loss:
+        batch: TensorDict,
+        targets: Dict[str, List[torch.Tensor]],
+    ) -> Dict[str, float]:
+        minibatch_size = 1024
+        T, B = _get_leading_dims(batch)
 
-        loss_dict = {
-            key + "_loss": 0
-            for key in batch._fields
-            if "_policy" in key and getattr(batch, key) is not None
-        }
-        loss_dict["value_loss"] = 0
+        n_iters = ((T * B) // minibatch_size) + 1
 
-        batch_size = batch.batch_size * batch.trajectory_length
-
-        if remove_padding:
-            t = batch.valid.sum(0)
-            # old_size = batch.trajectory_length * batch.batch_size
-            # reduced_size = batch.valid.sum().item()
-            # reduction = 100 * (1 - (reduced_size / old_size))
-            # print(
-            #     f"\n{reduction:.2f} % reduction - bs_eff = {old_size}, true_bs = {reduced_size}"
-            # )
-
-            batch = batch.flatten_without_padding(t)
-            targets = targets.flatten_without_padding(t)
-            indices = indices.flatten_without_padding(t)
-
-        else:
-            batch = batch.flatten(0, 1)
-            targets = targets.flatten(0, 1)
-            indices = indices.flatten(0, 1)
-
-        batch = {k: v.to(self.replay_buffer.device) for k, v in batch.items()}
-        indices = {k: v.to(self.replay_buffer.device) for k, v in indices.items()}
+        batch = {k: v.flatten(0, 1).unsqueeze(1) for k, v in batch.items()}
         targets = {
-            k: [v.to(self.replay_buffer.device) for v in vt]
-            for k, vt in targets.items()
+            k: [v.flatten(0, 1).unsqueeze(1) for v in vt] for k, vt in targets.items()
         }
 
-        minibatch_size = 4096
+        valid_sum = {}
+        loss_dict = {}
 
-        value_loss_field = "value_loss"
+        for policy_select, field in enumerate(_FIELDS):
+            for k in range(2):
+                policy_valid_sum_field = f"{field}_policy_valid_sum"
+                value_valid_sum_field = f"{field}_value_valid_sum"
 
-        n = batch_size // minibatch_size
-        if batch["valid"].shape[1] / minibatch_size != n:
-            n += 1
+                for valid_sum_field in [policy_valid_sum_field, value_valid_sum_field]:
+                    if valid_sum_field not in valid_sum:
+                        valid_sum[valid_sum_field] = []
 
-        for i in range(n):
+                mask = batch["policy_select"] == policy_select
 
-            start, end = i * minibatch_size, (i + 1) * minibatch_size
+                policy_mask = batch["valid"] & mask & (batch["player_id"] == k)
+                valid_sum[policy_valid_sum_field].append(policy_mask.sum().item())
 
-            minibatch = {k: v[:, start:end] for k, v in batch.items()}
+                value_mask = targets["has_played"][k] & mask
+                valid_sum[value_valid_sum_field].append(value_mask.sum().item())
 
-            if torch.all(~minibatch["valid"]):
+            loss_dict[f"{field}_value_loss"] = [0, 0]
+            loss_dict[f"{field}_policy_loss"] = [0, 0]
+
+        for i in range(n_iters):
+            start_idx, end_idx = i * minibatch_size, (i + 1) * minibatch_size
+
+            if not batch["valid"][start_idx:end_idx].sum().item():
                 continue
 
-            loss = 0
-            minitarget = {k: [v[:, start:end] for v in vt] for k, vt in targets.items()}
-            minindices = Indices(**{k: vt[:, start:end] for k, vt in indices.items()})
+            minibatch = {
+                k: v[start_idx:end_idx].to(self.replay_buffer.device)
+                for k, v in batch.items()
+            }
+            minitargets = {
+                k: [v[start_idx:end_idx].to(self.replay_buffer.device) for v in vt]
+                for k, vt in targets.items()
+            }
 
-            with torch.autocast(device_type="cuda", dtype=torch.float16):
-                model_output = self.learner_model.forward(minibatch, indices=minindices)
+            loss_dict = self._step(minibatch, minitargets, loss_dict, valid_sum)
 
-            for pi_field in model_output.pi._fields:
+        return loss_dict
 
-                field = pi_field.replace("_policy", "")
-                pi = getattr(model_output.pi, pi_field)
-
-                if pi is None:
-                    continue
-
-                mask_field = field + "_mask"
-                logit = getattr(model_output.logit, field)
-
-                if field == "move" or field == "flag":
-                    valid = minibatch["valid"] * (minibatch["action_type_index"] == 0)
-                    normalization = batch["valid"] * (batch["action_type_index"] == 0)
-
-                elif field == "switch":
-                    valid = minibatch["valid"] * (minibatch["action_type_index"] == 1)
-                    normalization = batch["valid"] * (batch["action_type_index"] == 1)
-
-                else:
-                    valid = minibatch["valid"]
-                    normalization = batch["valid"]
-
-                policy_mask = minibatch[mask_field]
-
-                policy_loss_field = field + "_policy_loss"
-
-                # Uses v-trace to define q-values for Nerd
-                policy_loss = get_loss_nerd(
-                    [logit] * 2,
-                    [pi] * 2,
-                    minitarget[f"{field}_policy_target"],
-                    valid,
-                    minibatch["player_id"],
-                    policy_mask,
-                    minitarget[f"{field}_is"],
-                    normalization=normalization,
-                    clip=self.config.nerd.clip,
-                    threshold=self.config.nerd.beta,
-                )
-                loss_dict[policy_loss_field] += policy_loss.item()
-
-                loss += policy_loss
-
-            # repr_loss = self._get_repr_loss(
-            #     model_output.state_action_emb,
-            #     model_output.state_emb,
-            #     (batch["valid"][:-1] * batch["valid"][1:]).flatten(0, 1),
-            # )
-            # loss_dict["repr_loss"] = repr_loss.item()
-            # loss = loss + repr_loss
-
-            has_played = minitarget["has_played"]
-            value_loss = get_loss_v(
-                [model_output.v] * 2,
-                minitarget["value_targets"],
-                has_played,
-                normalization=targets["has_played"],
-            )
-            loss_dict[value_loss_field] += value_loss.item()
-
-            loss += value_loss
-
-            self.scaler.scale(loss).backward()
-
-        return Loss(**loss_dict)
-
-    def _get_repr_loss(
+    def _step(
         self,
-        state_action_emb: torch.Tensor,
-        state_emb: torch.Tensor,
-        valid: torch.Tensor,
-    ) -> torch.Tensor:
-        criterion = nn.CrossEntropyLoss(reduction="none")
+        batch: TensorDict,
+        targets: Dict[str, List[torch.Tensor]],
+        loss_dict: Dict[str, float],
+        valid_sum: Dict[str, int],
+    ):
+        with torch.autocast(device_type="cuda", dtype=torch.float16):
+            model_output = self.learner_model(batch, compute_log_policy=False)
 
-        n = state_action_emb[:-1].flatten(0, 1).shape[0]
-        labels = torch.arange(n, device=self.replay_buffer.device)
+        loss = 0
+        T, _ = _get_leading_dims(batch)
 
-        logits = torch.einsum(
-            "ik,jk->ij",
-            state_action_emb[:-1].flatten(0, 1),
-            state_emb[1:].flatten(0, 1),
-        )
-        loss = criterion(logits, labels)
-        loss = torch.maximum(loss, torch.tensor(1))
+        for policy_select, field in enumerate(_FIELDS):
+            policy_valid = batch["valid"].view(T)
 
-        loss = loss * valid
-        loss = loss.sum() / valid.sum().clamp(min=1)
+            trajectory_mask = batch["policy_select"] == policy_select
+            policy_valid = (policy_valid & trajectory_mask.squeeze(-1)).unsqueeze(-1)
 
-        return loss
+            policy_loss_field = f"{field}_policy_loss"
+            value_loss_field = f"{field}_value_loss"
+
+            policy_field_valid_sum = valid_sum[f"{field}_policy_valid_sum"]
+            value_field_valid_sum = valid_sum[f"{field}_value_valid_sum"]
+
+            pg_losses = get_loss_nerd(
+                [model_output[f"{field}_logits"]] * 2,
+                [model_output[f"{field}_policy"]] * 2,
+                targets[f"{field}_policy_target"],
+                policy_valid,
+                batch["player_id"],
+                policy_field_valid_sum,
+                batch[f"{field}_mask"],
+                targets[f"{field}_is"],
+            )
+
+            value_losses = get_loss_v(
+                [model_output[f"{field}_value"]] * 2,
+                targets["value_targets"],
+                [has_played & trajectory_mask for has_played in targets["has_played"]],
+                value_field_valid_sum,
+            )
+
+            for k, (pg_loss, value_loss) in enumerate(zip(pg_losses, value_losses)):
+                loss += pg_loss
+                loss += value_loss
+                loss_dict[policy_loss_field][k] += pg_loss.item()
+                loss_dict[value_loss_field][k] += value_loss.item()
+
+        loss.backward()
+
+        return loss_dict
 
     def run(self):
         while True:

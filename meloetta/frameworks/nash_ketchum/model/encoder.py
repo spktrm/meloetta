@@ -1,15 +1,14 @@
 import torch.nn as nn
 
-from meloetta.frameworks.nash_ketchum.model.interfaces import (
-    State,
-    EncoderOutput,
-    SideEncoderOutput,
-)
+from collections import OrderedDict
+
+from meloetta.actors.types import State, TensorDict
+
 from meloetta.frameworks.nash_ketchum.model.config import EncoderConfig
 from meloetta.frameworks.nash_ketchum.model.encoders import (
     SideEncoder,
     ScalarEncoder,
-    WeatherEncoder,
+    HistoryEncoder,
 )
 
 
@@ -19,14 +18,14 @@ class Encoder(nn.Module):
         self.side_encoder = SideEncoder(
             gen=gen, n_active=n_active, config=config.side_encoder_config
         )
-        self.weather_encoder = WeatherEncoder(
-            gen=gen, config=config.weather_encoder_config
-        )
         self.scalar_encoder = ScalarEncoder(
             gen=gen, n_active=n_active, config=config.scalar_encoder_config
         )
+        # self.history_encoder = HistoryEncoder(
+        #     gen=gen, n_active=n_active, config=config.side_encoder_config
+        # )
 
-    def forward(self, state: State) -> EncoderOutput:
+    def forward(self, state: State) -> TensorDict:
         sides = state["sides"]
         boosts = state["boosts"]
         volatiles = state["volatiles"]
@@ -43,41 +42,41 @@ class Encoder(nn.Module):
         faint_counter = scalars[..., 5:]
 
         # action masks
-        action_type_mask = state["action_type_mask"]
-        move_mask = state["move_mask"]
-        switch_mask = state["switch_mask"]
-        flag_mask = state["flag_mask"]
-        max_move_mask = state.get("max_move_mask")
-        target_mask = state.get("target_mask")
+        # action_type_mask = state["action_type_mask"]
+        # move_mask = state["move_mask"]
+        # switch_mask = state["switch_mask"]
+        # flag_mask = state["flag_mask"]
+        # max_move_mask = state.get("max_move_mask")
+        # target_mask = state.get("target_mask")
 
-        side_embs = self.side_encoder(
-            side=sides,
+        side_embeddings = self.side_encoder.forward(side=sides)
+
+        scalar_embeddings = self.scalar_encoder.forward(
+            turn=turn,
+            # action_type_mask=action_type_mask,
+            # move_mask=move_mask,
+            # max_move_mask=max_move_mask,
+            # switch_mask=switch_mask,
+            # flag_mask=flag_mask,
+            # target_mask=target_mask,
+            n=n,
+            total_pokemon=total_pokemon,
+            faint_counter=faint_counter,
             boosts=boosts,
             volatiles=volatiles,
             side_conditions=side_conditions,
             wisher=wisher,
-        )
-
-        weather_emb = self.weather_encoder(
             weather=weather,
             pseudoweather=pseudoweathers,
         )
 
-        scalar_emb = self.scalar_encoder(
-            turn=turn,
-            action_type_mask=action_type_mask,
-            move_mask=move_mask,
-            max_move_mask=max_move_mask,
-            switch_mask=switch_mask,
-            flag_mask=flag_mask,
-            target_mask=target_mask,
-            n=n,
-            total_pokemon=total_pokemon,
-            faint_counter=faint_counter,
-        )
+        # history_embedding = self.history_encoder.forward(
+        #     state["hist"],
+        #     side_embeddings["pokemon_embeddings"],
+        #     side_embeddings["move_embeddings"],
+        # )
 
-        return EncoderOutput(
-            **side_embs._asdict(),
-            weather_emb=weather_emb,
-            scalar_emb=scalar_emb,
+        return OrderedDict(
+            **scalar_embeddings,
+            **side_embeddings,  # history_embedding=history_embedding
         )

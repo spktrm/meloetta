@@ -62,6 +62,14 @@ class SelfPlayWorker:
         results = asyncio.run(selfplay())
         return results
 
+    async def start_battle(self, player: Player, player_index: int):
+        if player_index % 2 == 0:
+            await player.client.challenge_user(
+                f"player{player_index + 1}", self.battle_format, self.team
+            )
+        else:
+            await player.client.accept_challenge(self.battle_format, self.team)
+
     async def actor(self, player_index: int, barrier: Barrier) -> Any:
         username = f"player{player_index}"
 
@@ -69,13 +77,8 @@ class SelfPlayWorker:
         await player.client.login()
         await barrier.wait()
 
-        while True:  # 10 battles each player-player pair
-            if player_index % 2 == 0:
-                await player.client.challenge_user(
-                    f"player{player_index + 1}", self.battle_format, self.team
-                )
-            else:
-                await player.client.accept_challenge(self.battle_format, self.team)
+        while True:
+            await self.start_battle(player, player_index)
 
             turn = 0
             turns_since_last_move = expand_bt(torch.tensor(0, dtype=torch.long))
@@ -87,16 +90,18 @@ class SelfPlayWorker:
 
             while True:
                 message = await player.client.receive_message()
-                action_required = await player.recieve(message)
+                action_required = player._recieve(message)
+
                 if "is offering a tie." in message:
                     await player.client.websocket.send(
                         player.room.battle_tag + "|" + "/offertie"
                     )
+
                 if "|error" in message:
                     # edge case for handling when the pokemon is trapped
                     if "Can't switch: The active Pokémon is trapped" in message:
                         message = await player.client.receive_message()
-                        action_required = await player.recieve(message)
+                        action_required = player._recieve(message)
                         action_required = True
 
                     # for some reason, disabled max moves are being selected

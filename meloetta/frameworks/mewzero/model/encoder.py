@@ -79,7 +79,7 @@ class Encoder(nn.Module):
             switches,
         ) = self.private_encoder(private_reserve)
 
-        public_entity_emb, public_spatial, = self.public_encoder(
+        (public_entity_emb, public_spatial,) = self.public_encoder(
             public_n,
             public_total_pokemon,
             public_faint_counter,

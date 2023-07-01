@@ -26,6 +26,11 @@ class Client:
         message = await self.websocket.recv()
         return message
 
+    async def search_for_match(self, battle_format, team):
+        await self.update_team(battle_format, team)
+        message = ["/search {}".format(battle_format)]
+        await self.send_message("", message)
+
     async def send_message(self, room, message_list):
         message = room + "|" + "|".join(message_list)
         await self.websocket.send(message)
@@ -76,7 +81,9 @@ class Client:
             assertion = ""
 
         message = ["/trn " + self.username + ",0," + assertion]
-        await self.send_message("", message)
+        resp = await self.send_message("", message)
+        if resp is None:
+            print(f"`{self.username}` successfully logged in")
 
     async def leave_battle(self, battle_tag):
         message = ["/leave {}".format(battle_tag)]

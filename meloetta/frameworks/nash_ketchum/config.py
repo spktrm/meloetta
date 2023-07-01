@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from typing import Any, Sequence
 
-from meloetta.frameworks.nash_ketchum.model import config
+from meloetta.frameworks.nash_ketchum.modelv2 import config
 from meloetta.frameworks.nash_ketchum import utils
 
 
@@ -24,6 +24,7 @@ class AdamConfig:
     b1: float = 0.0
     b2: float = 0.999
     eps: float = 10e-8
+    weight_decay: float = 1e-5
 
 
 @dataclass
@@ -45,21 +46,22 @@ class NAshKetchumConfig:
     # The config related to the ADAM optimizer used for updating `params`.
     adam: AdamConfig = AdamConfig()
     # All gradients values are clipped to [-clip_gradient, clip_gradient].
-    clip_gradient: float = 10000
+    clip_gradient: float = 10_000
     # The "speed" at which `params_target` is following `params`.
     target_network_avg: float = 1e-3
 
     # RNaD algorithm configuration.
     # Entropy schedule configuration. See EntropySchedule class documentation.
     entropy_schedule_repeats: Sequence[int] = (
-        10,
-        9,
+        # 10,
+        # 9,
         1,
     )
     entropy_schedule_size: Sequence[int] = (
-        100,
+        # 100,
         1000,
-        10000,
+        # 10000,
+        # 25000,
     )
     # The weight of the reward regularisation term in RNaD.
     eta_reward_transform: float = 0.2
@@ -70,7 +72,7 @@ class NAshKetchumConfig:
     c_vtrace: float = 1.0
     rho_vtrace: float = torch.inf
 
-    trajectory_length: int = 768
+    trajectory_length: int = 1024
 
     battle_format: str = "gen9randombattle"
     # battle_format: str = "gen3randombattle"
@@ -93,17 +95,17 @@ class NAshKetchumConfig:
     learner_device: str = "cuda"
 
     debug_mode = False
-    eval_mode = False
+    eval_mode = not debug_mode
 
     # This config will spawn 20 workers with 2 players each
     # for a total of 40 players, playing 20 games.
     # it is recommended to have an even number of players per worker
     num_actors: int = 1 if debug_mode else 12
-    num_buffers: int = max(4 * num_actors, 2 * batch_size)
+    num_buffers: int = 64
 
     model_config: config.NAshKetchumModelConfig = config.NAshKetchumModelConfig()
 
-    eval: bool = (not debug_mode) or eval_mode
+    eval: bool = (not debug_mode) and eval_mode
 
     def __getindex__(self, key: str):
         return self.__dict__[key]

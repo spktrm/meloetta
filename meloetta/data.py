@@ -5,6 +5,8 @@ import numpy as np
 from copy import deepcopy
 from typing import Dict, Any
 
+from collections import OrderedDict
+
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = f"{ROOT_DIR}/js/data"
 
@@ -65,7 +67,7 @@ def load_feature_embedding(type: str, gen: int):
 
 
 Schema = Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]
-with open("meloetta/pretrained/schema.json", "r") as f:
+with open(os.path.join("meloetta/pretrained/schema.json"), "r") as f:
     schema: Schema = json.loads(f.read())
 
 TOKENIZED_SCHEMA = deepcopy(schema)
@@ -118,8 +120,8 @@ def get_item_token(gen: int, key: int, value: Any):
     return lookup.get(value, -1)
 
 
-GENDERS = {"M": 0, "F": 1, "N": 2}
-STATUS = {"par": 0, "psn": 1, "frz": 2, "slp": 3, "brn": 4}
+GENDERS = OrderedDict({"M": 0, "F": 1, "N": 2})
+STATUS = OrderedDict({"par": 0, "psn": 1, "frz": 2, "slp": 3, "brn": 4})
 
 
 def get_gender_token(value: str):
@@ -134,21 +136,21 @@ with open(f"{ROOT_DIR}/pretrained/wsnc.json", "r") as f:
     WSNC = json.loads(f.read())
 
 VOLATILES = WSNC["volatiles"]
-VOLATILES = {v: i for i, v in enumerate(VOLATILES)}
+VOLATILES = OrderedDict({v: i for i, v in enumerate(VOLATILES)})
 
 WEATHERS = WSNC["weathers"]
-WEATHERS = {v: i for i, v in enumerate(WEATHERS)}
+WEATHERS = OrderedDict({v: i for i, v in enumerate(WEATHERS)})
 
 PSEUDOWEATHERS = WSNC["pseudoweather"]
 TERRAIN = WSNC["terrain"]
-PSEUDOWEATHERS = {v: i for i, v in enumerate(PSEUDOWEATHERS + TERRAIN)}
+PSEUDOWEATHERS = OrderedDict({v: i for i, v in enumerate(PSEUDOWEATHERS + TERRAIN)})
 
 ITEM_EFFECTS = WSNC["item_effects"]
-ITEM_EFFECTS = {v: i for i, v in enumerate(ITEM_EFFECTS) if v}
+ITEM_EFFECTS = OrderedDict({v: i for i, v in enumerate(ITEM_EFFECTS) if v})
 
 
 SIDE_CONDITIONS = WSNC["side_conditions"]
-SIDE_CONDITIONS = {v: i for i, v in enumerate(SIDE_CONDITIONS) if v}
+SIDE_CONDITIONS = OrderedDict({v: i for i, v in enumerate(SIDE_CONDITIONS) if v})
 
 
 def get_item_effect_token(name: str):
@@ -169,22 +171,28 @@ def get_side_condition_token(name: str):
 
 # Choice related
 
-CHOICE_TOKENS = {
-    "move": 0,
-    "switch": 1,
-}
+CHOICE_TOKENS = OrderedDict(
+    {
+        "move": 0,
+        "switch": 1,
+    }
+)
 
-CHOICE_FLAGS = {
-    "mega": 0,
-    "zmove": 1,
-    "dynamax": 2,
-    "max": 2,
-    "terastallize": 3,
-}
+CHOICE_FLAGS = OrderedDict(
+    {
+        "mega": 0,
+        "zmove": 1,
+        "dynamax": 2,
+        "max": 2,
+        "terastallize": 3,
+    }
+)
 
 CHOICE_TARGETS = list(range(-3, 3))
 CHOICE_TARGETS.remove(0)
-CHOICE_TARGETS = {str(target): i for i, target in enumerate(CHOICE_TARGETS)}
+CHOICE_TARGETS = OrderedDict(
+    {str(target): i for i, target in enumerate(CHOICE_TARGETS)}
+)
 
 
 def get_choice_flag_token(name: str):
@@ -210,10 +218,5 @@ _STATE_FIELDS = {
     "scalars",
     "prev_choices",
     "choices_done",
-    "action_type_mask",
-    "move_mask",
-    "max_move_mask",
-    "switch_mask",
-    "flag_mask",
-    "target_mask",
+    "action_mask",
 }

@@ -14,14 +14,14 @@ from meloetta.data import GMAX_MOVES
 from meloetta.room import BattleRoom
 
 
-from transformers import AutoTokenizer, AutoModel
+# from transformers import AutoTokenizer, AutoModel
 
 # model_id = "princeton-nlp/sup-simcse-roberta-large"
-model_id = "dmis-lab/biobert-v1.1"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModel.from_pretrained(model_id)
-model = model.eval()
+# model_id = "dmis-lab/biobert-v1.1"
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# tokenizer = AutoTokenizer.from_pretrained(model_id)
+# model = AutoModel.from_pretrained(model_id)
+# model = model.eval()
 # model = model.to(device)
 
 
@@ -98,10 +98,11 @@ def get_schema(data: dict):
 
     for key in schema:
         for sample in data.values():
-            schema[key].add(json.dumps(get_nested(sample, key)))
+            value = json.dumps(get_nested(sample, key))
+            schema[key].add(value)
 
     schema = dict(sorted(schema.items()))
-    return {key: sorted(value) for key, value in schema.items() if len(value) > 1}
+    return {key: list(sorted(value)) for key, value in schema.items() if len(value) > 1}
 
 
 class Dex(ABC):
@@ -122,7 +123,7 @@ class Dex(ABC):
         if func.__name__ == "one_hot_enc":
             num = len(schema)
             value = schema.index(json.dumps(value))
-            return func(value, num)
+            return func(int(value), num)
         elif "bin_enc" in func.__name__:
             value = value or 0
             num = max(list(map(lambda x: int(float(x)) if x != "null" else 0, schema)))
@@ -131,8 +132,8 @@ class Dex(ABC):
         elif "log_enc" in func.__name__:
             return func(value)
         elif func.__name__ == "sqrt_one_hot_enc":
-            num = max(list(map(lambda x: int(x), schema)))
-            num = int(np.sqrt(num))
+            num = max(list(map(lambda x: int(float(x)), schema)))
+            num = int(np.sqrt(num)) + 1
             value = int(np.sqrt(value))
             return func(value, num)
         elif func.__name__ == "bow_enc":
@@ -174,20 +175,20 @@ class Dex(ABC):
 
 class Pokedex(Dex):
     FEATURES = {
-        "id": one_hot_enc,
+        # "id": one_hot_enc,
         # "baseSpecies": one_hot_enc,
         "formeid": one_hot_enc,
         "types": bow_enc,
-        "evos": lambda v: one_hot_enc(int(True if v else False), 2),
+        "evos": lambda v: np.array([1]) if v else np.array([0]),
         # "abilities.S": one_hot_enc,
-        "baseStats.hp": z_score,
-        "baseStats.atk": z_score,
-        "baseStats.def": z_score,
-        "baseStats.spa": z_score,
-        "baseStats.spd": z_score,
-        "baseStats.spe": z_score,
-        "bst": z_score,
-        "weightkg": z_score,
+        "baseStats.hp": sqrt_one_hot_enc,
+        "baseStats.atk": sqrt_one_hot_enc,
+        "baseStats.def": sqrt_one_hot_enc,
+        "baseStats.spa": sqrt_one_hot_enc,
+        "baseStats.spd": sqrt_one_hot_enc,
+        "baseStats.spe": sqrt_one_hot_enc,
+        "bst": sqrt_one_hot_enc,
+        "weightkg": sqrt_one_hot_enc,
         # "heightm": bin_enc,
     }
 
@@ -253,10 +254,8 @@ class Pokedex(Dex):
 
 class Movedex(Dex):
     FEATURES = {
-        "accuracy": lambda x: np.array([0, 1, int(x) / 100])
-        if x == True
-        else np.array([1, 0, 1]),
-        "basePower": z_score,
+        "basePower": one_hot_enc,
+        "accuracy": one_hot_enc,
         "category": one_hot_enc,
         "critRatio": one_hot_enc,
         "flags.allyanim": single_enc,
@@ -461,6 +460,7 @@ def main():
                 data = torch.cat((torch.zeros_like(data[0]).unsqueeze(0), data), dim=0)
                 names = [None] + [sample["name"] for sample in samples]
             except:
+                print(feature)
                 traceback.print_exc()
             else:
                 schema[f"gen{gen}"][dex_name] = deepcopy(dex.raw_schema)

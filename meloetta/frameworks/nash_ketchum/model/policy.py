@@ -1,21 +1,118 @@
 import torch
 import torch.nn as nn
 
-from typing import Tuple
+from typing import Union
+from collections import OrderedDict
 
+from meloetta.actors.types import TensorDict
 from meloetta.frameworks.nash_ketchum.model import config
-from meloetta.frameworks.nash_ketchum.model.interfaces import (
-    EncoderOutput,
-    Indices,
-    Policy,
-    State,
+from meloetta.frameworks.nash_ketchum.model.utils import (
+    MLP,
+    Resnet,
+    VectorMerge,
+    _legal_policy,
+    _multinomial,
 )
-from meloetta.frameworks.nash_ketchum.model.heads import (
-    ActionTypeHead,
-    MoveHead,
-    FlagsHead,
-    SwitchHead,
-)
+
+
+class FunctionHead(nn.Module):
+    def __init__(
+        self,
+        gen: int,
+        gametype: str,
+        name: str,
+        config: Union[config.ActionTypeHeadConfig, config.FlagHeadConfig],
+    ):
+        super().__init__()
+
+        self.name = name
+        self.config = config
+        self.gametype = gametype
+        self.gen = gen
+
+        self.resnet = Resnet(config.input_dim, config.num_layers_resnet)
+        self.logits = MLP(
+            [config.input_dim for _ in range(config.num_layers_mlp)]
+            + [config.num_actions]
+        )
+        self.embedding = nn.Embedding(config.num_actions, config.input_dim)
+        self.merge = VectorMerge(
+            OrderedDict(state=config.input_dim, action=config.input_dim),
+            config.input_dim,
+        )
+
+    def forward(
+        self,
+        state_embedding: torch.Tensor,
+        mask: torch.Tensor,
+        action: torch.Tensor = None,
+    ) -> TensorDict:
+        state_embedding_ = self.resnet(state_embedding)
+        action_logits = self.logits(state_embedding_)
+        action_policy = _legal_policy(action_logits, mask)
+        if action is None:
+            action = _multinomial(action_policy)
+        action_embedding = self.embedding(action)
+        state_action_embedding = self.merge(
+            OrderedDict(state=state_embedding, action=action_embedding)
+        )
+        return OrderedDict(
+            {
+                f"{self.name}_logits": action_logits,
+                f"{self.name}_policy": action_policy,
+                f"{self.name}_index": action,
+                "state_embedding": state_action_embedding,
+            }
+        )
+
+
+class EmbeddingSelectHead(nn.Module):
+    def __init__(
+        self,
+        gen: int,
+        gametype: str,
+        name: str,
+        config: Union[config.MoveHeadConfig, config.SwitchHeadConfig],
+    ):
+        super().__init__()
+
+        self.name = name
+        self.config = config
+        self.gametype = gametype
+        self.gen = gen
+
+        self.resnet = Resnet(config.input_dim, config.num_layers_resnet)
+        self.query_mlp = MLP(
+            [config.query_dim for _ in range(config.num_layers_query)]
+            + [config.key_dim]
+        )
+        self.keys_mlp = MLP(
+            [config.key_dim for _ in range(config.num_layers_key)] + [config.key_dim]
+        )
+        self.denom = config.key_dim**0.5
+
+    def forward(
+        self,
+        state_embedding: torch.Tensor,
+        entity_embeddings: torch.Tensor,
+        mask: torch.Tensor,
+        action: torch.Tensor = None,
+    ) -> TensorDict:
+        state_embedding_ = self.resnet(state_embedding)
+        query = self.query_mlp(state_embedding_).unsqueeze(-2)
+        keys = self.keys_mlp(entity_embeddings)
+        action_logits = keys @ query.transpose(-2, -1)
+        action_logits = (action_logits / self.denom).squeeze(-1)
+        action_policy = _legal_policy(action_logits, mask)
+        if action is None:
+            action = _multinomial(action_policy)
+        return OrderedDict(
+            {
+                f"{self.name}_logits": action_logits,
+                f"{self.name}_policy": action_policy,
+                f"{self.name}_index": action,
+            }
+        )
 
 
 class PolicyHeads(nn.Module):
@@ -26,136 +123,54 @@ class PolicyHeads(nn.Module):
         self.gametype = gametype
         self.gen = gen
 
-        self.action_type_head = ActionTypeHead(config.action_type_head_config)
-        self.move_head = MoveHead(config.move_head_config)
-        self.switch_head = SwitchHead(config.switch_head_config)
-
-        if gen == 8:
-            self.max_move_head = MoveHead(config.move_head_config)
-
-        if gen >= 6:
-            self.flag_head = FlagsHead(config.flag_head_config)
-
-        # if gametype != "singles":
-        #     self.target_head = PolicyHead(config.target_head_config)
+        self.action_type_head = FunctionHead(
+            gen, gametype, "action_type", config.action_type_head_config
+        )
+        self.flag_head = FunctionHead(gen, gametype, "flag", config.flag_head_config)
+        self.move_head = EmbeddingSelectHead(
+            gen, gametype, "move", config.move_head_config
+        )
+        self.switch_head = EmbeddingSelectHead(
+            gen, gametype, "switch", config.switch_head_config
+        )
 
     def forward(
         self,
-        state_emb: torch.Tensor,
-        encoder_output: EncoderOutput,
-        state: State,
-        indices: Indices = None,
-    ) -> Tuple[Indices, Policy, Policy]:
-
-        moves = encoder_output.moves.squeeze(2)
-        switches = encoder_output.switches
-
-        if not indices:
-            indices = Indices()
-
-        (
-            action_type_logits,
-            action_type_policy,
-            action_type_index,
-            autoregressive_embedding,
-        ) = self.action_type_head(
-            state_emb,
-            state["action_type_mask"],
-            indices.action_type_index,
+        state_embedding: torch.Tensor,
+        encoder_output: TensorDict,
+        state: TensorDict,
+    ) -> TensorDict:
+        action_type = self.action_type_head(
+            state_embedding,
+            state.get("action_type_mask"),
+            state.get("action_type_index"),
+        )
+        flag = self.flag_head(
+            action_type["state_embedding"],
+            state.get("flag_mask"),
+            state.get("flag_index"),
         )
 
-        (
-            move_logits,
-            move_policy,
-            move_index,
-            autoregressive_embedding,
-        ) = self.move_head(
-            action_type_index,
-            autoregressive_embedding,
-            moves,
-            state["move_mask"],
-            indices.move_index,
+        move = self.move_head(
+            flag["state_embedding"],
+            encoder_output["active_move_embeddings"],
+            state.get("move_mask"),
+            state.get("move_index"),
+        )
+        switch = self.switch_head(
+            action_type["state_embedding"],
+            encoder_output["switch_embeddings"],
+            state.get("switch_mask"),
+            state.get("switch_index"),
         )
 
-        (
-            switch_logits,
-            switch_policy,
-            switch_index,
-            autoregressive_embedding,
-        ) = self.switch_head(
-            action_type_index,
-            autoregressive_embedding,
-            switches,
-            state["switch_mask"],
-            indices.switch_index,
+        state_action_type_embedding = action_type.pop("state_embedding")
+        state_flag_embedding = flag.pop("state_embedding")
+        return OrderedDict(
+            **action_type,
+            **flag,
+            **move,
+            **switch,
+            state_action_type_embedding=state_action_type_embedding,
+            state_flag_embedding=state_flag_embedding,
         )
-
-        if self.gen >= 6:
-            (
-                flag_logits,
-                flag_policy,
-                flag_index,
-                autoregressive_embedding,
-            ) = self.flag_head(
-                action_type_index,
-                autoregressive_embedding,
-                state["flag_mask"],
-                indices.flag_index,
-            )
-        else:
-            flag_logits = None
-            flag_policy = None
-            flag_index = None
-
-        if self.gen == 8:
-            max_move_logits, max_move_policy, max_move_index = self.max_move_head(
-                action_type_index,
-                autoregressive_embedding,
-                moves,
-                state["max_move_mask"],
-                indices.max_move_index,
-            )
-        else:
-            max_move_index = None
-            max_move_logits = None
-            max_move_policy = None
-
-        if self.gametype != "singles":
-            target_logits, target_policy, target_index = self.target_head(
-                state["prev_choices"],
-                moves,
-                switches,
-                action_type_index,
-                indices.target_index,
-            )
-        else:
-            target_index = None
-            target_logits = None
-            target_policy = None
-
-        indices = Indices(
-            action_type_index=action_type_index,
-            move_index=move_index,
-            max_move_index=max_move_index,
-            switch_index=switch_index,
-            flag_index=flag_index,
-            target_index=target_index,
-        )
-        logits = Policy(
-            action_type=action_type_logits,
-            move=move_logits,
-            max_move=max_move_logits,
-            switch=switch_logits,
-            flag=flag_logits,
-            target=target_logits,
-        )
-        policy = Policy(
-            action_type=action_type_policy,
-            move=move_policy,
-            max_move=max_move_policy,
-            switch=switch_policy,
-            flag=flag_policy,
-            target=target_policy,
-        )
-
-        return indices, logits, policy, autoregressive_embedding

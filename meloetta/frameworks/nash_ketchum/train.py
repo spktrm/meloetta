@@ -14,7 +14,8 @@ from meloetta.workers import SelfPlayWorker, EvalWorker
 
 from meloetta.frameworks.random import RandomActor
 from meloetta.frameworks.max_damage import MaxDamageActor
-from meloetta.frameworks.nash_ketchum import NAshKetchumActor, NAshKetchumLearner
+from meloetta.frameworks.nash_ketchum.actor import NAshKetchumActor
+from meloetta.frameworks.nash_ketchum.learner import NAshKetchumLearner
 
 
 def start_frame_monitor(queue: mp.Queue):
@@ -66,6 +67,46 @@ def main(fpath: str = None, latest: bool = False):
     maxdmg_actor = MaxDamageActor
 
     procs: List[mp.Process] = []
+    threads: List[threading.Thread] = []
+
+    frame_monitor_thread = threading.Thread(
+        target=start_frame_monitor, args=(learner.replay_buffer.finish_queue,)
+    )
+    frame_monitor_thread.start()
+    threads.append(frame_monitor_thread)
+
+    for i in range(1):
+        learner_thread = threading.Thread(
+            target=learner.run,
+            name=f"Learning Thread{i}",
+        )
+        threads.append(learner_thread)
+        learner_thread.start()
+
+    # if learner.config.debug_mode:
+    num_players = 2
+    # else:
+    #     num_players = max(learner.config.batch_size // learner.config.num_actors, 2)
+
+    for i in range(learner.config.num_actors):
+        worker = SelfPlayWorker(
+            worker_index=i,
+            num_players=num_players,  # 2 is players per worker
+            battle_format=learner.config.battle_format,
+            team=learner.config.team,
+            actor_fn=main_actor,
+            actor_kwargs={
+                "model": learner.actor_model,
+                "replay_buffer": learner.replay_buffer,
+            },
+        )
+
+        process = mp.Process(
+            target=worker.run,
+            name=repr(worker) + str(i),
+        )
+        process.start()
+        procs.append(process)
 
     if learner.config.eval:
         evals = [
@@ -94,53 +135,10 @@ def main(fpath: str = None, latest: bool = False):
                 eval_actor_fn=main_actor,
                 eval_actor_kwargs={
                     "model": learner.actor_model,
-                    # "replay_buffer": learner.replay_buffer,
                 },
                 baseline_actor_fn=opponent_actor,
                 baseline_actor_args=opponent_actor_args,
             )
-            process = mp.Process(
-                target=worker.run,
-                name=repr(worker) + str(i),
-            )
-            process.start()
-            procs.append(process)
-
-    threads: List[threading.Thread] = []
-
-    frame_monitor_thread = threading.Thread(
-        target=start_frame_monitor, args=(learner.replay_buffer.finish_queue,)
-    )
-    frame_monitor_thread.start()
-    threads.append(frame_monitor_thread)
-
-    if not learner.config.eval_mode:
-        for i in range(1):
-            learner_thread = threading.Thread(
-                target=learner.run,
-                name=f"Learning Thread{i}",
-            )
-            threads.append(learner_thread)
-            learner_thread.start()
-
-        if learner.config.debug_mode:
-            num_players = 2
-        else:
-            num_players = max(learner.config.batch_size // learner.config.num_actors, 2)
-
-        for i in range(learner.config.num_actors):
-            worker = SelfPlayWorker(
-                worker_index=i,
-                num_players=num_players,  # 2 is players per worker
-                battle_format=learner.config.battle_format,
-                team=learner.config.team,
-                actor_fn=main_actor,
-                actor_kwargs={
-                    "model": learner.actor_model,
-                    "replay_buffer": learner.replay_buffer,
-                },
-            )
-
             process = mp.Process(
                 target=worker.run,
                 name=repr(worker) + str(i),
@@ -164,7 +162,7 @@ def main(fpath: str = None, latest: bool = False):
 if __name__ == "__main__":
     mp.set_start_method("spawn")
 
-    # fpath = "cpkts/cpkt-101000.tar"
+    # fpath = "cpkts/cpkt-00010000.tar"
     # main(fpath)
 
     # main(latest=True)
