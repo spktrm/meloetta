@@ -1,3 +1,4 @@
+import json
 import random
 
 import torch
@@ -7,9 +8,17 @@ from meloetta.actors.types import State, Choices
 from meloetta.embeddings import MoveEmbedding
 
 
+with open("meloetta/pretrained/schema.json", "r") as f:
+    schema = json.load(f)
+
+
 class MaxDamageModel(nn.Module):
     def __init__(self, gen: int):
         super().__init__()
+
+        self.schema = schema[f"gen{gen}"]
+        self.offset = len(self.schema["movedex"]["basePower"])
+        self.basePowers = torch.tensor(self.schema["movedex"]["basePower"])
         self.move_embedding = MoveEmbedding(gen=gen)
 
     def forward(
@@ -31,7 +40,8 @@ class MaxDamageModel(nn.Module):
                 move_tokens = moves[..., 0]
                 move_names = self.move_embedding.get_name(move_tokens)
                 moves_emb = self.move_embedding(move_tokens)
-                moves_basepower = moves_emb[..., 3].squeeze()
+                moves_basepower = moves_emb[..., : self.offset].squeeze()
+                moves_basepower = (moves_basepower * self.basePowers).max(-1).values
                 moves_basepower = torch.masked_fill(
                     moves_basepower, ~state["move_mask"].squeeze(), -1
                 )

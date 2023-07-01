@@ -3,12 +3,38 @@ import math
 import numpy as np
 
 import torch
+from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 
-from typing import Optional, Sequence, Mapping, Dict
+from typing import Optional, Sequence, Mapping, Dict, List
 
 BIAS = -1e4
+USE_LAYER_NORM = True
+
+
+def layer_init(
+    layer: nn.Module, std: float = np.sqrt(2), bias_const: float = 0.0
+) -> nn.Module:
+    torch.nn.init.orthogonal_(layer.weight, std)
+    torch.nn.init.constant_(layer.bias, bias_const)
+    return layer
+
+
+def linear_layer(
+    in_features: int,
+    out_features: int,
+    bias: bool = True,
+    mean: float = 0.0,
+    std: float = None,
+    bias_const: float = 0.0,
+) -> nn.Linear:
+    layer = nn.Linear(in_features, out_features, bias=bias)
+    if std is None:
+        std = 1 / math.sqrt(in_features)
+    nn.init.trunc_normal_(layer.weight, mean=mean, std=std)
+    nn.init.constant_(layer.bias, bias_const)
+    return layer
 
 
 def binary_enc_matrix(num_embeddings: int):
@@ -31,11 +57,14 @@ def power_one_hot_matrix(num_embeddings: int, power: float):
     return F.one_hot(i, torch.max(i) + 1).to(torch.float)
 
 
-def _legal_policy(logits: torch.Tensor, legal_actions: torch.Tensor) -> torch.Tensor:
+def _legal_policy(
+    logits: torch.Tensor, legal_actions: torch.Tensor = None
+) -> torch.Tensor:
     """A soft-max policy that respects legal_actions."""
     # Fiddle a bit to make sure we don't generate NaNs or Inf in the middle.
-    masked_logits = torch.where(legal_actions, logits, float("-inf"))
-    return masked_logits.softmax(-1)
+    if legal_actions is not None:
+        logits = torch.where(legal_actions, logits, float("-inf"))
+    return logits.softmax(-1)
 
 
 def _multinomial(dist: torch.Tensor) -> torch.Tensor:
@@ -46,18 +75,22 @@ def _multinomial(dist: torch.Tensor) -> torch.Tensor:
     - The current version of torch is bugged for multinomial and selects invalid indices with a very small prob.
     - numpy is significantly faster at the operation, even on the cpu
     """
-    np_dist = dist.cpu().view(-1).numpy().astype(np.float64)
-    np_dist = np_dist / sum(np_dist)
-    index = np.random.multinomial(1, np_dist)
-    index = index.argmax(-1)
-    index = torch.tensor(index)
-    return index
+    og_shape = dist.shape
+    np_dist = dist.cpu().flatten(0, -2).numpy().astype(np.float64)
+    np_dist = np_dist / np_dist.sum(-1, keepdims=True)
+    outs = []
+    for i in range(np_dist.shape[0]):
+        index = np.random.multinomial(1, np_dist[i])
+        index = index.argmax(-1)
+        index = torch.tensor(index)
+        outs.append(index)
+    return torch.stack(outs).view(*og_shape[:-1])
 
 
 def _log_policy(logits: torch.Tensor, legal_actions: torch.Tensor) -> torch.Tensor:
     log_policy = torch.where(legal_actions, logits, float("-inf"))
     log_policy = log_policy.log_softmax(-1)
-    log_policy = torch.masked_fill(log_policy, ~legal_actions, 0)
+    log_policy = torch.where(legal_actions, log_policy, 0)
     return log_policy
 
 
@@ -80,53 +113,65 @@ def gather_along_rows(
 
 
 class MLP(nn.Module):
-    def __init__(self, layer_sizes: Sequence[int], use_layer_norm: bool = True):
-        super().__init__()
-        self.mlp = nn.Sequential(
-            *[
-                nn.Sequential(
-                    *(
-                        ([nn.LayerNorm(in_features)] if use_layer_norm else [])
-                        + [nn.ReLU(), nn.Linear(in_features, out_features)]
-                    )
-                )
-                for in_features, out_features, in zip(layer_sizes, layer_sizes[1:])
-            ]
-        )
-
-    def forward(self, x: torch.Tensor):
-        return self.mlp(x)
-
-
-class GLU(nn.Module):
-    def __init__(self, input_dim: int, output_dim: int, context_dim: int):
-        super().__init__()
-        self.lin1 = MLP([context_dim, input_dim])
-        self.lin2 = MLP([input_dim, output_dim])
-
-    def forward(self, x: torch.Tensor, context: torch.Tensor):
-        gate = self.lin1(context)
-        gate = torch.sigmoid(gate)
-        x = gate * x
-        x = self.lin2(x)
-        return x
-
-
-class Resblock(nn.Module):
     def __init__(
         self,
-        hidden_size: int,
+        layer_sizes: Sequence[int],
+        use_layer_norm: bool = USE_LAYER_NORM,
+    ):
+        super().__init__()
+        layers = []
+        for (
+            in_features,
+            out_features,
+        ) in zip(layer_sizes, layer_sizes[1:]):
+            lin = linear_layer(in_features, out_features)
+            hiddens = [nn.ReLU(), lin]
+            if use_layer_norm:
+                hiddens.insert(0, nn.LayerNorm(in_features))
+            layers += hiddens
+
+        self.network = nn.Sequential(*layers)
+
+    def forward(self, x: torch.Tensor):
+        return self.network(x)
+
+
+class VectorResblock(nn.Module):
+    def __init__(
+        self,
+        input_size: int,
+        hidden_size: int = None,
         num_layers: int = 2,
-        use_layer_norm: bool = True,
+        use_layer_norm: bool = USE_LAYER_NORM,
     ) -> None:
         super().__init__()
 
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.use_layer_norm = use_layer_norm
+
         layers = []
-        for _ in range(num_layers):
-            hiddens = [nn.ReLU(), nn.Linear(hidden_size, hidden_size)]
+        hidden_size = input_size
+        for i in range(num_layers):
+            if i < num_layers - 1:
+                output_size = self.hidden_size or input_size
+            else:
+                output_size = input_size
+
+            lin = nn.Linear(hidden_size, output_size)
+            nn.init.normal_(lin.weight, std=5e-3)
+            nn.init.constant_(lin.bias, val=0.0)
+
+            hiddens = [nn.ReLU(), lin]
             if use_layer_norm:
-                hiddens = [nn.LayerNorm(hidden_size)] + hiddens
-            layers.append(nn.Sequential(*hiddens))
+                hiddens.insert(0, nn.LayerNorm(hidden_size))
+
+            hidden_size = output_size
+
+            mod = nn.Sequential(*hiddens)
+            layers.append(mod)
+
         self.layers = nn.ModuleList(layers)
 
     def forward(self, x: torch.Tensor):
@@ -136,10 +181,23 @@ class Resblock(nn.Module):
         return x + shortcut
 
 
+class Resnet(nn.Module):
+    def __init__(self, input_size: int, num_layers: int):
+        super().__init__()
+
+        self.resblocks = nn.ModuleList(
+            [VectorResblock(input_size) for _ in range(num_layers)]
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        for resblock in self.resblocks:
+            x = resblock(x)
+        return x
+
+
 class MultiHeadAttention(nn.Module):
     def __init__(
         self,
-        input_size: int,
         num_heads: int,
         key_size: int,
         value_size: int = None,
@@ -151,15 +209,21 @@ class MultiHeadAttention(nn.Module):
         self.key_size = key_size
         value_size = value_size or key_size
         model_size = model_size or key_size * num_heads
+
         self.value_size = value_size
         self.model_size = model_size
 
-        self.lin_q = nn.Linear(input_size, num_heads * key_size)
-        self.lin_k = nn.Linear(input_size, num_heads * key_size)
-        self.lin_v = nn.Linear(input_size, num_heads * value_size)
-        self.lin_out = nn.Linear(num_heads * value_size, model_size)
+        denom = 0.87962566103423978
+        qkv_std = (1 / math.sqrt(model_size)) / denom
 
-        self.attn_denom = key_size**0.5
+        self.lin_q = linear_layer(model_size, num_heads * key_size, std=qkv_std)
+        self.lin_k = linear_layer(model_size, num_heads * key_size, std=qkv_std)
+        self.lin_v = linear_layer(model_size, num_heads * value_size, std=qkv_std)
+
+        out_std = (1 / math.sqrt(num_heads * value_size)) / denom
+        self.lin_out = linear_layer(num_heads * value_size, model_size, std=out_std)
+
+        self.attn_denom = math.sqrt(key_size)
 
     def _linear_projection(
         self, x: torch.Tensor, layer: nn.Module, head_size: int
@@ -210,9 +274,8 @@ class TransformerLayer(nn.Module):
         transformer_num_heads: int,
         transformer_key_size: int,
         transformer_value_size: int,
-        input_size: int,
         model_size: int,
-        use_layer_norm: bool = True,
+        use_layer_norm: bool = USE_LAYER_NORM,
     ) -> None:
         super().__init__()
         self._use_layer_norm = use_layer_norm
@@ -223,7 +286,6 @@ class TransformerLayer(nn.Module):
             key_size=transformer_key_size,
             value_size=transformer_value_size,
             model_size=model_size,
-            input_size=input_size,
         )
 
     def forward(self, x: torch.Tensor, mask: torch.Tensor):
@@ -253,9 +315,8 @@ class TransformerEncoder(nn.Module):
         resblocks_num_before: int,
         resblocks_num_after: int,
         resblocks_hidden_size: Optional[int] = None,
-        use_layer_norm: bool = True,
+        use_layer_norm: bool = USE_LAYER_NORM,
     ):
-
         super().__init__()
         self._transformer_num_layers = num_layers
         self._transformer_num_heads = num_heads
@@ -265,13 +326,23 @@ class TransformerEncoder(nn.Module):
         if resblocks_hidden_size is None:
             resblocks_hidden_size = model_size
 
+        self._resblocks_before = nn.ModuleList(
+            [
+                VectorResblock(
+                    input_size=model_size,
+                    hidden_size=resblocks_hidden_size,
+                    use_layer_norm=use_layer_norm,
+                )
+                for i in range(resblocks_num_before)
+            ]
+        )
+
         self._transformer_layers = nn.ModuleList(
             [
                 TransformerLayer(
                     num_heads,
                     key_size,
                     value_size,
-                    input_size=resblocks_hidden_size,
                     model_size=model_size,
                     use_layer_norm=use_layer_norm,
                 )
@@ -279,22 +350,14 @@ class TransformerEncoder(nn.Module):
             ]
         )
 
-        self._resblocks_before = nn.ModuleList(
-            [
-                Resblock(
-                    hidden_size=resblocks_hidden_size,
-                    use_layer_norm=use_layer_norm,
-                )
-                for _ in range(resblocks_num_before)
-            ]
-        )
         self._resblocks_after = nn.ModuleList(
             [
-                Resblock(
+                VectorResblock(
+                    input_size=model_size,
                     hidden_size=resblocks_hidden_size,
                     use_layer_norm=use_layer_norm,
                 )
-                for _ in range(resblocks_num_after)
+                for i in range(resblocks_num_after)
             ]
         )
 
@@ -324,22 +387,19 @@ class ToVector(nn.Module):
         input_dim: int,
         hidden_dim: int,
         output_dim: int,
-        use_layer_norm: bool = True,
     ):
         super().__init__()
 
-        self.mlp = MLP([input_dim, hidden_dim])
-        self.out = nn.Sequential(
-            *(
-                ([nn.LayerNorm(hidden_dim)] if use_layer_norm else [])
-                + [nn.ReLU(), nn.Linear(hidden_dim, output_dim)]
-            )
-        )
+        self.hidden = MLP([input_dim, hidden_dim])
+        self.gate = MLP([input_dim, hidden_dim])
+        self.out = MLP([hidden_dim, output_dim])
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.mlp(x)
-        # x = torch.cat((x[..., :1, :].mean(1), x[..., 1:, :].mean(1)), dim=-1)
-        x = x.mean(1)
+    def forward(self, x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+        gate = self.gate(x)
+        x = self.hidden(x)
+        masked_gate = torch.where(mask.unsqueeze(-1), gate, float("-inf"))
+        masked_gate = masked_gate.softmax(-2)
+        x = (x * masked_gate).sum(1)
         return self.out(x)
 
 
@@ -349,57 +409,67 @@ class VectorMerge(nn.Module):
         input_sizes: Mapping[str, Optional[int]],
         output_size: int,
         gating_type: str = "none",
-        use_layer_norm: bool = True,
-        name: Optional[str] = None,
+        use_layer_norm: bool = USE_LAYER_NORM,
     ):
         super().__init__()
 
         if not input_sizes:
             raise ValueError("input_names cannot be empty")
+
         self._input_sizes = input_sizes
         self._output_size = output_size
         self._gating_type = gating_type
         self._use_layer_norm = use_layer_norm
-        self._input_dtypes = {}
+
+        def _get_pre_layer(value):
+            layers = [nn.ReLU()]
+            if use_layer_norm:
+                layers.insert(0, nn.LayerNorm(value))
+            return nn.Sequential(*layers)
 
         self.pre_layers = nn.ModuleDict(
-            {
-                key: nn.Sequential(
-                    *(([nn.LayerNorm(value)] if use_layer_norm else []) + [nn.ReLU()])
-                )
-                for key, value in input_sizes.items()
-            }
+            {key: _get_pre_layer(value) for key, value in input_sizes.items()}
         )
         self.encoding_layers = nn.ModuleDict(
-            {key: nn.Linear(value, output_size) for key, value in input_sizes.items()}
-        )
-        self.gating_layers = nn.ModuleDict(
             {
-                key: nn.Linear(value, len(input_sizes) * value)
+                key: linear_layer(value, output_size)
                 for key, value in input_sizes.items()
             }
+        )
+
+        def _get_gating_layer(*args, **kwargs):
+            layer = nn.Linear(*args, **kwargs)
+            nn.init.normal_(layer.weight, std=5e-3)
+            nn.init.constant_(layer.bias, val=0)
+            return layer
+
+        self.gating_layers = nn.ModuleList(
+            [
+                _get_gating_layer(value, len(input_sizes) * value)
+                for _, value in input_sizes.items()
+            ]
         )
 
     def _compute_gate(
         self,
-        inputs_to_gate: Dict[str, torch.Tensor],
-        init_gate: Dict[str, torch.Tensor],
+        inputs_to_gate: List[torch.Tensor],
+        init_gate: List[torch.Tensor],
     ):
-        leading_dims = next(iter(inputs_to_gate.values())).shape[:2]
-        gate = {k: self.gating_layers[k](y) for k, y in init_gate.items()}
-        gate = sum(gate.values())
-        gate = gate.view(*leading_dims, len(inputs_to_gate), self._output_size)
+        leading_dims = inputs_to_gate[0].shape[:2]
+        gate = [self.gating_layers[i](y) for i, y in enumerate(init_gate)]
+        gate = sum(gate)
+        gate = gate.reshape(*leading_dims, len(inputs_to_gate), self._output_size)
         gate = torch.softmax(gate, dim=len(leading_dims))
-        gate = {k: gate[:, :, i] for i, (k, _) in enumerate(inputs_to_gate.items())}
+        gate = gate.chunk(len(init_gate), len(leading_dims))
         return gate
 
     def _encode(self, inputs: Dict[str, torch.Tensor]):
-        gate, outputs = {}, {}
+        gate, outputs = [], []
         for name, _ in self._input_sizes.items():
             feature = inputs[name]
             feature = self.pre_layers[name](feature)
-            gate[name] = feature
-            outputs[name] = self.encoding_layers[name](feature)
+            gate.append(feature)
+            outputs.append(self.encoding_layers[name](feature))
         return gate, outputs
 
     def forward(self, inputs: Dict[str, torch.Tensor]):
@@ -409,6 +479,6 @@ class VectorMerge(nn.Module):
             output = outputs[0]
         else:
             gate = self._compute_gate(outputs, gate)
-            data = [gate[k] * outputs[k] for k in inputs.keys()]
+            data = [g.squeeze(-2) * o for g, o in zip(gate, outputs)]
             output = sum(data)
         return output

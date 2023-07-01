@@ -332,7 +332,7 @@ def get_loss_v(
 ) -> torch.Tensor:
     """Define the loss function for the critic."""
     loss_v_list = []
-    for (v_n, v_target, mask) in zip(v_list, v_target_list, mask_list):
+    for v_n, v_target, mask in zip(v_list, v_target_list, mask_list):
         assert v_n.shape[0] == v_target.shape[0]
 
         loss_v = torch.unsqueeze(mask, dim=-1) * (v_n - v_target.detach()) ** 2

@@ -1,13 +1,17 @@
 import re
-import uuid
 import torch
+import torch.nn.functional as F
 
 from typing import Dict, List, Any, Sequence, NamedTuple, Tuple
 
-from functools import wraps
 from jax import tree_util as tree
 
+from meloetta.actors.types import TensorDict
 from meloetta.data import CHOICE_FLAGS
+
+
+def _get_leading_dims(tensor_dict: TensorDict) -> int:
+    return next(iter(tensor_dict.values())).shape[:2]
 
 
 class LoopVTraceCarry(NamedTuple):
@@ -149,14 +153,15 @@ def _policy_ratio(
 
 @torch.no_grad()
 def v_trace(
-    v: torch.Tensor,
+    v: Sequence[torch.Tensor],
+    policy_select: torch.Tensor,
     valid: torch.Tensor,
     policies_valid: Sequence[torch.Tensor],
     player_id: torch.Tensor,
     acting_policies: Sequence[torch.Tensor],
     merged_policies: Sequence[torch.Tensor],
     merged_log_policies: Sequence[torch.Tensor],
-    player_others: torch.Tensor,
+    player_other: torch.Tensor,
     actions_ohs: Sequence[torch.Tensor],
     reward: torch.Tensor,
     player: int,
@@ -197,28 +202,24 @@ def v_trace(
                 torch.ones_like(merged_policy), acting_policy, actions_oh, policy_valid
             )
         )
-        merged_log_policy = merged_log_policy * policy_valid.unsqueeze(-1)
         eta_reg_entropies.append(
             torch.sum(merged_policy * merged_log_policy, dim=-1)
-            * torch.squeeze(player_others, dim=-1)
+            * torch.squeeze(player_other, dim=-1)
         )
-        eta_log_policies.append(-eta * merged_log_policy * player_others)
+        eta_log_policies.append(-eta * merged_log_policy * player_other)
 
-    eta_reg_entropy = -eta * torch.sum(torch.stack(eta_reg_entropies, dim=-1), dim=-1)
+    eta_reg_entropy = torch.stack(eta_reg_entropies, dim=-1)
+    eta_reg_entropy = eta_reg_entropy * torch.stack(policies_valid, dim=-1)
+    eta_reg_entropy = -eta * torch.sum(eta_reg_entropy, dim=-1)
     policy_ratio = torch.prod(torch.stack(policy_ratios, dim=-1), dim=-1)
 
     init_state_v_trace = LoopVTraceCarry(
         reward=torch.zeros_like(reward[-1]),
         reward_uncorrected=torch.zeros_like(reward[-1]),
-        next_value=torch.zeros_like(v[-1]),
-        next_v_target=torch.zeros_like(v[-1]),
+        next_value=torch.zeros_like(v[0][-1]),
+        next_v_target=torch.zeros_like(v[0][-1]),
         importance_sampling=torch.ones_like(policy_ratio[-1]),
     )
-
-    actions_ohs = [
-        actions_oh * policy_valid.unsqueeze(-1)
-        for actions_oh, policy_valid in zip(actions_ohs, policies_valid)
-    ]
 
     def _loop_v_trace(carry: LoopVTraceCarry, x) -> Tuple[LoopVTraceCarry, Any]:
         (
@@ -316,6 +317,9 @@ def v_trace(
             (reset_carry, (reset_v_target, reset_learning_output)),
         )
 
+    v = torch.stack(v, dim=-1).squeeze()
+    v = (v * F.one_hot(policy_select, 4)).sum(-1, keepdim=True)
+
     _, (v_target, learning_output) = pytorch_scan(
         f=_loop_v_trace,
         init=init_state_v_trace,
@@ -351,32 +355,28 @@ def apply_force_with_threshold(
     return decision_outputs * clipped_force.detach()
 
 
-def renormalize(
-    loss: torch.Tensor, mask: torch.Tensor, normalization: torch.Tensor
-) -> torch.Tensor:
+def renormalize(loss: torch.Tensor, mask: torch.Tensor, denom: int) -> torch.Tensor:
     """The `normalization` is the number of steps over which loss is computed."""
     loss = torch.sum(loss * mask)
-    return loss / torch.sum(normalization).clamp(min=1)
+    return loss / denom
 
 
 def get_loss_v(
     v_list: Sequence[torch.Tensor],
     v_target_list: Sequence[torch.Tensor],
     mask_list: Sequence[torch.Tensor],
-    normalization: Sequence[torch.Tensor],
-) -> torch.Tensor:
+    scale_list: Sequence[int],
+) -> Sequence[torch.Tensor]:
     """Define the loss function for the critic."""
     loss_v_list = []
-    for (v_n, v_target, mask, norm) in zip(
-        v_list, v_target_list, mask_list, normalization
-    ):
+    for v_n, v_target, mask, scale in zip(v_list, v_target_list, mask_list, scale_list):
         assert v_n.shape[0] == v_target.shape[0]
 
         loss_v = torch.unsqueeze(mask, dim=-1) * (v_n - v_target.detach()) ** 2
-        loss_v = torch.sum(loss_v) / torch.sum(norm).clamp(min=1)
-
+        loss_v = torch.sum(loss_v) / scale
         loss_v_list.append(loss_v)
-    return sum(loss_v_list)
+
+    return loss_v_list
 
 
 def get_loss_nerd(
@@ -385,23 +385,17 @@ def get_loss_nerd(
     q_vr_list: Sequence[torch.Tensor],
     valid: torch.Tensor,
     player_ids: Sequence[torch.Tensor],
+    scale: Sequence[int],
     legal_actions: torch.Tensor,
     importance_sampling_correction: Sequence[torch.Tensor],
-    normalization: Sequence[torch.Tensor],
     clip: float = 100,
     threshold: float = 2,
-) -> torch.Tensor:
+) -> Sequence[torch.Tensor]:
     """Define the nerd loss."""
     assert isinstance(importance_sampling_correction, list)
     loss_pi_list = []
-    for k, (logit_pi, pi, q_vr, is_c, norm) in enumerate(
-        zip(
-            logit_list,
-            policy_list,
-            q_vr_list,
-            importance_sampling_correction,
-            normalization,
-        )
+    for k, (logit_pi, pi, q_vr, is_c) in enumerate(
+        zip(logit_list, policy_list, q_vr_list, importance_sampling_correction)
     ):
         assert logit_pi.shape[0] == q_vr.shape[0]
         # loss policy
@@ -421,9 +415,9 @@ def get_loss_nerd(
             threshold_center,
         )
         nerd_loss = torch.sum(legal_actions * force, dim=-1)
-        nerd_loss = -renormalize(nerd_loss, valid * (player_ids == k), norm)
+        nerd_loss = -renormalize(nerd_loss, valid * (player_ids == k), scale[k])
         loss_pi_list.append(nerd_loss)
-    return sum(loss_pi_list)
+    return loss_pi_list
 
 
 def get_gen_and_gametype(battle_format: str) -> Tuple[int, str]:
@@ -466,7 +460,7 @@ def get_buffer_specs(
 
     buffer_specs = {
         "sides": {
-            "size": (trajectory_length, 3, 12, 37),
+            "size": (trajectory_length, 3, 12, 38),
             "dtype": torch.long,
         },
         "boosts": {
@@ -514,12 +508,12 @@ def get_buffer_specs(
             "dtype": torch.bool,
         },
         "rewards": {
-            "size": (trajectory_length, 2),
+            "size": (trajectory_length,),
             "dtype": torch.float32,
         },
-        "player_id": {
+        "value": {
             "size": (trajectory_length,),
-            "dtype": torch.long,
+            "dtype": torch.float32,
         },
     }
     if gametype != "singles":
@@ -541,14 +535,6 @@ def get_buffer_specs(
                     "size": (trajectory_length, 1),
                     "dtype": torch.long,
                 },
-                "target_policy": {
-                    "size": (trajectory_length, 2 * n_active),
-                    "dtype": torch.float32,
-                },
-                "target_index": {
-                    "size": (trajectory_length,),
-                    "dtype": torch.long,
-                },
             }
         )
 
@@ -557,19 +543,19 @@ def get_buffer_specs(
         {
             "action_type_policy": {
                 "size": (trajectory_length, 3),
-                "dtype": torch.float32,
-            },
-            "move_policy": {
-                "size": (trajectory_length, 4),
-                "dtype": torch.float32,
-            },
-            "switch_policy": {
-                "size": (trajectory_length, 6),
-                "dtype": torch.float32,
+                "dtype": torch.float,
             },
             "flag_policy": {
                 "size": (trajectory_length, len(CHOICE_FLAGS)),
-                "dtype": torch.float32,
+                "dtype": torch.float,
+            },
+            "move_policy": {
+                "size": (trajectory_length, 4),
+                "dtype": torch.float,
+            },
+            "switch_policy": {
+                "size": (trajectory_length, 6),
+                "dtype": torch.float,
             },
         }
     )
@@ -581,6 +567,10 @@ def get_buffer_specs(
                 "size": (trajectory_length,),
                 "dtype": torch.long,
             },
+            "flag_index": {
+                "size": (trajectory_length,),
+                "dtype": torch.long,
+            },
             "move_index": {
                 "size": (trajectory_length,),
                 "dtype": torch.long,
@@ -589,30 +579,8 @@ def get_buffer_specs(
                 "size": (trajectory_length,),
                 "dtype": torch.long,
             },
-            "flag_index": {
-                "size": (trajectory_length,),
-                "dtype": torch.long,
-            },
         }
     )
-
-    if gen == 8:
-        buffer_specs.update(
-            {
-                "max_move_mask": {
-                    "size": (trajectory_length, 4),
-                    "dtype": torch.bool,
-                },
-                "max_move_policy": {
-                    "size": (trajectory_length, 4),
-                    "dtype": torch.float32,
-                },
-                "max_move_index": {
-                    "size": (trajectory_length,),
-                    "dtype": torch.long,
-                },
-            }
-        )
 
     buffer_specs.update(
         {
@@ -620,12 +588,30 @@ def get_buffer_specs(
                 "size": (trajectory_length,),
                 "dtype": torch.bool,
             },
+            "utc": {
+                "size": (trajectory_length,),
+                "dtype": torch.float64,
+            },
+            "hist": {
+                "size": (trajectory_length, 10, 4, 4),
+                "dtype": torch.long,
+            },
+            "policy_select": {
+                "size": (trajectory_length,),
+                "dtype": torch.long,
+            },
         },
     )
     return buffer_specs
 
 
-def create_buffers(num_buffers: int, trajectory_length: int, gen: int, gametype: str):
+def create_buffers(
+    num_buffers: int,
+    trajectory_length: int,
+    gen: int,
+    gametype: str,
+    num_players: int = 2,
+):
     """
     num_buffers: int
         the size of the replay buffer
@@ -641,13 +627,20 @@ def create_buffers(num_buffers: int, trajectory_length: int, gen: int, gametype:
         trajectory_length, gen, gametype, private_reserve_size
     )
 
-    buffers: Dict[str, List[torch.Tensor]] = {key: [] for key in buffer_specs}
+    buffers: Dict[str, List[List[torch.Tensor]]] = {
+        key: [[], []] for key in buffer_specs
+    }
     for _ in range(num_buffers):
-        for key in buffer_specs:
-            if key.endswith("_mask"):
-                buffers[key].append(torch.ones(**buffer_specs[key]).share_memory_())
-            else:
-                buffers[key].append(torch.zeros(**buffer_specs[key]).share_memory_())
+        for k in range(num_players):
+            for key in buffer_specs:
+                if key.endswith("_mask"):
+                    buffers[key][k].append(
+                        torch.ones(**buffer_specs[key]).share_memory_()
+                    )
+                else:
+                    buffers[key][k].append(
+                        torch.zeros(**buffer_specs[key]).share_memory_()
+                    )
     return buffers
 
 

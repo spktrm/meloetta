@@ -95,11 +95,15 @@ class Resblock(nn.Module):
     ) -> None:
         super().__init__()
 
-        hiddens = [nn.ReLU(), nn.Linear(hidden_size, hidden_size)]
-        if use_layer_norm:
-            hiddens = [nn.LayerNorm(hidden_size)] + hiddens
-        layer = lambda: nn.Sequential(*hiddens)
-        self.layers = nn.ModuleList([layer() for _ in range(num_layers)])
+        layers = []
+        for _ in range(num_layers):
+            hiddens = [nn.ReLU(), nn.Linear(hidden_size, hidden_size)]
+            if use_layer_norm:
+                hiddens = [nn.LayerNorm(hidden_size)] + hiddens
+            layer = nn.Sequential(*hiddens)
+            layers.append(layer)
+
+        self.layers = nn.ModuleList(layers)
 
     def forward(self, x: torch.Tensor):
         shortcut = x
@@ -156,7 +160,6 @@ class TransformerEncoder(nn.Module):
         resblocks_hidden_size: Optional[int] = None,
         use_layer_norm: bool = True,
     ):
-
         super().__init__()
         self._transformer_num_layers = num_layers
         self._transformer_num_heads = num_heads

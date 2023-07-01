@@ -83,7 +83,6 @@ class Siamese(nn.Module):
         )
 
     def sample_(self, batch_size: int) -> torch.Tensor:
-
         team_shape = (batch_size, 7)
         batch = torch.zeros(1, *team_shape, 28, dtype=torch.long)
 

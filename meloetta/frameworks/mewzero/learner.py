@@ -181,11 +181,21 @@ class MewZeroLearner:
             except Exception as e:
                 traceback.print_exc()
 
-        learner_model = learner_model.to(config.learner_device, non_blocking=True)
-        actor_model = actor_model.to(config.actor_device, non_blocking=True)
-        target_model = target_model.to(config.learner_device, non_blocking=True)
-        model_prev = model_prev.to(config.learner_device, non_blocking=True)
-        model_prev_ = model_prev_.to(config.learner_device, non_blocking=True)
+        learner_model = learner_model.to(
+            config.learner_device,
+        )
+        actor_model = actor_model.to(
+            config.actor_device,
+        )
+        target_model = target_model.to(
+            config.learner_device,
+        )
+        model_prev = model_prev.to(
+            config.learner_device,
+        )
+        model_prev_ = model_prev_.to(
+            config.learner_device,
+        )
 
         learner = MewZeroLearner(
             learner_model,
@@ -218,8 +228,12 @@ class MewZeroLearner:
     def collect_batch_trajectory(self):
         hidden_state = self.learner_model.core.initial_state(self.config.batch_size)
         hidden_state = (
-            hidden_state[0].to(self.config.learner_device, non_blocking=True),
-            hidden_state[1].to(self.config.learner_device, non_blocking=True),
+            hidden_state[0].to(
+                self.config.learner_device,
+            ),
+            hidden_state[1].to(
+                self.config.learner_device,
+            ),
         )
         batch = None
         while batch is None:
@@ -358,7 +372,6 @@ class MewZeroLearner:
         hidden_state: Tuple[torch.Tensor, torch.Tensor],
         targets: Targets,
     ) -> Loss:
-
         loss_dict = {key + "_loss": 0 for key in Policy._fields}
         loss_dict.update({key.replace("policy", "value"): 0 for key in loss_dict})
 

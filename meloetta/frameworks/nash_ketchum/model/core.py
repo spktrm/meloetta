@@ -1,11 +1,10 @@
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
-from meloetta.frameworks.nash_ketchum.model.interfaces import EncoderOutput
+from collections import OrderedDict
 
+from meloetta.actors.types import TensorDict
 from meloetta.frameworks.nash_ketchum.model import config
-from meloetta.frameworks.nash_ketchum.model.utils import Resblock, VectorMerge
+from meloetta.frameworks.nash_ketchum.model.utils import VectorResblock, VectorMerge
 
 
 class Core(nn.Module):
@@ -14,32 +13,25 @@ class Core(nn.Module):
         self.config = config
 
         self.merge = VectorMerge(
-            {
-                "pokemon_embedding": config.side_encoder_dim,
-                "boosts": config.side_encoder_dim,
-                "volatiles": config.side_encoder_dim,
-                "side_conditions": config.side_encoder_dim,
-                "weather_emb": config.side_encoder_dim,
-                "scalar_emb": config.side_encoder_dim,
-            },
+            OrderedDict(
+                side_embs=config.side_encoder_dim,
+                scalar_emb=config.side_encoder_dim,
+                # hist_emb=config.side_encoder_dim,
+            ),
             output_size=config.hidden_dim,
         )
         self.resblocks = nn.ModuleList(
-            [Resblock(config.hidden_dim) for _ in range(config.num_layers)]
+            [VectorResblock(config.hidden_dim) for _ in range(config.num_layers)]
         )
 
-    def forward(self, encoder_output: EncoderOutput):
+    def forward(self, encoder_output: TensorDict):
         state_embedding = self.merge(
-            {
-                "pokemon_embedding": encoder_output.pokemon_embedding,
-                "boosts": encoder_output.boosts,
-                "volatiles": encoder_output.volatiles,
-                "side_conditions": encoder_output.side_conditions,
-                "weather_emb": encoder_output.weather_emb,
-                "scalar_emb": encoder_output.scalar_emb,
-            }
+            OrderedDict(
+                side_embs=encoder_output["pokemon_embedding"],
+                scalar_emb=encoder_output["scalar_embedding"],
+                # hist_emb=encoder_output["history_embedding"],
+            )
         )
         for resblock in self.resblocks:
             state_embedding = resblock(state_embedding)
-
         return state_embedding

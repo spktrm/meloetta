@@ -131,6 +131,9 @@ class ReplayBuffer:
             self.free_queue.put(m)
 
         batch = {
-            k: t.to(device=self.device, non_blocking=True) for k, t in batch.items()
+            k: t.to(
+                device=self.device,
+            )
+            for k, t in batch.items()
         }
         return Batch(**batch)

@@ -189,6 +189,10 @@ class BattleRoom:
             state = deserialize(state)
         return state
 
+    def get_turns(self, prev_turns: int = -1) -> Dict[str, Union[str, Dict[str, Any]]]:
+        turns = self._execute("engine.getTurns({})".format(json.dumps(prev_turns)))
+        return turns
+
     @property
     def battle_tag(self):
         return self._battle_tag

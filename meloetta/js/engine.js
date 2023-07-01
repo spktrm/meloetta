@@ -140,4 +140,21 @@ var engine = {
     getType: function (type) {
         return this.client.battle.dex.types.get(type);
     },
+
+    getTurns: function (prevTurns = -1) {
+        turns = [[]];
+        for (var i = this.client.battle.stepQueue.length - 1; i >= 0; i--) {
+            line = this.client.battle.stepQueue[i];
+            if (line.startsWith("|turn") || line.startsWith("|start")) {
+                if (prevTurns > 0 && turns.length >= (prevTurns + 1)) {
+                    return turns.filter((array) => !Array.isArray(array) || array.length > 0);
+                }
+                turns.push([]);
+            }
+            if (line.length > 1) {
+                turns[turns.length - 1].push(line);
+            }
+        }
+        return turns.filter((array) => !Array.isArray(array) || array.length > 0);
+    }
 };

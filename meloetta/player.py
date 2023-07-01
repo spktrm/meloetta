@@ -215,6 +215,13 @@ class ChoiceBuilder:
         else:
             action_masks["target_mask"] = None
 
+        action_masks = {
+            k: (v if torch.any(v) else torch.ones_like(v, dtype=torch.bool))
+            if v is not None
+            else v
+            for k, v in action_masks.items()
+        }
+
         return Choices(
             targeting,
             prev_choices,

@@ -61,7 +61,6 @@ class Tree:
         return action, child
 
     def run(self, initial_observation: Dict[str, torch.Tensor]):
-
         for _ in range(self.num_simulations):
             history = []
             node = self.root
