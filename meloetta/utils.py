@@ -2,7 +2,7 @@ import torch
 
 from typing import Dict, List
 
-from meloetta.data import CHOICE_FLAGS
+from meloetta.data import CHOICE_FLAGS, VOLATILES
 
 
 def to_id(string: str):

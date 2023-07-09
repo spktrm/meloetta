@@ -4,7 +4,7 @@ import random
 import torch
 import torch.nn as nn
 
-from meloetta.actors.types import State, Choices
+from meloetta.types import State, Choices
 from meloetta.embeddings import MoveEmbedding
 
 
@@ -26,18 +26,16 @@ class MaxDamageModel(nn.Module):
         state: State,
         choices: Choices,
     ):
-        private_reserve = state["private_reserve"].squeeze()
+        private_reserve = state["sides"][..., 0, :, :].squeeze()
         private_reserve_x = private_reserve + 1
 
-        active = private_reserve_x[..., 1] == 2
+        active = private_reserve_x[..., 12] == 2
 
         try:
             if choices["moves"] and active.sum():
                 active_mons = private_reserve_x[active]
 
-                moves = active_mons[..., -8:]
-                moves = moves.view(*moves.shape[:-1], 4, 2)
-                move_tokens = moves[..., 0]
+                move_tokens = active_mons[..., -12:-8].long()
                 move_names = self.move_embedding.get_name(move_tokens)
                 moves_emb = self.move_embedding(move_tokens)
                 moves_basepower = moves_emb[..., : self.offset].squeeze()

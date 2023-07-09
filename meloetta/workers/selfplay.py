@@ -154,11 +154,13 @@ class SelfPlayWorker:
                     )
                     while True:
                         message = await player.client.receive_message()
-                        action_required = await player.recieve(message)
+                        action_required = player._recieve(message)
+
                         if "is offering a tie." in message:
                             await player.client.websocket.send(
                                 player.room.battle_tag + "|" + "/offertie"
                             )
+
                         ended = player.room.get_js_attr("battle?.ended")
                         if ended:
                             break

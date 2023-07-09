@@ -2,8 +2,8 @@ import random
 import multiprocessing as mp
 
 from meloetta.room import BattleRoom
+from meloetta.types import State, Choices
 from meloetta.actors.base import Actor
-from meloetta.actors.types import State, Choices
 
 
 class RandomActor(Actor):

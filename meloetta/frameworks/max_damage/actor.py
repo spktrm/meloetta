@@ -3,7 +3,7 @@ import multiprocessing as mp
 
 from meloetta.room import BattleRoom
 from meloetta.actors.base import Actor
-from meloetta.actors.types import State, Choices
+from meloetta.types import State, Choices
 
 from meloetta.frameworks.max_damage.model import MaxDamageModel
 

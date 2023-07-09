@@ -24,7 +24,7 @@ class AdamConfig:
     b1: float = 0.0
     b2: float = 0.999
     eps: float = 10e-8
-    weight_decay: float = 1e-5
+    weight_decay: float = 1e-1
 
 
 @dataclass
@@ -59,8 +59,8 @@ class NAshKetchumConfig:
     )
     entropy_schedule_size: Sequence[int] = (
         # 100,
-        1000,
-        # 10000,
+        # 1000,
+        10000,
         # 25000,
     )
     # The weight of the reward regularisation term in RNaD.
@@ -100,8 +100,8 @@ class NAshKetchumConfig:
     # This config will spawn 20 workers with 2 players each
     # for a total of 40 players, playing 20 games.
     # it is recommended to have an even number of players per worker
-    num_actors: int = 1 if debug_mode else 12
-    num_buffers: int = 64
+    num_actors: int = 1 if debug_mode else 16
+    num_buffers: int = max(2 * batch_size, num_actors)
 
     model_config: config.NAshKetchumModelConfig = config.NAshKetchumModelConfig()
 

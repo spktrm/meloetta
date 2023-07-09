@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 from typing import List, Dict, Tuple
 
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.frameworks.nash_ketchum.buffer import ReplayBuffer
 from meloetta.frameworks.nash_ketchum.config import NAshKetchumConfig
 from meloetta.frameworks.nash_ketchum.entropy import EntropySchedule
@@ -272,15 +272,14 @@ class NAshKetchumLearner:
             batch["scalars"][..., 0].max(0).values.float().mean()
         ).item()
 
-        move_available = batch["action_type_policy"][..., 0] > 0
-        loss_dict["move_prob"] = (
-            batch["action_type_policy"][..., 0].sum() / move_available.sum()
-        ).item()
+        choice_available = batch["action_type_mask"].sum(-1, keepdim=True) > 1
+        choice_available = choice_available * batch["valid"].unsqueeze(-1)
 
-        switch_available = batch["action_type_policy"][..., 1] > 0
-        loss_dict["switch_prob"] = (
-            batch["action_type_policy"][..., 1].sum() / switch_available.sum()
-        ).item()
+        action_type_policy = batch["action_type_policy"] * choice_available
+        action_type_policy = action_type_policy.sum(0).sum(0) / choice_available.sum()
+
+        loss_dict["move_prob"] = action_type_policy[..., 0].item()
+        loss_dict["switch_prob"] = action_type_policy[..., 1].item()
 
         for k, v in loss_dict.items():
             if isinstance(v, list):
@@ -455,7 +454,10 @@ class NAshKetchumLearner:
             v_target_list.append(v_target_)
             has_played_list.append(has_played)
             v_trace_policy_target_list.append(policy_targets_)
-            importance_sampling_corrections.append(policy_ratios)
+            importance_sampling_corrections.append(
+                # [torch.ones_like(policy_ratio) for policy_ratio in policy_ratios]
+                policy_ratios
+            )
 
         targets_dict["value_targets"] = v_target_list
         targets_dict["has_played"] = has_played_list

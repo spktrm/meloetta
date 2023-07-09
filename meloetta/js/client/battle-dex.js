@@ -836,7 +836,7 @@ var Dex = new ((function () {
         return (
             "background:transparent url(" +
             Dex.resourcePrefix +
-            "sprites/pokemonicons-sheet.png?v12) no-repeat scroll -" +
+            "sprites/pokemonicons-sheet.png?v13) no-repeat scroll -" +
             left +
             "px -" +
             top +

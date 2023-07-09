@@ -564,6 +564,7 @@ var BattleTooltips = (function () {
             ),
             moveType = _this$getMoveType[0],
             category = _this$getMoveType[1];
+        var categoryDiff = move.category !== category;
 
         if (isZOrMax === "zmove") {
             if (item.zMoveFrom === move.name) {
@@ -622,6 +623,7 @@ var BattleTooltips = (function () {
                         basePower: movePower,
                     })
                 );
+                categoryDiff = false;
             }
         } else if (isZOrMax === "maxmove") {
             if (move.category === "Status") {
@@ -643,7 +645,18 @@ var BattleTooltips = (function () {
                         basePower: basePower,
                     })
                 );
+                categoryDiff = false;
             }
+        }
+
+        if (categoryDiff) {
+            move = new Move(
+                move.id,
+                move.name,
+                Object.assign({}, move, {
+                    category: category,
+                })
+            );
         }
 
         text += "<h2>" + move.name + "<br />";
@@ -1205,7 +1218,8 @@ var BattleTooltips = (function () {
     };
     _proto2.calculateModifiedStats = function calculateModifiedStats(
         clientPokemon,
-        serverPokemon
+        serverPokemon,
+        statStagesOnly
     ) {
         var _clientPokemon$effect,
             _clientPokemon$volati,
@@ -1257,6 +1271,7 @@ var BattleTooltips = (function () {
                 stats[statName] = Math.floor(stats[statName]);
             }
         }
+        if (statStagesOnly) return stats;
 
         var ability = toID(
             (_clientPokemon$effect =
@@ -1914,7 +1929,6 @@ var BattleTooltips = (function () {
             "revelationdance",
             "struggle",
             "technoblast",
-            "terablast",
             "terrainpulse",
             "weatherball",
         ];
@@ -1964,8 +1978,17 @@ var BattleTooltips = (function () {
             }
         }
 
-        if (this.battle.gen <= 3 && category !== "Status") {
-            category = Dex.getGen3Category(moveType);
+        if (
+            move.id === "photongeyser" ||
+            move.id === "lightthatburnsthesky" ||
+            (move.id === "terablast" && pokemon.terastallized)
+        ) {
+            var stats = this.calculateModifiedStats(
+                pokemon,
+                serverPokemon,
+                true
+            );
+            if (stats.atk > stats.spa) category = "Physical";
         }
         return [moveType, category];
     };
@@ -1986,7 +2009,15 @@ var BattleTooltips = (function () {
             value.weatherModify(0, "Hail");
             value.weatherModify(0, "Snow");
         }
-        if (move.id === "hurricane" || move.id === "thunder") {
+        if (
+            [
+                "hurricane",
+                "thunder",
+                "bleakwindstorm",
+                "wildboltstorm",
+                "sandsearstorm",
+            ].includes(move.id)
+        ) {
             value.weatherModify(0, "Rain Dance");
             value.weatherModify(0, "Primordial Sea");
         }
@@ -2647,7 +2678,11 @@ var BattleTooltips = (function () {
             return value;
         }
 
-        if (itemName === "Punching Glove" && move.flags["punch"]) {
+        if (
+            (itemName === "Muscle Band" && move.category === "Physical") ||
+            (itemName === "Wise Glasses" && move.category === "Special") ||
+            (itemName === "Punching Glove" && move.flags["punch"])
+        ) {
             value.itemModify(1.1);
         }
 

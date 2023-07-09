@@ -12,7 +12,7 @@ from meloetta.frameworks.mewzero.model import (
 )
 
 from meloetta.actors.base import Actor
-from meloetta.actors.types import State, Choices
+from meloetta.types import State, Choices
 
 
 class MewZeroActor(Actor):

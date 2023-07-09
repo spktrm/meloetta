@@ -16,12 +16,13 @@ from meloetta.frameworks.nash_ketchum.modelv2.utils import (
     ToVector,
     TransformerEncoder,
 )
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.embeddings import (
     AbilityEmbedding,
     PokedexEmbedding,
     MoveEmbedding,
     ItemEmbedding,
+    RandomBattlesEmbedding,
 )
 
 from meloetta.data import (
@@ -43,38 +44,42 @@ class PokemonEmbedding(nn.Module):
 
         self.gen = gen
 
+        self.randbats_embedding = RandomBattlesEmbedding(gen)
+
         pokedex_onehot = PokedexEmbedding(gen=gen)
-        num_species = pokedex_onehot.num_embeddings
-        self.pokedex_embedding = nn.Embedding(
-            num_species + 1,
-            config.entity_embedding_dim,
-            padding_idx=0,
-        )
-
-        self.ability_onehot = AbilityEmbedding(gen=gen)
-        self.ability_embedding_known = nn.Embedding(
-            self.ability_onehot.num_embeddings, config.entity_embedding_dim
-        )
-        self.ability_embedding_unknown = MLP(
-            [config.entity_embedding_dim, config.entity_embedding_dim]
-        )
-
+        ability_onehot = AbilityEmbedding(gen=gen)
         item_onehot = ItemEmbedding(gen=gen)
+        move_onehot = MoveEmbedding(gen=gen)
+
+        num_species = pokedex_onehot.num_embeddings
+        self.pokedex_onehot = nn.Embedding.from_pretrained(
+            torch.eye(num_species)[..., 1:]
+        )
+        self.species_embedding = linear_layer(
+            num_species - 1,
+            config.entity_embedding_dim,
+            bias=False,
+        )
+
+        self.ability_onehot = nn.Embedding.from_pretrained(
+            torch.eye(ability_onehot.num_embeddings)[..., 1:]
+        )
+        self.ability_embedding = linear_layer(
+            ability_onehot.num_embeddings - 1, config.entity_embedding_dim, bias=False
+        )
+
         self.item_onehot = nn.Embedding.from_pretrained(
             torch.eye(item_onehot.num_embeddings)[..., 1:]
         )
         self.item_effect_onehot = nn.Embedding.from_pretrained(
             torch.eye(len(ITEM_EFFECTS) + 1)[..., 1:]
         )
-        self.item_embedding_known = linear_layer(
+        self.item_embedding = linear_layer(
             self.item_onehot.embedding_dim + self.item_effect_onehot.embedding_dim,
             config.entity_embedding_dim,
-        )
-        self.item_embedding_unknown = MLP(
-            [config.entity_embedding_dim, config.entity_embedding_dim]
+            bias=False,
         )
 
-        move_onehot = MoveEmbedding(gen=gen)
         self.pp_bin_enc = nn.Embedding.from_pretrained(binary_enc_matrix(64))
         self.move_raw_onehot = nn.Embedding.from_pretrained(
             torch.eye(move_onehot.num_embeddings)[..., 1:]
@@ -82,18 +87,13 @@ class PokemonEmbedding(nn.Module):
         self.move_embedding = linear_layer(
             self.move_raw_onehot.embedding_dim + self.pp_bin_enc.embedding_dim,
             config.entity_embedding_dim,
-        )
-        self.moveset_onehot = linear_layer(
-            self.move_raw_onehot.embedding_dim, config.entity_embedding_dim
-        )
-        self.unknown_move_embedding = MLP(
-            [config.entity_embedding_dim, config.entity_embedding_dim]
+            bias=False,
         )
 
-        self.last_move_embedding = linear_layer(
-            move_onehot.embedding_dim + self.pp_bin_enc.embedding_dim,
-            config.entity_embedding_dim,
-        )
+        # self.last_move_embedding = linear_layer(
+        #     move_onehot.embedding_dim + self.pp_bin_enc.embedding_dim,
+        #     config.entity_embedding_dim,
+        # )
 
         self.active_onehot = nn.Embedding.from_pretrained(torch.eye(3)[..., 1:])
         self.fainted_onehot = nn.Embedding.from_pretrained(torch.eye(3)[..., 1:])
@@ -142,14 +142,11 @@ class PokemonEmbedding(nn.Module):
             self.reviving_onehot = nn.Embedding.from_pretrained(torch.eye(3)[..., 1:])
             self.tera_onehot = nn.Embedding.from_pretrained(torch.eye(2))
 
-            teratype_onehot = torch.eye(len(BattleTypeChart) + 1)[..., 1:]
-            teratype_onehot[0] = torch.ones_like(teratype_onehot[0]) / len(
-                BattleTypeChart
+            self.teratype_onehot = nn.Embedding.from_pretrained(
+                torch.eye(len(BattleTypeChart) + 1)[..., 1:]
             )
-            teratype_onehot = nn.Embedding.from_pretrained(teratype_onehot)
-            self.teratype_onehot = nn.Sequential(
-                teratype_onehot,
-                linear_layer(len(BattleTypeChart), config.entity_embedding_dim),
+            self.teratype_lin = linear_layer(
+                len(BattleTypeChart), config.entity_embedding_dim, bias=False
             )
 
             onehot_size += self.tera_onehot.embedding_dim
@@ -163,70 +160,116 @@ class PokemonEmbedding(nn.Module):
 
         self.mlp = MLP([config.entity_embedding_dim, config.entity_embedding_dim])
 
-    def embed_species(self, species_token: torch.Tensor):
-        return self.pokedex_embedding(species_token)
+    def encode_species(self, species_token: torch.Tensor):
+        species_token = species_token.clamp(min=0)
+        (
+            unknown_species_encoding,
+            unknown_ability_encoding,
+            unknown_item_encoding,
+            unknown_moveset_encoding,
+            unknown_teratype_encoding,
+        ) = self.randbats_embedding(species_token)
+
+        known_onehot = self.pokedex_onehot(species_token)
+        team_onehot = known_onehot.sum(-2, keepdim=True).expand(-1, -1, -1, 12, -1)
+        unknown_species_encoding = (
+            torch.ones_like(unknown_species_encoding) - team_onehot
+        )
+        unknown_species_encoding = (
+            unknown_species_encoding
+            / unknown_species_encoding.sum(-1, keepdim=True).clamp(min=1)
+        )
+
+        known_mask = (species_token > 0).unsqueeze(-1)
+
+        return (
+            torch.where(known_mask, known_onehot, unknown_species_encoding),
+            torch.where(
+                known_mask,
+                unknown_ability_encoding,
+                unknown_species_encoding @ self.randbats_embedding.abilities.weight[1:],
+            ),
+            torch.where(
+                known_mask,
+                unknown_item_encoding,
+                unknown_species_encoding @ self.randbats_embedding.items.weight[1:],
+            ),
+            torch.where(
+                known_mask,
+                unknown_moveset_encoding,
+                unknown_species_encoding @ self.randbats_embedding.movesets.weight[1:],
+            ),
+            torch.where(
+                known_mask,
+                unknown_teratype_encoding,
+                unknown_species_encoding @ self.randbats_embedding.teratypes.weight[1:],
+            ),
+        )
 
     def embed_ability(
-        self, ability_token: torch.Tensor, species_embedding: torch.Tensor
-    ):
-        known = self.ability_embedding_known(ability_token)
-        unknown = self.ability_embedding_unknown(species_embedding)
-        unknown_mask = (ability_token > 0).unsqueeze(-1)
-        return torch.where(unknown_mask, known, unknown)
+        self, ability_token: torch.Tensor, unknown_ability_encoding: torch.Tensor
+    ) -> torch.Tensor:
+        known_mask = (ability_token > 0).unsqueeze(-1)
+        ability_encoding = torch.where(
+            known_mask,
+            self.ability_onehot(ability_token),
+            unknown_ability_encoding
+            / unknown_ability_encoding.sum(-1, keepdim=True).clamp(min=1),
+        )
+        return self.ability_embedding(ability_encoding)
 
     def embed_item(
         self,
         item_token: torch.Tensor,
         item_effect_token: torch.Tensor,
-        species_embedding: torch.Tensor,
+        unknown_item_encoding: torch.Tensor,
     ) -> torch.Tensor:
+        known_mask = (item_token > 0).unsqueeze(-1)
+        item_dist = torch.where(
+            known_mask,
+            self.item_onehot(item_token),
+            unknown_item_encoding
+            / unknown_item_encoding.sum(-1, keepdim=True).clamp(min=1),
+        )
         item_concat = torch.cat(
-            (
-                self.item_onehot(item_token),
-                self.item_effect_onehot(item_effect_token),
-            ),
+            (item_dist, self.item_effect_onehot(item_effect_token)),
             dim=-1,
         )
-        known_item_embedding = self.item_embedding_known(item_concat)
-        unknown_item_embedding = self.item_embedding_unknown(species_embedding)
-        known_mask = (item_token > 0).unsqueeze(-1)
-        return torch.where(known_mask, known_item_embedding, unknown_item_embedding)
+        return self.item_embedding(item_concat)
 
     def embed_moveset(
         self,
         move_tokens: torch.Tensor,
         pp_token: torch.Tensor,
-        species_embedding: torch.Tensor,
+        unknwown_moveset_encoding: torch.Tensor,
     ) -> torch.Tensor:
+        known_mask = (move_tokens > 0).unsqueeze(-1)
+        unknwown_moveset_encoding = unknwown_moveset_encoding.unsqueeze(-2)
+        known_moveset_onehot = self.move_raw_onehot(move_tokens).sum(-2, keepdim=True)
+        unknwown_moveset_encoding = (
+            unknwown_moveset_encoding - known_moveset_onehot
+        ).expand(-1, -1, -1, 12, -1, -1)
+
+        move_dist = torch.where(
+            known_mask,
+            self.move_raw_onehot(move_tokens),
+            unknwown_moveset_encoding
+            / unknwown_moveset_encoding.sum(-1, keepdim=True).clamp(min=1),
+        )
         move_concat = torch.cat(
-            (
-                self.move_raw_onehot(move_tokens),
-                self.pp_bin_enc(pp_token),
-            ),
+            (move_dist, self.pp_bin_enc(pp_token)),
             dim=-1,
         )
-        known_mask = (move_tokens > 0).unsqueeze(-1)
+        move_embedding = self.move_embedding(move_concat)
 
-        known_move_embedding = self.move_embedding(move_concat)
-
-        moveset_onehot = self.move_raw_onehot(move_tokens).sum(-2)
-        moveset_onehot = self.moveset_onehot(moveset_onehot)
-        unknown_move_embedding = self.unknown_move_embedding(
-            moveset_onehot + species_embedding
-        ).unsqueeze(-2)
-
-        moveset_embedding = torch.where(
-            known_mask, known_move_embedding, unknown_move_embedding
-        )
-
-        return moveset_embedding.sum(-2), known_move_embedding
+        return move_embedding.sum(-2), move_embedding
 
     def forward(
         self, x: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor,]:
         longs = (x + 1).long().clamp(min=0)
 
-        species_token = (x[..., 0] + 2).long()
+        species_token = longs[..., 0]
         forme_token = longs[..., 1]
         # slot = longs[..., 2]
         # hp = longs[..., 3]
@@ -258,7 +301,15 @@ class PokemonEmbedding(nn.Module):
 
         side = (longs[..., 37] - 1).clamp(min=0, max=1)
 
-        species_embedding = self.embed_species(species_token)
+        (
+            species_onehot,
+            unknown_ability_encoding,
+            unknown_item_encoding,
+            unknown_moveset_encoding,
+            teratype_encoding,
+        ) = self.encode_species(species_token)
+
+        species_embedding = self.species_embedding(species_onehot)
 
         hp_embedding = self.hp_onehot((hp_ratio * 10).clamp(min=0, max=10).long())
         stat_enc = hp_embedding
@@ -271,11 +322,11 @@ class PokemonEmbedding(nn.Module):
         #     # )
         # )
 
-        ability_embedding = self.embed_ability(ability_token, species_embedding)
+        ability_embedding = self.embed_ability(ability_token, unknown_ability_encoding)
         # base_ability_emb = self.ability_embedding(base_ability)
 
         item_embedding = self.embed_item(
-            item_token, item_effect_token, species_embedding
+            item_token, item_effect_token, unknown_item_encoding
         )
         # prev_item_emb = self.embed_item(prev_item, prev_item_effect)
 
@@ -284,7 +335,7 @@ class PokemonEmbedding(nn.Module):
         toxic_turns_onehot = self.toxic_turns_onehot(toxic_turns)
 
         moveset_embedding, move_embeddings = self.embed_moveset(
-            move_tokens, pp_tokens, species_embedding
+            move_tokens, pp_tokens, unknown_moveset_encoding
         )
 
         # last_move_emb = self.last_move_embedding(
@@ -327,7 +378,12 @@ class PokemonEmbedding(nn.Module):
         ]
 
         if self.gen == 9:
-            embeddings += [self.teratype_onehot(teratype)]
+            teratype_encoding = torch.where(
+                (teratype > 0).unsqueeze(-1),
+                self.teratype_onehot(teratype),
+                teratype_encoding,
+            )
+            embeddings += [self.teratype_lin(teratype_encoding)]
             onehots += [self.tera_onehot((terastallized > 0).long())]
 
         onehots = torch.cat(onehots, dim=-1)
@@ -336,7 +392,7 @@ class PokemonEmbedding(nn.Module):
 
         pokemon_emb = sum(embeddings)
 
-        mask = species_token > 0
+        mask = species_token >= 0
         pokemon_emb = self.mlp(pokemon_emb)
 
         return pokemon_emb, mask, move_embeddings

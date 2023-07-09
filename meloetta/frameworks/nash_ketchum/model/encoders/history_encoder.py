@@ -17,7 +17,7 @@ from meloetta.frameworks.nash_ketchum.model.utils import (
     ToVector,
     TransformerEncoder,
 )
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.embeddings import (
     AbilityEmbedding,
     PokedexEmbedding,

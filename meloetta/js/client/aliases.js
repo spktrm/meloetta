@@ -31,7 +31,7 @@ const Aliases = {
     // formats
     randbats: "[Gen 9] Random Battle",
     uber: "[Gen 9] Ubers",
-    anythinggoes: "[Gen 8] Anything Goes",
+    anythinggoes: "[Gen 9] Anything Goes",
     ubers: "[Gen 9] Ubers",
     overused: "[Gen 9] OU",
     underused: "[Gen 9] UU",
@@ -111,8 +111,8 @@ const Aliases = {
     gen6ag: "[Gen 6] Anything Goes",
     crossevo: "[Gen 9] Cross Evolution",
     mayhem: "[Gen 9] Random Battle Mayhem",
-    omotm: "[Gen 9] Tier Shift",
-    lcotm: "[Gen 9] The Card Game",
+    omotm: "[Gen 9] Force of the Fallen",
+    lcotm: "[Gen 9] Inheritance",
     // mega evos
     fabio: "Ampharos-Mega",
     maero: "Aerodactyl-Mega",

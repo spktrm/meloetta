@@ -10,7 +10,7 @@ class _Config(NamedTuple):
 
 
 class SideEncoderConfig(_Config):
-    entity_embedding_dim: int = 128
+    entity_embedding_dim: int = 256
     num_layers: int = 3
     num_heads: int = 2
     key_size: int = entity_embedding_dim // 2
@@ -19,7 +19,7 @@ class SideEncoderConfig(_Config):
     resblocks_num_after: int = 2
     resblocks_hidden_size: int = key_size
 
-    output_dim: int = 256
+    output_dim: int = 768
 
 
 class ScalarEncoderConfig(_Config):

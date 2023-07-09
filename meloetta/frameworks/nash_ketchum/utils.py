@@ -6,7 +6,7 @@ from typing import Dict, List, Any, Sequence, NamedTuple, Tuple
 
 from jax import tree_util as tree
 
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.data import CHOICE_FLAGS
 
 
@@ -468,11 +468,11 @@ def get_buffer_specs(
             "dtype": torch.long,
         },
         "volatiles": {
-            "size": (trajectory_length, 2, 113),
+            "size": (trajectory_length, 2, 114),
             "dtype": torch.long,
         },
         "side_conditions": {
-            "size": (trajectory_length, 2, 58),
+            "size": (trajectory_length, 2, 37),
             "dtype": torch.long,
         },
         "pseudoweathers": {

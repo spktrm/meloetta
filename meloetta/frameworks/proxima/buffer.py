@@ -5,7 +5,7 @@ import multiprocessing as mp
 
 from typing import Dict, List
 
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.frameworks.proxima.utils import create_buffers
 
 

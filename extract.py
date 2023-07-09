@@ -35,7 +35,7 @@ CLIENT_SRC = [
 DATA_SRC = [
     os.path.join(f"{PS_CLIENT_DIR}/data", file)
     for file in os.listdir(f"{PS_CLIENT_DIR}/data")
-    if file.endswith(".js") and file not in ["text-afd.js"]
+    if file.endswith(".js") and file not in ["text-afd.js", "graphics.js"]
 ]
 
 
@@ -54,7 +54,11 @@ def main():
         exports += re.findall(r"exports.(\w+) =", file_src)
 
         file_src = file_src.replace("exports.", "")
-        _ctx.eval(file_src)
+        try:
+            _ctx.eval(file_src)
+        except Exception as e:
+            print(file)
+            raise e
 
     for export in exports:
         try:

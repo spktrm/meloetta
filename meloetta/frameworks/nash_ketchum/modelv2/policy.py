@@ -4,7 +4,7 @@ import torch.nn as nn
 from typing import Union
 from collections import OrderedDict
 
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.frameworks.nash_ketchum.modelv2 import config
 from meloetta.frameworks.nash_ketchum.modelv2.utils import (
     MLP,
@@ -12,6 +12,7 @@ from meloetta.frameworks.nash_ketchum.modelv2.utils import (
     VectorMerge,
     _legal_policy,
     _multinomial,
+    # gather_along_rows,
 )
 
 
@@ -98,6 +99,10 @@ class EmbeddingSelectHead(nn.Module):
             [config.key_dim for _ in range(config.num_layers_key)] + [1]
         )
         self.denom = config.key_dim**0.5
+        # self.merge = VectorMerge(
+        #     OrderedDict(state=config.input_dim, action=config.key_dim),
+        #     config.input_dim,
+        # )
 
     def forward(
         self,
@@ -116,11 +121,19 @@ class EmbeddingSelectHead(nn.Module):
         action_policy = _legal_policy(action_logits, mask)
         if action is None:
             action = _multinomial(action_policy)
+
+        # T, B = keys.shape
+        # action_embedding = gather_along_rows(keys.flatten(0, 1), action).view(T, B, -1)
+
+        # state_action_embedding = self.merge(
+        #     OrderedDict(state=state_embedding, action=action_embedding)
+        # )
         return OrderedDict(
             {
                 f"{self.name}_logits": action_logits,
                 f"{self.name}_policy": action_policy,
                 f"{self.name}_index": action,
+                # "state_embedding": state_action_embedding,
             }
         )
 
@@ -180,6 +193,8 @@ class PolicyHeads(nn.Module):
 
         state_action_type_embedding = action_type.pop("state_embedding")
         state_flag_embedding = flag.pop("state_embedding")
+        # state_move_embedding = move.pop("state_embedding")
+        # state_switch_embedding = switch.pop("state_embedding")
 
         return OrderedDict(
             **action_type,
@@ -188,4 +203,6 @@ class PolicyHeads(nn.Module):
             **switch,
             state_action_type_embedding=state_action_type_embedding,
             state_flag_embedding=state_flag_embedding,
+            # state_move_embedding=state_move_embedding,
+            # state_switch_embedding=state_switch_embedding,
         )

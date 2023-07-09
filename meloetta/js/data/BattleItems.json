@@ -46,7 +46,6 @@
         "itemUser": ["Dialga-Origin"],
         "num": 1777,
         "gen": 8,
-        "isNonstandard": "Unobtainable",
         "desc": "If held by a Dialga, its Steel- and Dragon-type attacks have 1.2x power."
     },
     "adamantorb": {
@@ -57,7 +56,6 @@
         "itemUser": ["Dialga"],
         "num": 135,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "If held by a Dialga, its Steel- and Dragon-type attacks have 1.2x power."
     },
     "adrenalineorb": {
@@ -823,7 +821,6 @@
         "forcedForme": "Arceus-Dragon",
         "num": 311,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Dragon-type attacks have 1.2x power. Judgment is Dragon type."
     },
     "dragonfang": {
@@ -885,7 +882,6 @@
         "forcedForme": "Arceus-Dark",
         "num": 312,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Dark-type attacks have 1.2x power. Judgment is Dark type."
     },
     "dreamball": {
@@ -941,7 +937,6 @@
         "forcedForme": "Arceus-Ground",
         "num": 305,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Ground-type attacks have 1.2x power. Judgment is Ground type."
     },
     "eeviumz": {
@@ -1185,7 +1180,6 @@
         "forcedForme": "Arceus-Fighting",
         "num": 303,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Fighting-type attacks have 1.2x power. Judgment is Fighting type."
     },
     "flameorb": {
@@ -1206,7 +1200,6 @@
         "forcedForme": "Arceus-Fire",
         "num": 298,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Fire-type attacks have 1.2x power. Judgment is Fire type."
     },
     "floatstone": {
@@ -1530,7 +1523,6 @@
         "itemUser": ["Giratina-Origin"],
         "num": 1779,
         "gen": 8,
-        "isNonstandard": "Unobtainable",
         "desc": "If held by a Giratina, its Ghost- and Dragon-type attacks have 1.2x power."
     },
     "griseousorb": {
@@ -1541,7 +1533,6 @@
         "itemUser": ["Giratina"],
         "num": 112,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "If held by a Giratina, its Ghost- and Dragon-type attacks have 1.2x power."
     },
     "groundgem": {
@@ -1725,7 +1716,6 @@
         "forcedForme": "Arceus-Ice",
         "num": 302,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Ice-type attacks have 1.2x power. Judgment is Ice type."
     },
     "iciumz": {
@@ -1769,7 +1759,6 @@
         "forcedForme": "Arceus-Bug",
         "num": 308,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Bug-type attacks have 1.2x power. Judgment is Bug type."
     },
     "ironball": {
@@ -1788,7 +1777,6 @@
         "forcedForme": "Arceus-Steel",
         "num": 313,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Steel-type attacks have 1.2x power. Judgment is Steel type."
     },
     "jabocaberry": {
@@ -2137,7 +2125,6 @@
         "itemUser": ["Palkia-Origin"],
         "num": 1778,
         "gen": 8,
-        "isNonstandard": "Unobtainable",
         "desc": "If held by a Palkia, its Water- and Dragon-type attacks have 1.2x power."
     },
     "lustrousorb": {
@@ -2148,7 +2135,6 @@
         "itemUser": ["Palkia"],
         "num": 136,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "If held by a Palkia, its Water- and Dragon-type attacks have 1.2x power."
     },
     "luxuryball": {
@@ -2294,7 +2280,6 @@
         "forcedForme": "Arceus-Grass",
         "num": 301,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Grass-type attacks have 1.2x power. Judgment is Grass type."
     },
     "medichamite": {
@@ -2427,7 +2412,6 @@
         "forcedForme": "Arceus-Psychic",
         "num": 307,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Psychic-type attacks have 1.2x power. Judgment is Psychic type."
     },
     "miracleseed": {
@@ -2740,7 +2724,6 @@
         "forcedForme": "Arceus-Fairy",
         "num": 644,
         "gen": 6,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Fairy-type attacks have 1.2x power. Judgment is Fairy type."
     },
     "plumefossil": {
@@ -3233,7 +3216,6 @@
         "itemUser": ["Zamazenta-Crowned"],
         "num": 1104,
         "gen": 8,
-        "isNonstandard": "Unobtainable",
         "desc": "If held by a Zamazenta, this item changes its forme to Crowned Shield."
     },
     "rustedsword": {
@@ -3242,7 +3224,6 @@
         "itemUser": ["Zacian-Crowned"],
         "num": 1103,
         "gen": 8,
-        "isNonstandard": "Unobtainable",
         "desc": "If held by a Zacian, this item changes its forme to Crowned Sword."
     },
     "sablenite": {
@@ -3462,7 +3443,6 @@
         "forcedForme": "Arceus-Flying",
         "num": 306,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Flying-type attacks have 1.2x power. Judgment is Flying type."
     },
     "slowbronite": {
@@ -3565,7 +3545,6 @@
         "forcedForme": "Arceus-Water",
         "num": 299,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Water-type attacks have 1.2x power. Judgment is Water type."
     },
     "spookyplate": {
@@ -3576,7 +3555,6 @@
         "forcedForme": "Arceus-Ghost",
         "num": 310,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Ghost-type attacks have 1.2x power. Judgment is Ghost type."
     },
     "sportball": {
@@ -3678,12 +3656,11 @@
         "forcedForme": "Arceus-Rock",
         "num": 309,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Rock-type attacks have 1.2x power. Judgment is Rock type."
     },
     "strangeball": {
         "name": "Strange Ball",
-        "spritenum": 303,
+        "spritenum": 308,
         "num": 1785,
         "gen": 8,
         "isPokeball": true,
@@ -3833,7 +3810,6 @@
         "forcedForme": "Arceus-Poison",
         "num": 304,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Poison-type attacks have 1.2x power. Judgment is Poison type."
     },
     "tr00": {
@@ -4958,7 +4934,6 @@
         "forcedForme": "Arceus-Electric",
         "num": 300,
         "gen": 4,
-        "isNonstandard": "Unobtainable",
         "desc": "Holder's Electric-type attacks have 1.2x power. Judgment is Electric type."
     },
     "zoomlens": {

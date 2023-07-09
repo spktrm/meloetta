@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from collections import OrderedDict
 
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 
 from meloetta.frameworks.nash_ketchum.modelv2 import config
 from meloetta.frameworks.nash_ketchum.modelv2.utils import (

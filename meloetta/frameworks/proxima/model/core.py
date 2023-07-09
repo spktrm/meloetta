@@ -2,7 +2,7 @@ import torch.nn as nn
 
 from collections import OrderedDict
 
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.frameworks.proxima.model import config
 from meloetta.frameworks.proxima.model.utils import Resblock, VectorMerge
 

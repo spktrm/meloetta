@@ -33,7 +33,8 @@ def linear_layer(
     if std is None:
         std = 1 / math.sqrt(in_features)
     nn.init.trunc_normal_(layer.weight, mean=mean, std=std)
-    nn.init.constant_(layer.bias, bias_const)
+    if bias:
+        nn.init.constant_(layer.bias, bias_const)
     return layer
 
 

@@ -3,7 +3,7 @@ import torch
 
 from typing import NamedTuple, Iterator, Tuple, Dict, List
 
-from meloetta.actors.types import State, Choices
+from meloetta.types import State, Choices
 
 
 class EncoderOutput(NamedTuple):

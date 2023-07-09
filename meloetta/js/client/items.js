@@ -123,7 +123,6 @@ const Items = {
         itemUser: ["Dialga-Origin"],
         num: 1777,
         gen: 8,
-        isNonstandard: "Unobtainable",
     },
     adamantorb: {
         name: "Adamant Orb",
@@ -143,7 +142,6 @@ const Items = {
         itemUser: ["Dialga"],
         num: 135,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     adrenalineorb: {
         name: "Adrenaline Orb",
@@ -1498,7 +1496,6 @@ const Items = {
         forcedForme: "Arceus-Dragon",
         num: 311,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     dragonfang: {
         name: "Dragon Fang",
@@ -1592,7 +1589,6 @@ const Items = {
         forcedForme: "Arceus-Dark",
         num: 312,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     dreamball: {
         name: "Dream Ball",
@@ -1662,7 +1658,6 @@ const Items = {
         forcedForme: "Arceus-Ground",
         num: 305,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     eeviumz: {
         name: "Eevium Z",
@@ -2101,7 +2096,6 @@ const Items = {
         forcedForme: "Arceus-Fighting",
         num: 303,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     flameorb: {
         name: "Flame Orb",
@@ -2140,7 +2134,6 @@ const Items = {
         forcedForme: "Arceus-Fire",
         num: 298,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     floatstone: {
         name: "Float Stone",
@@ -2613,7 +2606,6 @@ const Items = {
         itemUser: ["Giratina-Origin"],
         num: 1779,
         gen: 8,
-        isNonstandard: "Unobtainable",
     },
     griseousorb: {
         name: "Griseous Orb",
@@ -2633,7 +2625,6 @@ const Items = {
         itemUser: ["Giratina"],
         num: 112,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     groundgem: {
         name: "Ground Gem",
@@ -2918,7 +2909,6 @@ const Items = {
         forcedForme: "Arceus-Ice",
         num: 302,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     iciumz: {
         name: "Icium Z",
@@ -2974,7 +2964,6 @@ const Items = {
         forcedForme: "Arceus-Bug",
         num: 308,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     ironball: {
         name: "Iron Ball",
@@ -3021,7 +3010,6 @@ const Items = {
         forcedForme: "Arceus-Steel",
         num: 313,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     jabocaberry: {
         name: "Jaboca Berry",
@@ -3631,7 +3619,6 @@ const Items = {
         itemUser: ["Palkia-Origin"],
         num: 1778,
         gen: 8,
-        isNonstandard: "Unobtainable",
     },
     lustrousorb: {
         name: "Lustrous Orb",
@@ -3651,7 +3638,6 @@ const Items = {
         itemUser: ["Palkia"],
         num: 136,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     luxuryball: {
         name: "Luxury Ball",
@@ -3866,7 +3852,6 @@ const Items = {
         forcedForme: "Arceus-Grass",
         num: 301,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     medichamite: {
         name: "Medichamite",
@@ -4165,7 +4150,6 @@ const Items = {
         forcedForme: "Arceus-Psychic",
         num: 307,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     miracleseed: {
         name: "Miracle Seed",
@@ -4690,7 +4674,6 @@ const Items = {
         forcedForme: "Arceus-Fairy",
         num: 644,
         gen: 6,
-        isNonstandard: "Unobtainable",
     },
     plumefossil: {
         name: "Plume Fossil",
@@ -5481,7 +5464,6 @@ const Items = {
         itemUser: ["Zamazenta-Crowned"],
         num: 1104,
         gen: 8,
-        isNonstandard: "Unobtainable",
     },
     rustedsword: {
         name: "Rusted Sword",
@@ -5498,7 +5480,6 @@ const Items = {
         itemUser: ["Zacian-Crowned"],
         num: 1103,
         gen: 8,
-        isNonstandard: "Unobtainable",
     },
     sablenite: {
         name: "Sablenite",
@@ -5867,7 +5848,6 @@ const Items = {
         forcedForme: "Arceus-Flying",
         num: 306,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     slowbronite: {
         name: "Slowbronite",
@@ -6019,7 +5999,6 @@ const Items = {
         forcedForme: "Arceus-Water",
         num: 299,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     spookyplate: {
         name: "Spooky Plate",
@@ -6043,7 +6022,6 @@ const Items = {
         forcedForme: "Arceus-Ghost",
         num: 310,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     sportball: {
         name: "Sport Ball",
@@ -6228,12 +6206,10 @@ const Items = {
         forcedForme: "Arceus-Rock",
         num: 309,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     strangeball: {
         name: "Strange Ball",
-        spritenum: 303,
-        // TODO
+        spritenum: 308,
         num: 1785,
         gen: 8,
         isPokeball: true,
@@ -6442,7 +6418,6 @@ const Items = {
         forcedForme: "Arceus-Poison",
         num: 304,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     tr00: {
         name: "TR00",
@@ -7879,7 +7854,6 @@ const Items = {
         forcedForme: "Arceus-Electric",
         num: 300,
         gen: 4,
-        isNonstandard: "Unobtainable",
     },
     zoomlens: {
         name: "Zoom Lens",

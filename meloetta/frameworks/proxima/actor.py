@@ -11,7 +11,7 @@ from meloetta.frameworks.proxima.model import ProximaModel
 
 
 from meloetta.actors.base import Actor
-from meloetta.actors.types import State, Choices, Battle, TensorDict
+from meloetta.types import State, Choices, Battle, TensorDict
 from meloetta.utils import expand_bt
 from meloetta.data import (
     BOOSTS,

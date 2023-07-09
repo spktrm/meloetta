@@ -4,7 +4,7 @@ import torch.nn as nn
 from collections import OrderedDict
 from typing import Optional, Union, Literal, Dict, Any
 
-from meloetta.actors.types import State, TensorDict
+from meloetta.types import State, TensorDict
 
 from meloetta.frameworks.nash_ketchum.modelv2.utils import _log_policy
 

@@ -5,7 +5,7 @@ from typing import Dict, List, Any, Sequence, NamedTuple, Tuple
 
 from jax import tree_util as tree
 
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.data import CHOICE_FLAGS
 
 

@@ -1,10 +1,11 @@
 import torch
+import random
 import threading
 import multiprocessing as mp
 
 from typing import Dict, List
 
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.frameworks.nash_ketchum.utils import create_buffers
 
 
@@ -175,10 +176,9 @@ class ReplayBuffer:
         batch["player_id"] = player_id
 
         for m in indices:
-            self.free_queue.put(m)
-            # if random.random() < 0.5:
-            #     self.free_queue.put(m)
-            # else:
+            # if random.random() < 2 / 3:
             #     self.full_queue.put(m)
+            # else:
+            self.free_queue.put(m)
 
         return indices, batch

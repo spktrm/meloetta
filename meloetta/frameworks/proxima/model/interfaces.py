@@ -2,7 +2,7 @@ import torch
 
 from typing import NamedTuple
 
-from meloetta.actors.types import Choices
+from meloetta.types import Choices
 
 
 class PostProcess(NamedTuple):

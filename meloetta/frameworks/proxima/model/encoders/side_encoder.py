@@ -16,7 +16,7 @@ from meloetta.frameworks.proxima.model.utils import (
     ToVector,
     TransformerEncoder,
 )
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 from meloetta.embeddings import (
     AbilityEmbedding,
     PokedexEmbedding,

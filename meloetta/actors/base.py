@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from meloetta.vector import VectorizedState
 from meloetta.room import BattleRoom
-from meloetta.actors.types import State, Choices, Battle
+from meloetta.types import State, Choices, Battle
 
 
 Battle = Dict[str, Dict[str, Dict[str, Any]]]
@@ -39,4 +39,4 @@ class Actor(ABC):
     def get_vectorized_state(
         self, room: BattleRoom, battle: Battle
     ) -> Dict[str, torch.Tensor]:
-        return VectorizedState.from_battle(room, battle).to_dict()
+        return VectorizedState.from_battle(room, battle)

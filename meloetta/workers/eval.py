@@ -107,30 +107,34 @@ class EvalWorker:
 
             while True:
                 message = await player.client.receive_message()
-                action_required = await player.recieve(message)
+                action_required = player._recieve(message)
+
                 if "is offering a tie." in message:
                     await player.client.websocket.send(
                         player.room.battle_tag + "|" + "/offertie"
                     )
+
                 if "|error" in message:
-                    # print(message)
                     # edge case for handling when the pokemon is trapped
                     if "Can't switch: The active Pokémon is trapped" in message:
                         message = await player.client.receive_message()
-                        action_required = await player.recieve(message)
+                        action_required = player._recieve(message)
                         action_required = True
 
                     # for some reason, disabled max moves are being selected
                     elif "Can't move" in message:
                         print(message)
 
+                    else:
+                        print(message)
+
                 if action_required:
                     # inputs to neural net
                     battle = player.room.get_battle()
-                    battle["turn"] = DRAW_BY_TURNS * (
-                        1 - (1 - (battle["turn"] / DRAW_BY_TURNS)) ** 2
-                    )
                     turn = battle["turn"]
+                    # battle["turn"] = DRAW_BY_TURNS * (
+                    #     1 - (1 - (battle["turn"] / DRAW_BY_TURNS)) ** 2
+                    # )
                     vstate = actor.get_vectorized_state(player.room, battle)
 
                 ended = player.room.get_js_attr("battle?.ended")
@@ -170,11 +174,13 @@ class EvalWorker:
                     )
                     while True:
                         message = await player.client.receive_message()
-                        action_required = await player.recieve(message)
+                        action_required = player._recieve(message)
+
                         if "is offering a tie." in message:
                             await player.client.websocket.send(
                                 player.room.battle_tag + "|" + "/offertie"
                             )
+
                         ended = player.room.get_js_attr("battle?.ended")
                         if ended:
                             break

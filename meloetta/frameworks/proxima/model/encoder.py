@@ -2,7 +2,7 @@ import torch.nn as nn
 
 from collections import OrderedDict
 
-from meloetta.actors.types import State, TensorDict
+from meloetta.types import State, TensorDict
 
 from meloetta.frameworks.proxima.model.config import EncoderConfig
 from meloetta.frameworks.proxima.model.encoders import SideEncoder, ScalarEncoder

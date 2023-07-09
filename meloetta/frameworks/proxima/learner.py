@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 from typing import Dict
 
-from meloetta.actors.types import TensorDict
+from meloetta.types import TensorDict
 
 from meloetta.frameworks.proxima.buffer import ReplayBuffer
 from meloetta.frameworks.proxima.config import ProximaConfig

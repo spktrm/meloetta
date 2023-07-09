@@ -83,11 +83,7 @@ def main(fpath: str = None, latest: bool = False):
         threads.append(learner_thread)
         learner_thread.start()
 
-    # if learner.config.debug_mode:
     num_players = 2
-    # else:
-    #     num_players = max(learner.config.batch_size // learner.config.num_actors, 2)
-
     for i in range(learner.config.num_actors):
         worker = SelfPlayWorker(
             worker_index=i,
@@ -135,6 +131,7 @@ def main(fpath: str = None, latest: bool = False):
                 eval_actor_fn=main_actor,
                 eval_actor_kwargs={
                     "model": learner.actor_model,
+                    "pid": 0,
                 },
                 baseline_actor_fn=opponent_actor,
                 baseline_actor_args=opponent_actor_args,
@@ -165,6 +162,6 @@ if __name__ == "__main__":
     # fpath = "cpkts/cpkt-00010000.tar"
     # main(fpath)
 
-    # main(latest=True)
+    main(latest=True)
 
     main()

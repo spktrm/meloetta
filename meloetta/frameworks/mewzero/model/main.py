@@ -5,7 +5,7 @@ import torch.nn as nn
 from copy import deepcopy
 from typing import Optional, Union, Literal, Tuple, Dict, Any, List
 
-from meloetta.actors.types import State, Choices
+from meloetta.types import State, Choices
 
 from meloetta.frameworks.mewzero.model.utils import _log_policy
 

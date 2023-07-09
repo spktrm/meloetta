@@ -118,6 +118,7 @@
         "tarshot",
         "taunt",
         "telekinesis",
+        "terastallize",
         "throatchop",
         "torment",
         "transform",
@@ -146,7 +147,6 @@
         "psychicterrain"
     ],
     "item_effects": [
-        "bestowed",
         "consumed",
         "disturbed",
         "eaten",
@@ -162,12 +162,6 @@
     "side_conditions": [
         "auroraveil",
         "craftyshield",
-        "firepledge",
-        "gmaxcannonade",
-        "gmaxvinelash",
-        "gmaxvolcalith",
-        "gmaxwildfire",
-        "grasspledge",
         "lightscreen",
         "luckychant",
         "matblock",
@@ -180,7 +174,6 @@
         "stickyweb",
         "tailwind",
         "toxicspikes",
-        "waterpledge",
         "wideguard"
     ]
 }
